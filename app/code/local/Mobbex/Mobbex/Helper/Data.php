@@ -13,8 +13,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         );
 	}
 
-	public function getModuleUrl($action, $path) {
-		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true)) . $path; 
+	public function getModuleUrl($action, $queryParams) {
+		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true, '_query' => $queryParams)); 
 	}
 
 	public function getReference($order)
@@ -48,7 +48,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$headers = $this->getHeaders();
 
 		// Return Query Params
-		$queryParams = '&orderId=' . $order->getIncrementId();
+		$queryParams = array('orderId' => $order->getIncrementId());
 		
         // Create data
         $data = array(
