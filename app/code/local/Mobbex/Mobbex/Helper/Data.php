@@ -44,6 +44,14 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			);
 		}
 
+		// Add shipping item
+		if (!empty($order->getShippingDescription())) {
+            $items[] = [
+                'description' => 'Envío: ' . $order->getShippingDescription(),
+                'total' => $order->getShippingAmount(),
+            ];
+        }
+
 		// Get Headers
 		$headers = $this->getHeaders();
 
@@ -60,7 +68,13 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             'items' => $items,
             'webhook' => $this->getModuleUrl('notification', $queryParams),
             'redirect' => 0,
-            'total' => round($order->getGrandTotal(), 2),
+			'total' => round($order->getGrandTotal(), 2),
+			'options' => [
+                'theme' => [
+                    'type' => 'light', 
+					'colors' => null
+				],
+            ],
 		);
 
 		$curl_data = array(
