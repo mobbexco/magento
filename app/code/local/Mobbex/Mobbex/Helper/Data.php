@@ -25,7 +25,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     public function createCheckout($order)
     {
 		// Init Curl
-		$curl = curl_init("https://mobbex.com/p/checkout/create");
+		$curl = curl_init("https://api.mobbex.com/p/checkout");
 		
         // Create an unique id
 		$tracking_ref = $this->getReference($order);
