@@ -57,12 +57,17 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 		// Return Query Params
 		$queryParams = array('orderId' => $order->getIncrementId());
+
+		$customer = [
+			'name' => $order->getCustomerName(),
+			'email' => $order->getCustomerEmail(),
+			'phone' => !empty($order->getBillingAddress()->getTelephone()) ? $order->getBillingAddress()->getTelephone() : null,
+		];
 		
         // Create data
         $data = array(
             'reference' => $tracking_ref,
             'currency' => 'ARS',
-            'email' => $order->getCustomerEmail(),
             'description' => 'Orden #' . $order->getIncrementId(),
             'return_url' => $this->getModuleUrl('response', $queryParams),
             'items' => $items,
@@ -74,7 +79,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
                     'type' => 'light', 
 					'colors' => null
 				],
-            ],
+			],
+			'customer' => $customer,
 		);
 
 		$curl_data = array(
