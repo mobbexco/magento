@@ -1,0 +1,12 @@
+<?php
+$order_url = Mage::getUrl('mobbex/payment/getCheckout', array('_secure' => true));
+$script_url = $this->getSkinUrl('js/mobbex_embed.js');
+?>
+<form name="mobbexform" method="get"></form>
+<div id="mbbx-container"></div>
+
+<script type="text/javascript">
+	console.log('Mobbex Embed block working');
+	var orderUrl = '<?= $order_url ?>';
+</script>
+<script type="text/javascript" src="<?= $script_url ?>"></script>

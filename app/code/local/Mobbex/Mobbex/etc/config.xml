@@ -45,5 +45,12 @@
 				</args>
 			</mobbex>
 		</routers>
+		<layout>
+            <updates>
+                <module>
+                    <file>mobbex.xml</file>
+                </module>
+            </updates>
+        </layout>
 	</frontend>
 </config>

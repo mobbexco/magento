@@ -40,7 +40,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
 				"description" => $product->getName(), 
 				"quantity" => $product->getQtyOrdered(), 
-				"total" => round($product->getPrice(),2) 
+				"total" => round($product->getFinalPrice(),2) 
 			);
 		}
 
@@ -63,13 +63,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'email' => $order->getCustomerEmail(),
 			'phone' => !empty($order->getBillingAddress()->getTelephone()) ? $order->getBillingAddress()->getTelephone() : null,
 		];
-		
+
+		$return_url = $this->getModuleUrl('response', $queryParams);
+
         // Create data
         $data = array(
             'reference' => $tracking_ref,
             'currency' => 'ARS',
             'description' => 'Orden #' . $order->getIncrementId(),
-            'return_url' => $this->getModuleUrl('response', $queryParams),
+            'return_url' => $return_url,
             'items' => $items,
             'webhook' => $this->getModuleUrl('notification', $queryParams),
             'redirect' => 0,
@@ -81,6 +83,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				],
 			],
 			'customer' => $customer,
+			'timeout' => 5,
 		);
 
 		$curl_data = array(
@@ -113,7 +116,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			$res = json_decode($response, true);
 			
 			if($res['data']) {
-				return $res['data']['url'];
+				$res['data']['returnUrl'] = $return_url;
+				return $res['data'];
 			} else {
 				// Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('mobbex/payment/cancel', array('_secure' => true)));
 
