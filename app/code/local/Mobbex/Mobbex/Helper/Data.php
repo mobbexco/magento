@@ -1,6 +1,8 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    const VERSION = '1.1.0';
+
 	public function getHeaders() {
 		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
 		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
@@ -8,8 +10,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		return array(
             'cache-control: no-cache',
             'content-type: application/json',
+            'x-api-key: ' . $apiKey,
             'x-access-token: ' . $accessToken,
-            'x-api-key: ' . $apiKey
         );
 	}
 
@@ -19,13 +21,21 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 	public function getReference($order)
     {
-        return 'mag_oder_'.$order->getIncrementId().'_seed_'.mt_rand(100000, 999999);
+        return 'mag_order_'.$order->getIncrementId().'_seed_'.mt_rand(100000, 999999);
 	}
+
+	private function getPlatform()
+    {
+        return [
+            "name" => "magento_1",
+            "version" => $this::VERSION
+        ];
+    }
 	
     public function createCheckout($order)
     {
 		// Init Curl
-		$curl = curl_init("https://api.mobbex.com/p/checkout");
+		$curl = curl_init();
 		
         // Create an unique id
 		$tracking_ref = $this->getReference($order);
@@ -61,53 +71,58 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$customer = [
 			'name' => $order->getCustomerName(),
 			'email' => $order->getCustomerEmail(),
-			'phone' => !empty($order->getBillingAddress()->getTelephone()) ? $order->getBillingAddress()->getTelephone() : null,
+			'phone' => !empty($order->getBillingAddress()) ? $order->getBillingAddress()->getTelephone() : null,
 		];
 
 		$return_url = $this->getModuleUrl('response', $queryParams);
+
+		// Get domain from store URL
+		$base_url = Mage::getBaseUrl();
+		$domain = str_replace(['https://', 'http://'], '', $base_url);
+		if (substr($domain, -1) === '/') {
+			$domain = rtrim($domain, '/');
+		}
 
         // Create data
         $data = array(
             'reference' => $tracking_ref,
             'currency' => 'ARS',
             'description' => 'Orden #' . $order->getIncrementId(),
+			'test' => false, // TODO: Add to config
             'return_url' => $return_url,
             'items' => $items,
             'webhook' => $this->getModuleUrl('notification', $queryParams),
-            'redirect' => 0,
-			'total' => round($order->getGrandTotal(), 2),
 			'options' => [
+				'button' => (Mage::getStoreConfig('payment/mobbex/embed') == true),
+				'embed' => true,
+				'domain' => $domain,
                 'theme' => [
-                    'type' => 'light', 
+					'type' => 'light', 
 					'colors' => null
 				],
+				'platform' => $this->getPlatform(),
 			],
+			'redirect' => 0,
+			'total' => round($order->getGrandTotal(), 2),
 			'customer' => $customer,
 			'timeout' => 5,
 		);
 
-		$curl_data = array(
+		curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.mobbex.com/p/checkout",
+            CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => "POST",
-			CURLOPT_HTTPHEADER => $headers,
-			CURLINFO_HEADER_OUT => $headers,
 			CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_RETURNTRANSFER => true,
-		);
-
-		// Uncomment for Debugging
-		// echo '<pre>' . print_r($curl_data, true) . '</pre>';
-
-		// Set Curl Data
-		curl_setopt_array($curl, $curl_data);
+			CURLOPT_HTTPHEADER => $headers
+		]);
 		
         $response = curl_exec($curl);
 		$err = curl_error($curl);
 		
-		// Close Curl
 		curl_close($curl);
 		
         if ($err) {
@@ -116,7 +131,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			$res = json_decode($response, true);
 			
 			if($res['data']) {
-				$res['data']['returnUrl'] = $return_url;
+				$res['data']['return_url'] = $return_url;
 				return $res['data'];
 			} else {
 				// Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('mobbex/payment/cancel', array('_secure' => true)));
