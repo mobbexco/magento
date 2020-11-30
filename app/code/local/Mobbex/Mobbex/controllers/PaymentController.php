@@ -151,7 +151,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     }
 
     /** Use to get checkout data via ajax */
-    public function getCheckout()
+    public function getCheckoutAction()
     {
         // Retrieve order
         $_order = new Mage_Sales_Model_Order();
@@ -165,7 +165,12 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         $mobbex_data['checkoutId'] = $checkout['id'];
 
         // Return data in json
-        echo json_encode($mobbex_data);
-        exit;
+        $this->getResponse()->clearHeaders()->setHeader(
+            'Content-type',
+            'application/json'
+        );
+        $this->getResponse()->setBody(
+            Mage::helper('core')->jsonEncode($mobbex_data)
+        );
     }
 }
