@@ -50,7 +50,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
 				"description" => $product->getName(), 
 				"quantity" => $product->getQtyOrdered(), 
-				"total" => round($product->getFinalPrice(),2) 
+				"total" => round($product->getPrice(),2) 
 			);
 		}
 
