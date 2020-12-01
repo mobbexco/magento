@@ -5,12 +5,15 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     // The redirect action is triggered when someone places an order
     public function redirectAction()
     {
-        $this->loadLayout();
-
-        $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'mobbex', array('template' => 'mobbex/redirect.phtml'));
-        $this->getLayout()->getBlock('content')->append($block);
-
-        $this->renderLayout();
+        $embed = Mage::getStoreConfig('payment/mobbex/embed');
+        if (!$embed) {
+            $this->loadLayout();
+    
+            $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'mobbex', array('template' => 'mobbex/redirect.phtml'));
+            $this->getLayout()->getBlock('content')->append($block);
+    
+            $this->renderLayout();
+        }
     }
 
     // The response action is triggered when your gateway sends back a response after processing the customer's payment
@@ -27,7 +30,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
         // Success or Waiting: Results must be received with Webhook
         if ($status == 200 || $status == 2) {
-            Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => true));
+            $this->_redirect('checkout/onepage/success', array('_secure' => true));
         } else {
             // Restore last order
             if (Mage::getSingleton('checkout/session')->getLastRealOrderId()) {
@@ -40,7 +43,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 Mage::getSingleton('core/session')->addError(Mage::helper('mobbex')->__('The payment has failed.'));
 
                 //Redirect to cart
-                Mage_Core_Controller_Varien_Action::_redirect('checkout/cart', array('_secure' => true));
+                $this->_redirect('checkout/cart', array('_secure' => true));
             }
         }
     }
@@ -145,5 +148,30 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         }
 
         Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => true));
+    }
+
+    /** Use to get checkout data via ajax */
+    public function getCheckoutAction()
+    {
+        // Retrieve order
+        $_order = new Mage_Sales_Model_Order();
+        $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+        $order = $_order->loadByIncrementId($orderId);
+
+        // Get Checkout Data
+        $checkout = Mage::helper('mobbex/data')->createCheckout($order);
+
+        $mobbex_data['returnUrl'] = $checkout['return_url'];
+        $mobbex_data['checkoutId'] = $checkout['id'];
+        $mobbex_data['orderId'] = $orderId;
+
+        // Return data in json
+        $this->getResponse()->clearHeaders()->setHeader(
+            'Content-type',
+            'application/json'
+        );
+        $this->getResponse()->setBody(
+            Mage::helper('core')->jsonEncode($mobbex_data)
+        );
     }
 }
