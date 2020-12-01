@@ -21,7 +21,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 	public function getReference($order)
     {
-        return 'mag_order_'.$order->getIncrementId().'_seed_'.mt_rand(100000, 999999);
+        return 'mag_order_'.$order->getIncrementId().'_time_'.time();
 	}
 
 	private function getPlatform()
