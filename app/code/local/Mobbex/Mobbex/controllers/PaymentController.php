@@ -30,7 +30,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
         // Success or Waiting: Results must be received with Webhook
         if ($status == 200 || $status == 2) {
-            Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/success', array('_secure' => true));
+            $this->_redirect('checkout/onepage/success', array('_secure' => true));
         } else {
             // Restore last order
             if (Mage::getSingleton('checkout/session')->getLastRealOrderId()) {
@@ -43,7 +43,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 Mage::getSingleton('core/session')->addError(Mage::helper('mobbex')->__('The payment has failed.'));
 
                 //Redirect to cart
-                Mage_Core_Controller_Varien_Action::_redirect('checkout/cart', array('_secure' => true));
+                $this->_redirect('checkout/cart', array('_secure' => true));
             }
         }
     }
@@ -151,7 +151,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     }
 
     /** Use to get checkout data via ajax */
-    public function getCheckout()
+    public function getCheckoutAction()
     {
         // Retrieve order
         $_order = new Mage_Sales_Model_Order();
@@ -163,9 +163,15 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
         $mobbex_data['returnUrl'] = $checkout['return_url'];
         $mobbex_data['checkoutId'] = $checkout['id'];
+        $mobbex_data['orderId'] = $orderId;
 
         // Return data in json
-        echo json_encode($mobbex_data);
-        exit;
+        $this->getResponse()->clearHeaders()->setHeader(
+            'Content-type',
+            'application/json'
+        );
+        $this->getResponse()->setBody(
+            Mage::helper('core')->jsonEncode($mobbex_data)
+        );
     }
 }

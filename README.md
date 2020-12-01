@@ -2,7 +2,7 @@
 
 ## Instalación
 1) Descomprimir la versión descargada
-2) Copiar el contenido de "app" en el raiz de tu ecommerce
+2) Copiar el contenido de "app" y "skin" en el raiz de tu ecommerce
 3) Ingresá en el Admin de Magento
 4) Dirigite a "Sistema", "Configuración", "Métodos de Pago"
 5) Buscá Mobbex y clickealo
