@@ -2,15 +2,31 @@
 <config>
 	<modules>
 		<Mobbex_Mobbex>
-			<version>1.0.0</version>
+			<version>1.2.0</version>
 		</Mobbex_Mobbex>
 	</modules>
 	<global>
 		<models>
 			<mobbex>
 				<class>Mobbex_Mobbex_Model</class>
+				<resourceModel>mobbex_mobbex_resource</resourceModel>
 			</mobbex>
+			<mobbex_mobbex_resource>
+				<class>Mobbex_Mobbex_Model_Resource</class>
+				<entities>
+					<customfield>
+						<table>mobbex_customfield</table>
+					</customfield>
+				</entities>
+			</mobbex_mobbex_resource>
 		</models>
+		<resources>
+            <mobbex_mobbex_setup>
+                <setup>
+                    <module>Mobbex_Mobbex</module>
+                </setup>
+            </mobbex_mobbex_setup>
+        </resources>
 		<helpers>
 			<mobbex>
 				<class>Mobbex_Mobbex_Helper</class>

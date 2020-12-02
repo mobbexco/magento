@@ -1,7 +1,7 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
 
 	public function getHeaders() {
 		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
@@ -32,6 +32,34 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         ];
     }
 	
+	public function getInstallments($products)
+	{
+        $installments = [];
+
+        $ahora = array(
+            'ahora_3' => 'Ahora 3',
+            'ahora_6' => 'Ahora 6',
+            'ahora_12' => 'Ahora 12',
+            'ahora_18' => 'Ahora 18',
+        );
+
+        foreach ($products as $product) {
+			
+			foreach ($ahora as $key => $value) {
+				
+				$product_id = $product->getProductId();
+				$field_data = Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', $key);
+
+                if ($field_data == true) {
+                    $installments[] = '-' . $key;
+                    unset($ahora[$key]);
+                }
+            }
+		}
+		
+        return $installments;
+	}
+
     public function createCheckout($order)
     {
 		// Init Curl
@@ -106,6 +134,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'total' => round($order->getGrandTotal(), 2),
 			'customer' => $customer,
 			'timeout' => 5,
+			'installments' => $this->getInstallments($products),
 		);
 
 		curl_setopt_array($curl, [
