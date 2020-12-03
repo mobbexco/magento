@@ -69,4 +69,24 @@
             </updates>
         </layout>
 	</frontend>
+	<adminhtml>
+    	<layout>
+    		<updates>
+    			<module>
+    				<file>mobbex.xml</file>
+    			</module>
+    		</updates>
+    	</layout>
+        <events>
+            <catalog_product_save_after>
+                <observers>
+                    <mobbex_save_product_data>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>saveProductTabData</method>
+                    </mobbex_save_product_data>
+                </observers>
+            </catalog_product_save_after>
+        </events>
+    </adminhtml>
 </config>

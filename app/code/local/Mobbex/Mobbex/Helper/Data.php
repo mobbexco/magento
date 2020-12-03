@@ -50,7 +50,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				$product_id = $product->getProductId();
 				$field_data = Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', $key);
 
-                if ($field_data == true) {
+                if ($field_data === 'yes') {
                     $installments[] = '-' . $key;
                     unset($ahora[$key]);
                 }
