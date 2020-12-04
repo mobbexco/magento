@@ -1,4 +1,9 @@
 <?php
+// If embed is disabled
+if(!Mage::getStoreConfig('payment/mobbex/embed')) {
+	return;
+}
+
 $order_url = Mage::getUrl('mobbex/payment/getCheckout', array('_secure' => true));
 $script_url = $this->getSkinUrl('js/mobbex_embed.js');
 ?>
