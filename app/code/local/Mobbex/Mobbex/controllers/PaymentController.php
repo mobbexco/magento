@@ -29,7 +29,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         Mage::log($order, null, 'mobbex_response.log', true);
 
         // Success or Waiting: Results must be received with Webhook
-        if ($status == 200 || $status == 2) {
+        if ($status > 1 && $status < 400) {
             $this->_redirect('checkout/onepage/success', array('_secure' => true));
         } else {
             // Restore last order
@@ -51,74 +51,78 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     public function notificationAction()
     {
         if ($this->getRequest()->isPost()) {
-            // Get Data
-            $insMessage = $this->getRequest()->getPost();
-            $orderId = $this->getRequest()->getParam('orderId');
 
-            // Load the Order
-            $order = Mage::getModel('sales/order');
-            $order->loadByIncrementId($orderId);
+            try {
+                // Get Data
+                $insMessage = $this->getRequest()->getPost();
+                $orderId = $this->getRequest()->getParam('orderId');
 
-            $res = $insMessage['data'];
+                // Load the Order
+                $order = Mage::getModel('sales/order');
+                $order->loadByIncrementId($orderId);
 
-            // Get the Reference ( Transaction ID )
-            $transaction_id = $res['payment']['id'];
+                $res = $insMessage['data'];
 
-            // Get the Status
-            $status = $res['payment']['status']['code'];
+                // Get the Reference ( Transaction ID )
+                $transaction_id = $res['payment']['id'];
 
-            $message = $res['payment']['status']['message'] . ' ( Transacción: ' . $transaction_id . ' )';
+                // Get the Status
+                $status = $res['payment']['status']['code'];
 
-            Mage::log('ORDER ID: ' . $orderId, null, 'mobbex_notification.log', true);
-            Mage::log($res, null, 'mobbex_notification.log', true);
+                $message = $res['payment']['status']['message'] . ' ( Transacción: ' . $transaction_id . ' )';
 
-            // Payment was successful, so update the order's state, send order email and move to the success page
-            if ($status == 200 || $status == 2) {
-                try {
+                Mage::log('ORDER ID: ' . $orderId, null, 'mobbex_notification.log', true);
+                Mage::log($res, null, 'mobbex_notification.log', true);
+
+                if (isset($orderId) && !empty($status)) {
+
                     $source_type = $res['payment']['source']['type'];
-					$source_name = $res['payment']['source']['name'];
+                    $source_name = $res['payment']['source']['name'];
 
                     // Get Source number in case of cards
                     $source_number = 'N/A';
                     if (isset($res['payment']['source']['number'])) {
                         $source_number = ' ' . $res['payment']['source']['number'];
-					}
-					
-					$user_name = isset($res['user']['name']) ? $res['user']['name'] : '';
-					$user_email = isset($res['user']['email']) ? $res['user']['email'] : '';
+                    }
+                    
+                    $user_name = isset($res['user']['name']) ? $res['user']['name'] : '';
+                    $user_email = isset($res['user']['email']) ? $res['user']['email'] : '';
 
                     Mage::log('Saving state for Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
 
+                    $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
+                    $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
+                    
+                    $order->addStatusHistoryComment($paymentComment);
+                    $order->addStatusHistoryComment($userComment);
+
                     // Get Order status
-                    if ($status == 2) {
-                        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, 'El cliente eligió un medio de pago en Efectivo. Se aguarda recepción de pago. Mensaje: ' . $message);
-                    } else {
+                    if ($status == 2 || $status == 3 || $status == 100) {
+                        $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, 'Se aguarda recepción de pago. Mensaje: ' . $message);
+                    } else if ($status == 4 || $status >= 200 && $status < 400) {
                         $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true, $message);
-					}
 
-					$paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
-					$userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
-					
-					$order->addStatusHistoryComment($paymentComment);
-					$order->addStatusHistoryComment($userComment);
+                        // Prepare payment object
+                        $payment = $order->getPayment();
 
-                    // Prepare payment object
-                    $payment = $order->getPayment();
+                        $payment->setTransactionId($transaction_id);
+                        $payment->setLastTransId($transaction_id);
+                        $payment->setIsTransactionClosed(1);
+                        $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, array(
+                            'source' => $source_name,
+                            'source_number' => $source_number,
+                        ));
 
-                    $payment->setTransactionId($transaction_id);
-                    $payment->setLastTransId($transaction_id);
-                    $payment->setIsTransactionClosed(1);
-                    $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, array(
-                        'source' => $source_name,
-                        'source_number' => $source_number,
-                    ));
+                        // Save payment, transaction and order
+                        $payment->save();
 
-                    // Save payment, transaction and order
-                    $payment->save();
-
-                    // Send notifications to the user
-                    $order->sendNewOrderEmail();
-                    $order->setEmailSent(true);
+                        // Send notifications to the user
+                        $order->sendNewOrderEmail();
+                        $order->setEmailSent(true);
+                    } else {
+                        // Cancel Sale
+                        $order->cancel()->setState(Mage_Sales_Model_Order::STATE_CANCELED, true, $message);
+                    }
 
                     Mage::log('Save Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
 
@@ -126,12 +130,9 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $order->save();
 
                     Mage::getSingleton('checkout/session')->unsQuoteId();
-                } catch (Exception $e) {
-					$this->messageManager->addExceptionMessage($e, $e->getMessage());
                 }
-            } else {
-                // Cancel Sale
-                $order->cancel()->setState(Mage_Sales_Model_Order::STATE_CANCELED, true, $message)->save();
+            } catch (Exception $e) {
+                $this->messageManager->addExceptionMessage($e, $e->getMessage());
             }
         }
     }
