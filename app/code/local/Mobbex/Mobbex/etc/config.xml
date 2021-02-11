@@ -63,10 +63,11 @@
 		</routers>
 		<layout>
             <updates>
-                <module>
-                    <file>mobbex.xml</file>
-                </module>
-            </updates>
+            	<local module="Mobbex_Mobbex">
+	                <file>local.xml</file>    
+					<file>mobbex.xml</file>                                    
+	            </local>
+        	</updates>
         </layout>
 	</frontend>
 	<adminhtml>
@@ -87,6 +88,15 @@
                     </mobbex_save_product_data>
                 </observers>
             </catalog_product_save_after>
+			<sales_order_creditmemo_save_after>
+                <observers>
+                    <mobbex_product_refund>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>informRefundData</method>
+                    </mobbex_product_refund>
+                </observers>
+            </sales_order_creditmemo_save_after>
         </events>
     </adminhtml>
 </config>

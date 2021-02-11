@@ -38,4 +38,75 @@ class Mobbex_Mobbex_Model_Observer
 			}
 		}
 	}
+
+	public function informRefundData(Varien_Event_Observer $observer)
+    {
+        if (!self::$_singletonFlag) {
+			
+			self::$_singletonFlag = true;
+			$creditmemo = $observer->getEvent()->getCreditmemo();
+			$orderId = $creditmemo->getOrderId();
+			$order = $observer->getEvent()->getCreditmemo()->getOrder();
+			$payment = $order->getPayment();
+			$transactionId = $payment->getData('last_trans_id');
+			$amountRefound = $creditmemo->getData('grand_total');
+
+			return $this->sendRefund($transactionId,$amountRefound);
+			
+        }
+
+    }
+
+	private function sendRefund($transactionId,$amount)
+	{
+		// Init Curl
+		$curl = curl_init();
+		$headers = $this->getHeaders();
+
+		curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.mobbex.com/p/operations/".$transactionId."/refund",
+            CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => "POST",
+			CURLOPT_POSTFIELDS => json_encode(['total' => floatval($amount)]),
+			CURLOPT_HTTPHEADER => $headers
+		]);
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+		
+		curl_close($curl);
+		
+
+		if ($err) {
+            return false;
+        } else {
+			$result = json_decode($response['body']);	
+			if ($result->result) {
+				return true;
+			} else {
+				return false;
+			}
+        }
+		
+	}
+
+	/**
+     * @return array
+     */
+    private function getHeaders()
+    {
+		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
+		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
+
+		return array(
+            'cache-control: no-cache',
+            'content-type: application/json',
+            'x-api-key: ' . $apiKey,
+            'x-access-token: ' . $accessToken,
+        );
+    }
 }
