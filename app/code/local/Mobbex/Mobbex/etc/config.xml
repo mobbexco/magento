@@ -18,6 +18,11 @@
 						<table>mobbex_customfield</table>
 					</customfield>
 				</entities>
+				<entities>
+					<transaction>
+						<table>mobbex_transaction</table>
+					</transaction>
+				</entities>
 			</mobbex_mobbex_resource>
 		</models>
 		<resources>

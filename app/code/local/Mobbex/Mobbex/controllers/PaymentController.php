@@ -76,6 +76,9 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                 if (isset($orderId) && !empty($status)) {
 
+                    //Save transaction information
+                    Mage::getModel('mobbex/transaction')->saveMobbexTransaction($orderId,json_encode($res));
+
                     $source_type = $res['payment']['source']['type'];
                     $source_name = $res['payment']['source']['name'];
 
@@ -128,6 +131,9 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                     // Save the order
                     $order->save();
+
+                    //Order transaction information
+                    Mage::getModel('mobbex/transaction')->saveCustomField($orderId,$res);
 
                     Mage::getSingleton('checkout/session')->unsQuoteId();
                 }
