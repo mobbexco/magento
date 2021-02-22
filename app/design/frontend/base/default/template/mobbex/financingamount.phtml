@@ -1,0 +1,34 @@
+<?php
+    $_helper = $this->helper('mobbex/data');
+    $_order = $this->getOrder();
+    $_order_id= $_order->getRealOrderId();
+    //Save transaction information
+    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id));
+    $newFTotalCost = 0;
+    $newTotal = 0;
+    if($data){
+        $amount_paid = $data->payment->total ;
+        $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
+        $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
+        $newFTotalCost =  $amount_paid - ($subTotal + $shipTotal); //Fininancing Total Cost
+        $newTotal = $newFTotalCost + $subTotal + $shipTotal; // New total
+    }
+    
+?>
+
+<script>    
+    // Find a <table> element with id="myTable":
+    var financingCost = <?php echo $newFTotalCost; ?>;
+    var newTotal = <?php echo $newTotal; ?>;
+    jQuery(document).ready(function() {
+
+        var foot = jQuery("#my-orders-table").find('tfoot');//get the table with paid amounts
+        foot.prepend(jQuery('<tr class="shipping"> <td colspan="4" class="a-right"> Financing Cost </td> <td class="last a-right"> <span class="price"> $'+financingCost+' </span> </td> </tr>'));
+        //only if there is a financing cost added, the total is change
+        if(financingCost > 0){
+            jQuery(".grand_total").find("td:eq(1)").html('<strong> $'+newTotal+' </strong>');
+        }
+        
+    });
+
+</script>
