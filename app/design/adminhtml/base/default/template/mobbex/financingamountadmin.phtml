@@ -1,0 +1,37 @@
+<?php
+    $_order = $this->getOrder();
+    $_order_id = $_order->getRealOrderId();
+    //Save transaction information
+    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id));
+    $newFTotalCost = 0;
+    $newTotal = 0;
+    if($data){
+        $amount_paid = $data->payment->total ;
+        $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
+        $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
+        $newFTotalCost =  $amount_paid - ($subTotal + $shipTotal); //Fininancing Total Cost
+        $newTotal = $newFTotalCost + $subTotal + $shipTotal; // New total
+    }
+    
+?>
+
+
+<script>    
+    
+    var financingCost = <?php echo $newFTotalCost; ?>;
+    var newTotal = <?php echo $newTotal; ?>;
+    // Find a <table> element by class
+    var tableTotal = document.getElementsByClassName("order-totals")[0].getElementsByTagName("tfoot");
+
+    //only if there is a financing cost added, the total is change
+    if(financingCost > 0){
+        const trTotal = document.createElement('tr');
+        trTotal.innerHTML = '<tr class="0"><td class="label"><strong>Grand Total Paid</strong></td><td class="emph"><strong><span class="price">$'+newTotal+'</span></strong></td></tr>';
+        tableTotal[0].insertBefore(trTotal,tableTotal[0].firstChild);//add new total
+    }
+    const tr = document.createElement('tr');
+    //add financing total cost
+    tr.innerHTML = '<td class="label">Financing Cost</td><td ><span class="price">$'+financingCost+' </span> </td>'
+    tableTotal[0].insertBefore(tr,tableTotal[0].firstChild);
+
+</script>

@@ -81,6 +81,7 @@
     		<updates>
     			<module>
     				<file>mobbex.xml</file>
+					<file>financingamountadmin.xml</file>               
     			</module>
     		</updates>
     	</layout>
