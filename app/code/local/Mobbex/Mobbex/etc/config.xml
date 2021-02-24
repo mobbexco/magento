@@ -87,6 +87,24 @@
                     </mobbex_save_product_data>
                 </observers>
             </catalog_product_save_after>
+			<adminhtml_catalog_category_tabs>
+                <observers>
+                    <mobbex_category_new_tab>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>newTabCategory</method>
+                    </mobbex_category_new_tab>
+                </observers>
+            </adminhtml_catalog_category_tabs>
+			<catalog_category_save_after>
+                <observers>
+                    <mobbex_category_save_tab>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>saveCategoryTabData</method>
+                    </mobbex_category_save_tab>
+                </observers>
+            </catalog_category_save_after>
         </events>
     </adminhtml>
 </config>
