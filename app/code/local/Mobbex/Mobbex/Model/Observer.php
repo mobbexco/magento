@@ -57,11 +57,17 @@ class Mobbex_Mobbex_Model_Observer
 
     }
 
+	/**
+	 * Handle an order refund total and partial
+	 * @param	$transactionId : integer
+	 * @param	$amount : real
+	 * @return	 boolean
+	 */
 	private function sendRefund($transactionId,$amount)
 	{
 		// Init Curl
 		$curl = curl_init();
-		$headers = $this->getHeaders();
+		$headers = Mage::helper('mobbex/data')->getHeaders();
 
 		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/operations/".$transactionId."/refund",
@@ -93,20 +99,4 @@ class Mobbex_Mobbex_Model_Observer
         }
 		
 	}
-
-	/**
-     * @return array
-     */
-    private function getHeaders()
-    {
-		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
-		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
-
-		return array(
-            'cache-control: no-cache',
-            'content-type: application/json',
-            'x-api-key: ' . $apiKey,
-            'x-access-token: ' . $accessToken,
-        );
-    }
 }
