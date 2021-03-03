@@ -39,6 +39,11 @@ class Mobbex_Mobbex_Model_Observer
 		}
 	}
 
+	/**
+	 * Calculates the refund amount of an order
+	 * @param $observer : Varien_Event_Observer
+	 * @return boolean
+	 */
 	public function informRefundData(Varien_Event_Observer $observer)
     {
         if (!self::$_singletonFlag) {
@@ -49,19 +54,25 @@ class Mobbex_Mobbex_Model_Observer
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
 			$payment = $order->getPayment();
 			$transactionId = $payment->getData('last_trans_id');
-			$amountRefound = $creditmemo->getData('grand_total');
+			$amount = $creditmemo->getData('grand_total');
 
-			return $this->sendRefund($transactionId,$amountRefound);
+			return $this->sendRefund($transactionId,$amount);
 			
         }
 
     }
 
+	/**
+	 * Handle an order refund total and partial
+	 * @param	$transactionId : integer
+	 * @param	$amount : real
+	 * @return	 boolean
+	 */
 	private function sendRefund($transactionId,$amount)
 	{
 		// Init Curl
 		$curl = curl_init();
-		$headers = $this->getHeaders();
+		$headers = Mage::helper('mobbex/data')->getHeaders();
 
 		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/operations/".$transactionId."/refund",
@@ -93,20 +104,4 @@ class Mobbex_Mobbex_Model_Observer
         }
 		
 	}
-
-	/**
-     * @return array
-     */
-    private function getHeaders()
-    {
-		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
-		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
-
-		return array(
-            'cache-control: no-cache',
-            'content-type: application/json',
-            'x-api-key: ' . $apiKey,
-            'x-access-token: ' . $accessToken,
-        );
-    }
 }
