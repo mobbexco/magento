@@ -48,16 +48,20 @@ class Mobbex_Mobbex_Model_Observer
     {
         if (!self::$_singletonFlag) {
 			
+			$result = false;
 			self::$_singletonFlag = true;
 			$creditmemo = $observer->getEvent()->getCreditmemo();
-			$orderId = $creditmemo->getOrderId();
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
-			$payment = $order->getPayment();
-			$transactionId = $payment->getData('last_trans_id');
-			$amount = $creditmemo->getData('grand_total');
-
-			return $this->sendRefund($transactionId,$amount);
+			$orderId = $order->getData('increment_id');
+			$data = Mage::getModel('mobbex/transaction')->getMobbexTransaction($orderId);//get transaction data
+			if($data){
+				$payment = $order->getPayment();
+				$transactionId = $payment->getData('last_trans_id');
+				$amount = $creditmemo->getData('grand_total');	
+				$result = $this->sendRefund($transactionId,$amount);
+			}
 			
+			return $result;
         }
 
     }
