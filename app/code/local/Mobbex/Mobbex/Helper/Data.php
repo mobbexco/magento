@@ -220,4 +220,40 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			}
         }
 	}
+
+	/**
+     * Return the Cuit/Tax_id using the ApiKey to request via web service
+     * @return String Cuit
+     */
+    public function getCuit(){
+        $curl = curl_init();
+        $cuit = "";
+
+        $headers = $this->getHeaders();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.mobbex.com/p/entity/validate",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            //search the cuit in the plugins config if cant get it from api request
+            $cuit = $this->config->getCuit();
+        } else {
+            $res = json_decode($response, true);
+            $cuit = $res['data']['tax_id'];
+        }
+        return $cuit; 
+    }
 }
