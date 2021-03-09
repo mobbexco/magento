@@ -1,0 +1,137 @@
+<?php
+    $_helper = $this->helper('mobbex/data');
+    $taxi_id = $_helper->getCuit();
+    $_product = $this->getProduct(); 
+    $_price = $_product->getFinalPrice();
+    $buttonTitle = __('Ver Financiación'); 
+    $is_active = Mage::getStoreConfig('payment/mobbex/financing');
+    $url_information = "https://mobbex.com/p/sources/widget/arg/".$taxi_id ."/?total=".$_price;
+?>
+<Style>
+    /* The Modal (background) */
+    #mbbxProductModal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        z-index: 9999;
+    }
+    
+    /* Modal Content/Box */
+    #mbbxProductModalContent {
+        background-color: #fefefe;
+        margin: 10% auto auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%; /* Could be more or less, depending on screen size */
+        height: 100%; /* Full height */
+        z-index: 10000;
+    }
+    /* The Close Button */
+    #mbbxProductCloseModal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    
+    #mbbxProductCloseModal:hover,
+    #mbbxProductCloseModal:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    } 
+    /* The Modal Button */
+    #mbbxProductCloseModalBtnFinanciacion {
+        min-height: 40px;
+        line-height: 40px;
+        font-size: 16px;
+        padding: 0px 30px;
+        float: left;
+        min-width: 40px;
+        width: 40%;
+        white-space: normal;
+        background: #3399cc;
+        text-align: center;
+        text-transform: uppercase;
+        color: #FFFFFF;
+    }
+</Style>
+
+<?php if($is_active) : ?>
+    <div id="mbbxProductModal" class="modal">
+        <!-- Modal content -->
+        <div id="mbbxProductModalContent" class="modal-content">
+            <span id="mbbxProductCloseModal" class="close">&times;</span>
+            <iframe  id="iframe" src=<?php echo $url_information ?>></iframe>
+        </div>
+    </div>
+<?php endif; ?>
+
+<script>
+    //quantity selected
+    var quantityDom = document.getElementsByClassName("qty");
+    // Get the modal
+    var modal = document.getElementById("mbbxProductModal");
+    
+    // Get the <span> element that closes the modal
+    var span = document.getElementById("mbbxProductCloseModal");
+        
+    //document ready then verify if the button should be display
+    (function() {
+        var is_active = <?php echo $is_active; ?>;
+        if(is_active){
+            var divButton = document.getElementsByClassName("add-to-cart-wrapper")[0];  
+            var button = document.createElement("input");
+            button.type = "button";
+            button.value = "Ver Financiación";
+            button.id = "mbbxProductCloseModalBtnFinanciacion";
+            divButton.appendChild(button);    
+        }
+    })();
+    
+    
+    // When the user clicks on <span> (x), close the modal
+    span.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.style.display = "none";
+        return false;
+    });
+    
+    
+    // Get the button that opens the modal
+    var btn = document.getElementById("mbbxProductCloseModalBtnFinanciacion");
+    if(btn){
+        // When the user clicks on the button, show/open the modal
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var quantity = quantityDom.qty.value;
+            var price_one = <?php echo $_price; ?>;
+            var tax_id = <?php echo $taxi_id; ?>;
+            //recalculate the price based on quantity
+            var total_price = price_one * quantity;
+            iframe.src = "https://mobbex.com/p/sources/widget/arg/"+tax_id+"/?total="+total_price;
+            //set the modal and iframe style
+            modal.style.display = "block";
+            window.dispatchEvent(new Event('resize'));
+            document.getElementById('iframe').style.width = "100%"; 
+            document.getElementById('iframe').style.height = "96%"; 
+            return false;
+        });
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    } 
+
+    
+</script>
