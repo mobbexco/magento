@@ -15,7 +15,7 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
      * 
      * @return string
      */
-    public function getMobbexTransaction($order_id, $searched_column = 'order_id')
+    public function getMobbexTransaction($order_id, $searched_column = 'data')
     {
 
         $collection = $this->getCollection()

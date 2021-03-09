@@ -132,9 +132,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     // Save the order
                     $order->save();
 
-                    //Order transaction information
-                    Mage::getModel('mobbex/transaction')->saveCustomField($orderId,$res);
-
                     Mage::getSingleton('checkout/session')->unsQuoteId();
                 }
             } catch (Exception $e) {

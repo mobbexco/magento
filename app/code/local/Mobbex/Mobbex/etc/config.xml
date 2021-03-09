@@ -17,8 +17,7 @@
 					<customfield>
 						<table>mobbex_customfield</table>
 					</customfield>
-				</entities>
-				<entities>
+				
 					<transaction>
 						<table>mobbex_transaction</table>
 					</transaction>
