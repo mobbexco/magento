@@ -57,7 +57,46 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             }
 		}
 		
+		// Check "Ahora" custom fields in categories
+		$array_categories_id = array();
+		$array_categories_id = $this->getAllCategories($products);
+		
+		foreach ($array_categories_id as $cat_id) {
+		
+			foreach ($ahora as $key => $value) {
+				// If plan is checked and it's not added yet, add to filter
+				$checked = Mage::getModel('mobbex/customfield')->getCustomField($cat_id, 'category', $key);
+				if ($checked === 'yes' && !in_array('-' . $key, $installments)) {
+					$installments[] = '-' . $key;
+					unset($ahora[$key]);
+				} 
+			}
+		}
+		
+		
         return $installments;
+	}
+
+	/**
+	 * Return categories ids from an array of products
+	 * @param $listProducts : array
+	 * @return array
+	 */
+	private function getAllCategories($listProducts){
+		
+		$categories_id = array();
+		foreach ($listProducts as $product) {
+			//Search for the product object
+			$productId = $product->getProductId();
+			$prod = Mage::getModel('catalog/product')->load($productId);
+			$categories = $prod->getCategoryIds();//array of cateries ids
+			foreach ($categories as $cat_id) {
+				if(!in_array($cat_id, $categories_id)){
+					array_push($categories_id,$cat_id);
+				}
+			}
+		}
+		return $categories_id;
 	}
 
     public function createCheckout($order)
