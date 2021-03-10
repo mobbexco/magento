@@ -69,7 +69,8 @@
             <updates>
             	<local module="Mobbex_Mobbex">
 	                <file>local.xml</file>    
-					<file>mobbex.xml</file>                                    
+					<file>mobbex.xml</file>     
+					<file>financingamount.xml</file>                               
 	            </local>
         	</updates>
         </layout>
@@ -79,6 +80,7 @@
     		<updates>
     			<module>
     				<file>mobbex.xml</file>
+					<file>financingamountadmin.xml</file>               
     			</module>
     		</updates>
     	</layout>
