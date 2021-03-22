@@ -22,7 +22,10 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
             ->addFieldToFilter('order_id', $order_id)
             ->getColumnValues($searched_column);
 
-        return $collection;
+        foreach ($collection as $transaction_info) {
+        }   
+
+        return $transaction_info;
     }
 
     /**
