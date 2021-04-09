@@ -57,7 +57,46 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             }
 		}
 		
+		// Check "Ahora" custom fields in categories
+		$array_categories_id = array();
+		$array_categories_id = $this->getAllCategories($products);
+		
+		foreach ($array_categories_id as $cat_id) {
+		
+			foreach ($ahora as $key => $value) {
+				// If plan is checked and it's not added yet, add to filter
+				$checked = Mage::getModel('mobbex/customfield')->getCustomField($cat_id, 'category', $key);
+				if ($checked === 'yes' && !in_array('-' . $key, $installments)) {
+					$installments[] = '-' . $key;
+					unset($ahora[$key]);
+				} 
+			}
+		}
+		
+		
         return $installments;
+	}
+
+	/**
+	 * Return categories ids from an array of products
+	 * @param $listProducts : array
+	 * @return array
+	 */
+	private function getAllCategories($listProducts){
+		
+		$categories_id = array();
+		foreach ($listProducts as $product) {
+			//Search for the product object
+			$productId = $product->getProductId();
+			$prod = Mage::getModel('catalog/product')->load($productId);
+			$categories = $prod->getCategoryIds();//array of cateries ids
+			foreach ($categories as $cat_id) {
+				if(!in_array($cat_id, $categories_id)){
+					array_push($categories_id,$cat_id);
+				}
+			}
+		}
+		return $categories_id;
 	}
 
     public function createCheckout($order)
@@ -181,4 +220,40 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			}
         }
 	}
+
+	/**
+     * Return the Cuit/Tax_id using the ApiKey to request via web service
+     * @return String Cuit
+     */
+    public function getCuit(){
+        $curl = curl_init();
+        $cuit = "";
+
+        $headers = $this->getHeaders();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.mobbex.com/p/entity/validate",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            //search the cuit in the plugins config if cant get it from api request
+            $cuit = $this->config->getCuit();
+        } else {
+            $res = json_decode($response, true);
+            $cuit = $res['data']['tax_id'];
+        }
+        return $cuit; 
+    }
 }
