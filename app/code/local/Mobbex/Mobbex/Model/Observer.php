@@ -2,42 +2,46 @@
 
 class Mobbex_Mobbex_Model_Observer
 {
-	/**
-	 * Flag to stop observer executing more than once
-	 *
-	 */
-	static protected $_singletonFlag = false;
+    /**
+     * Flag to stop observer executing more than once
+     *
+     */
+    static protected $_singletonFlag = false;
 
-	public function saveProductTabData()
-	{
-		if (!self::$_singletonFlag) {
-			self::$_singletonFlag = true;
+    public function saveProductTabData()
+    {
+        if (!self::$_singletonFlag) {
+            self::$_singletonFlag = true;
 
-			$product_id = Mage::registry('current_product')->getId();
+            $product = Mage::registry('current_product');
 
-			try {
-				$plans = array(
-					'ahora_3' => Mage::app()->getRequest()->getPost('ahora_3'),
-					'ahora_6' => Mage::app()->getRequest()->getPost('ahora_6'),
-					'ahora_12' => Mage::app()->getRequest()->getPost('ahora_12'),
-					'ahora_18' => Mage::app()->getRequest()->getPost('ahora_18'),
-				);
+            // Check for catch associated products save
+            if (!empty($product)) {
+                $product_id = $product->getId();
 
-				foreach ($plans as $key => $value) {
-					if ($value === 'on') {
-						Mage::getModel('mobbex/customfield')->saveCustomField($product_id, 'product', $key, 'yes');
-					} else {
-						Mage::getModel('mobbex/customfield')->saveCustomField($product_id, 'product', $key, 'no');
-					}
-				}
+                try {
+                    $plans = array(
+                        'ahora_3' => Mage::app()->getRequest()->getPost('ahora_3'),
+                        'ahora_6' => Mage::app()->getRequest()->getPost('ahora_6'),
+                        'ahora_12' => Mage::app()->getRequest()->getPost('ahora_12'),
+                        'ahora_18' => Mage::app()->getRequest()->getPost('ahora_18'),
+                    );
 
-				return true;
+                    foreach ($plans as $key => $value) {
+                        if ($value === 'on') {
+                            Mage::getModel('mobbex/customfield')->saveCustomField($product_id, 'product', $key, 'yes');
+                        } else {
+                            Mage::getModel('mobbex/customfield')->saveCustomField($product_id, 'product', $key, 'no');
+                        }
+                    }
 
-			} catch (Exception $e) {
-				Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-			}
-		}
-	}
+                    return true;
+                } catch (Exception $e) {
+                    Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                }
+            }
+        }
+    }
 
 	public function saveCategoryTabData()
 	{
