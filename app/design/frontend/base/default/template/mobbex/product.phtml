@@ -4,7 +4,8 @@
     $_product = $this->getProduct(); 
     $_price = $_product->getFinalPrice();
     $buttonTitle = __('Ver Financiación'); 
-    $is_active = Mage::getStoreConfig('payment/mobbex/financing');
+    $is_active = false;
+    if($taxi_id) $is_active = Mage::getStoreConfig('payment/mobbex/financing');
     $url_information = "https://mobbex.com/p/sources/widget/arg/".$taxi_id ."/?total=".$_price;
 ?>
 <Style>
@@ -85,7 +86,7 @@
         
     //document ready then verify if the button should be display
     (function() {
-        var is_active = <?php echo $is_active; ?>;
+        var is_active = <?php echo $is_active ? 'true' : 'false'; ?>;
         if(is_active){
             var divButton = document.getElementsByClassName("add-to-cart-wrapper")[0];  
             var button = document.createElement("input");
@@ -96,14 +97,15 @@
         }
     })();
     
-    
-    // When the user clicks on <span> (x), close the modal
-    span.addEventListener('click', function(e) {
-        e.preventDefault();
-        modal.style.display = "none";
-        return false;
-    });
-    
+    var is_active = <?php echo $is_active ? 'true' : 'false'; ?>;
+    if(is_active){
+        // When the user clicks on <span> (x), close the modal
+        span.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.display = "none";
+            return false;
+        });
+    }
     
     // Get the button that opens the modal
     var btn = document.getElementById("mbbxProductCloseModalBtnFinanciacion");
@@ -113,7 +115,7 @@
             e.preventDefault();
             var quantity = quantityDom.qty.value;
             var price_one = <?php echo $_price; ?>;
-            var tax_id = <?php echo $taxi_id; ?>;
+            var tax_id = <?php echo $taxi_id ? $taxi_id : 0; ?>;
             //recalculate the price based on quantity
             var total_price = price_one * quantity;
             iframe.src = "https://mobbex.com/p/sources/widget/arg/"+tax_id+"/?total="+total_price;
