@@ -254,7 +254,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			}
         } else {
             $res = json_decode($response, true);
-            $cuit = $res['data']['tax_id'];
+			if($res['data']){
+				$cuit = $res['data']['tax_id'];
+			}
         }
         return $cuit; 
     }
