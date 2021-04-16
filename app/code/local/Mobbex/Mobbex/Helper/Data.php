@@ -227,7 +227,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getCuit(){
         $curl = curl_init();
-        $cuit = "";
+        $cuit = null;
 
         $headers = $this->getHeaders();
 
@@ -249,7 +249,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
         if ($err) {
             //search the cuit in the plugins config if cant get it from api request
-            $cuit = $this->config->getCuit();
+			if($this->config){
+				$cuit = $this->config->getCuit();
+			}
         } else {
             $res = json_decode($response, true);
             $cuit = $res['data']['tax_id'];
