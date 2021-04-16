@@ -1,7 +1,7 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '1.2.2';
+    const VERSION = '1.3.0';
 
 	public function getHeaders() {
 		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
