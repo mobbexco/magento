@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <checkout_onepage_index>
+        <reference name='checkout.onepage.shipping'>
+            <block type='checkout/onepage_shipping' name='form.additional.info' template='mobbex/shipping_field.phtml'></block>
+        </reference>
+    </checkout_onepage_index>
+</layout>

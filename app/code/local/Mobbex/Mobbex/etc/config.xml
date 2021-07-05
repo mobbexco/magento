@@ -2,10 +2,18 @@
 <config>
 	<modules>
 		<Mobbex_Mobbex>
-			<version>1.3.0</version>
+			<version>1.5.0</version>
 		</Mobbex_Mobbex>
 	</modules>
 	<global>
+		<fieldsets>
+			<sales_convert_quote_address>
+				<mobbex_dni>
+					<to_order_address>*</to_order_address>
+                    <to_customer_address>*</to_customer_address>
+				</mobbex_dni>
+			</sales_convert_quote_address>
+		</fieldsets>
 		<models>
 			<mobbex>
 				<class>Mobbex_Mobbex_Model</class>
@@ -71,6 +79,8 @@
 	                <file>local.xml</file>    
 					<file>mobbex.xml</file>     
 					<file>financingamount.xml</file>                               
+					<file>shippingdnimobbex.xml</file>        
+					<file>dnimobbex.xml</file>                
 	            </local>
         	</updates>
         </layout>
