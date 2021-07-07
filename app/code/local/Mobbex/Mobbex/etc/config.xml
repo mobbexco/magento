@@ -2,18 +2,10 @@
 <config>
 	<modules>
 		<Mobbex_Mobbex>
-			<version>1.5.0</version>
+			<version>1.4.0</version>
 		</Mobbex_Mobbex>
 	</modules>
 	<global>
-		<fieldsets>
-			<sales_convert_quote_address>
-				<mobbex_dni>
-					<to_order_address>*</to_order_address>
-                    <to_customer_address>*</to_customer_address>
-				</mobbex_dni>
-			</sales_convert_quote_address>
-		</fieldsets>
 		<models>
 			<mobbex>
 				<class>Mobbex_Mobbex_Model</class>
@@ -76,14 +68,24 @@
 		<layout>
             <updates>
             	<local module="Mobbex_Mobbex">
-	                <file>local.xml</file>    
+	                <file>local.xml</file>         
 					<file>mobbex.xml</file>     
-					<file>financingamount.xml</file>                               
-					<file>shippingdnimobbex.xml</file>        
+					<file>financingamount.xml</file>     
 					<file>dnimobbex.xml</file>                
 	            </local>
         	</updates>
         </layout>
+		<events>
+            <controller_action_postdispatch_checkout_onepage_savebilling>
+                <observers>
+                    <mobbex_save_dni>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>saveMobbexDni</method>
+                    </mobbex_save_dni>
+                </observers>
+            </controller_action_postdispatch_checkout_onepage_savebilling>
+        </events>
 	</frontend>
 	<adminhtml>
     	<layout>
