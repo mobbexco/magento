@@ -3,6 +3,19 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
     const VERSION = '1.3.0';
 
+	/**
+	* All 'ahora' plan keys.
+	*/
+	public static $ahora = ['ahora_3', 'ahora_6', 'ahora_12', 'ahora_18'];
+	
+	/** @var Mobbex_Mobbex_Model_Customfield */
+	public $fields;
+
+	public function __construct()
+	{
+		$this->fields = Mage::getModel('mobbex/customfield');
+	}
+
 	public function getHeaders() {
 		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
 		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
@@ -34,47 +47,65 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 	public function getInstallments($products)
 	{
-        $installments = [];
+		$installments = $allCommonPlans = $allAdvancedPlans = [];
 
-        $ahora = array(
-            'ahora_3' => 'Ahora 3',
-            'ahora_6' => 'Ahora 6',
-            'ahora_12' => 'Ahora 12',
-            'ahora_18' => 'Ahora 18',
-        );
+		foreach (self::$ahora as $ahoraPlan) {
+			// Get 'ahora' plans from categories
+			foreach ($this->getAllCategories($products) as $catId) {
+				// If category has plan selected
+				if ($this->fields->getCustomField($catId, 'category', $ahoraPlan) == 'yes') {
+					// Add to installments
+					$installments[] = '-' . $ahoraPlan;
+					continue 2;
+				}
+			}
 
-        foreach ($products as $product) {
-			
-			foreach ($ahora as $key => $value) {
-				
-				$product_id = $product->getProductId();
-				$field_data = Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', $key);
-
-                if ($field_data === 'yes') {
-                    $installments[] = '-' . $key;
-                    unset($ahora[$key]);
-                }
-            }
-		}
-		
-		// Check "Ahora" custom fields in categories
-		$array_categories_id = array();
-		$array_categories_id = $this->getAllCategories($products);
-		
-		foreach ($array_categories_id as $cat_id) {
-		
-			foreach ($ahora as $key => $value) {
-				// If plan is checked and it's not added yet, add to filter
-				$checked = Mage::getModel('mobbex/customfield')->getCustomField($cat_id, 'category', $key);
-				if ($checked === 'yes' && !in_array('-' . $key, $installments)) {
-					$installments[] = '-' . $key;
-					unset($ahora[$key]);
-				} 
+			// Get 'ahora' plans from products
+			foreach ($products as $product) {
+				// If product has plan selected
+				if ($this->fields->getCustomField($product->getProductId(), 'product', $ahoraPlan) == 'yes') {
+					// Add to installments
+					$installments[] = '-' . $ahoraPlan;
+					continue 2;
+				}
 			}
 		}
-		
-		
-        return $installments;
+
+		foreach ($products as $product) {
+			$productId = $product->getProductId();
+
+			// Get common and advanced plans from product
+			$commonPlans   = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
+			$advancedPlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
+
+			$allCatCommonPlans = $allCatAdvancedPlans = [];
+
+			// Get common and advanced plans from product categories
+			foreach ($product->getCategoryIds() as $catId) {
+				$catCommonPlans   = $this->fields->getCustomField($productId, 'category', 'common_plans') ?: [];
+				$catAdvancedPlans = $this->fields->getCustomField($productId, 'category', 'advanced_plans') ?: [];
+
+				$allCatCommonPlans   = array_merge($allCatCommonPlans, $catCommonPlans);
+				$allCatAdvancedPlans = array_merge($allCatAdvancedPlans, $catAdvancedPlans);
+			}
+
+			$allCommonPlans   = array_merge($allCommonPlans, $commonPlans, $allCatCommonPlans);
+			$allAdvancedPlans = array_merge($allAdvancedPlans, array_unique(array_merge($advancedPlans, $allCatAdvancedPlans)));
+		}
+
+		// Add common plans to installments
+		foreach ($allCommonPlans as $commonPlan) {
+			$installments[] = '-' . $commonPlan;
+		}
+
+		// Get all the advanced plans with their number of reps
+        foreach (array_count_values($allAdvancedPlans) as $plan => $reps) {
+            // Only if the plan is active on all products, add to installments
+            if ($reps == count($products))
+                $installments[] = '+uid:' . $plan;
+        }
+
+        return array_unique($installments);
 	}
 
 	/**
@@ -82,7 +113,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	 * @param $listProducts : array
 	 * @return array
 	 */
-	private function getAllCategories($listProducts){
+	private function getAllCategories($listProducts)
+	{
 		
 		$categories_id = array();
 		foreach ($listProducts as $product) {
@@ -225,7 +257,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
      * Return the Cuit/Tax_id using the ApiKey to request via web service
      * @return String Cuit
      */
-    public function getCuit(){
+	public function getCuit()
+	{
         $curl = curl_init();
         $cuit = null;
 
