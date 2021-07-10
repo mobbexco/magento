@@ -1,0 +1,27 @@
+.mbbx_plans_cont {
+    display: flex;
+}
+
+.mbbx_plan_list {
+    min-width: 250px;
+}
+
+.mbbx_plan_list>div {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.mbbx_plan_list label {
+    margin: 5px;
+}
+
+.mbbx_plan_source {
+    margin: 15px 0 5px 0;
+}
+
+.mbbx_plan_source img {
+    width: 30px;
+    border-radius: 100%;
+    margin-right: 10px;
+}

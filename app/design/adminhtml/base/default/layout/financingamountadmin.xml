@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<layout version="0.1.0">
-    <adminhtml_sales_order_view>
-		<reference name="content">
-			<block type="adminhtml/sales_order_totals" name="order_totals_financing" template="mobbex/financingamountadmin.phtml" />
-		</reference>
-	</adminhtml_sales_order_view>
-</layout>
