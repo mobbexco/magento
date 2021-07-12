@@ -65,6 +65,20 @@ class Mobbex_Mobbex_Model_Observer
 	}
 
 	/**
+	 * Save dni from checkout billing information
+	 */
+	public function saveMobbexDni($observer)
+	{
+		$data = $observer->getEvent()->getControllerAction()->getRequest()->getPost('billing', array());
+		$customerData = Mage::getSingleton('customer/session')->getCustomer();
+
+		if ($customerData && !empty($data['dni']))
+			Mage::getModel('mobbex/customfield')->saveCustomField($customerData->getId(), 'customer', 'dni', $data['dni']);
+
+		return true;
+	}
+
+	/**
 	 * Calculates the refund amount of an order
 	 * @param $observer : Varien_Event_Observer
 	 * @return boolean

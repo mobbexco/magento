@@ -72,6 +72,17 @@
     			</module>
         	</updates>
         </layout>
+		<events>
+            <controller_action_postdispatch_checkout_onepage_savebilling>
+                <observers>
+                    <mobbex_save_dni>
+                        <type>singleton</type>
+                        <class>mobbex/observer</class>
+                        <method>saveMobbexDni</method>
+                    </mobbex_save_dni>
+                </observers>
+            </controller_action_postdispatch_checkout_onepage_savebilling>
+        </events>
 	</frontend>
 	<adminhtml>
     	<layout>
