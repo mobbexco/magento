@@ -1,12 +1,19 @@
-let interval = setInterval(() => {
-    if (checkout.currentStep === 'review') {
-        const data = getFormData()
-        if (data["payment[method]"] === "mobbex") {
-            document.getElementById('review-buttons-container').children[0].onclick  = function(){ formRequest(data) }
+window.addEventListener('load', function () {
+    // Catch checkout section change
+    Checkout.prototype.gotoSection = Checkout.prototype.gotoSection.wrap(
+        function (parentMethod, section, reloadProgressBlock) {
+            parentMethod(section, reloadProgressBlock, reloadProgressBlock);
+
+            // If it's review section and mobbex was selected
+            if (section == 'review' && getFormData()["payment[method]"] == "mobbex") {
+                // Add event to init embed checkout
+                document.getElementById('review-buttons-container').children[0].onclick = function() {
+                    formRequest();
+                }
+            }
         }
-        clearInterval(interval)
-    }
-}, 1000)
+    );
+});
 
 function getFormData() {
     const fullData = {}
@@ -17,11 +24,11 @@ function getFormData() {
     return fullData
 };
 
-function formRequest(data) {
+function formRequest() {
     checkout.setLoadWaiting("review", true)
     new Ajax.Request(review.saveUrl, {
         method: "post",
-        parameters: data,
+        parameters: getFormData(),
         onSuccess: function(){
             getEmbedData()
         },
