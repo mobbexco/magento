@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
-    <adminhtml_catalog_product_edit>
+	<adminhtml_catalog_product_edit>
+		<reference name="head">
+			<action method="addCss">
+				<stylesheet>css/mobbex-plan-filter.css</stylesheet>
+			</action>
+		</reference>
 		<reference name="product_tabs">
 			<action method="addTab">
 				<name>mobbex_options</name>
@@ -8,4 +13,16 @@
 			</action>
 		</reference>
 	</adminhtml_catalog_product_edit>
+	<adminhtml_sales_order_view>
+		<reference name="content">
+			<block type="adminhtml/sales_order_totals" name="order_totals_financing" template="mobbex/financingamountadmin.phtml" />
+		</reference>
+	</adminhtml_sales_order_view>
+	<adminhtml_catalog_category_edit>
+		<reference name="head">
+			<action method="addCss">
+				<stylesheet>css/mobbex-plan-filter.css</stylesheet>
+			</action>
+		</reference>
+	</adminhtml_catalog_category_edit>
 </layout>

@@ -8,4 +8,14 @@
             <block type='checkout/onepage_billing' name='form.additional.info' template='mobbex/billing_fields.phtml'></block>
         </reference>
     </checkout_onepage_index>
+    <sales_order_view translate="label">
+        <reference name="my.account.wrapper">
+            <block type="sales/order_info" name="order_items_financing" template="mobbex/financingamount.phtml" />
+        </reference>
+    </sales_order_view>
+    <catalog_product_view translate="label">
+        <reference name="content"> 
+            <block type="catalog/product_view" name="product.info.financial" template="mobbex/product.phtml" />
+        </reference>
+    </catalog_product_view>
 </layout>

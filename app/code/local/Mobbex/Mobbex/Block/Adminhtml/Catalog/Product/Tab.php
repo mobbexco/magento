@@ -2,11 +2,30 @@
 
 class Mobbex_Mobbex_Block_Adminhtml_Catalog_Product_Tab extends Mage_Adminhtml_Block_Template implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+	/** @var Mobbex_Mobbex_Helper_Settings */
+	public $settings;
+
+	/** Common plans fields data. */
+	public $commonPlans;
+
+	/** Advanced plans fields data. */
+	public $advancedPlans;
 
 	public function _construct()
 	{
 		parent::_construct();
-		$this->setTemplate('mobbex/product_tab.phtml');
+
+		$id = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
+
+		if (empty($id))
+			return;
+
+		// Get plans fields
+		$this->settings		 = Mage::helper('mobbex/settings');
+		$this->commonPlans	 = $this->settings->getCommonPlanFields($id);
+		$this->advancedPlans = $this->settings->getAdvancedPlanFields($id);
+
+		$this->setTemplate('mobbex/plans-filter.phtml');
 	}
 
 	public function getTabLabel()
@@ -27,31 +46,5 @@ class Mobbex_Mobbex_Block_Adminhtml_Catalog_Product_Tab extends Mage_Adminhtml_B
 	public function isHidden()
 	{
 		return false;
-	}
-
-	public function getPlans()
-	{
-		$product_id = Mage::registry('current_product')->getId();
-
-		$ahora = array(
-			'ahora_3' => array(
-				'label' => 'Ahora 3',
-				'value' => Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', 'ahora_3'),
-			),
-			'ahora_6' => array(
-				'label' => 'Ahora 6',
-				'value' => Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', 'ahora_6'),
-			),
-			'ahora_12' => array(
-				'label' => 'Ahora 12',
-				'value' => Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', 'ahora_12'),
-			),
-			'ahora_18' => array(
-				'label' => 'Ahora 18',
-				'value' => Mage::getModel('mobbex/customfield')->getCustomField($product_id, 'product', 'ahora_18'),
-			),
-		);
-
-		return $ahora;
 	}
 }

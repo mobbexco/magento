@@ -1,0 +1,36 @@
+<div class="entry-edit">
+	<div class="entry-edit-head">
+		<h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Plans Configuration') ?></h4>
+	</div>
+	<div class="fieldset fieldset-wide" id="mobbex_options">
+		<div class="hor-scroll">
+			<h3><?= $this->__('Select the plans you want to appear in the checkout') ?></h3>
+			<div class="mbbx_plans_cont">
+				<div class="mbbx_plan_list">
+					<p><?= $this->__('Common plans') ?></p>
+					<?php foreach ($this->commonPlans as $planId => $data) : ?>
+						<div>
+							<input type="hidden" name="<?= $planId ?>" value="no">
+							<input type='checkbox' name='<?= $planId ?>' id='<?= $planId ?>' <?= ($data['value'] ? 'checked' : '') ?>>
+							<label for='<?= $planId ?>'><?= $data['label'] ?></label>
+						</div>
+					<?php endforeach; ?>
+				</div>
+				<div class="mbbx_plan_list">
+					<p><?= $this->__('Plans with advanced rules') ?></p>
+					<?php foreach ($this->advancedPlans as $sourceRef => $sourceData) : ?>
+						<div class='mbbx_plan_source'>
+							<img src='https://res.mobbex.com/images/sources/<?= $sourceRef ?>.png'><?= key($sourceData) ?>
+						</div>
+						<?php foreach (reset($sourceData) as $planId => $data) : ?>
+							<div>
+								<input type='checkbox' name='<?= $planId ?>' id='<?= $planId ?>' <?= ($data['value'] ? 'checked' : '') ?>>
+								<label for='<?= $planId ?>'><?= $data['label'] ?></label>
+							</div>
+						<?php endforeach; ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
