@@ -81,9 +81,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			$allCatCommonPlans = $allCatAdvancedPlans = [];
 
 			// Get common and advanced plans from product categories
-			foreach ($product->getCategoryIds() as $catId) {
-				$catCommonPlans   = $this->fields->getCustomField($productId, 'category', 'common_plans') ?: [];
-				$catAdvancedPlans = $this->fields->getCustomField($productId, 'category', 'advanced_plans') ?: [];
+			foreach ($product->getProduct()->getCategoryIds() as $catId) {
+				$catCommonPlans   = $this->fields->getCustomField($catId, 'category', 'common_plans') ?: [];
+				$catAdvancedPlans = $this->fields->getCustomField($catId, 'category', 'advanced_plans') ?: [];
 
 				$allCatCommonPlans   = array_merge($allCatCommonPlans, $catCommonPlans);
 				$allCatAdvancedPlans = array_merge($allCatAdvancedPlans, $catAdvancedPlans);
