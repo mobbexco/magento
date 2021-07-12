@@ -8,18 +8,16 @@ class Mobbex_Mobbex_Model_Observer
      */
     static protected $_singletonFlag = false;
 
-
 	/**
 	 * Save dni from checkout billing information
 	 */
-	public function saveMobbexDni( $observer){
-
+	public function saveMobbexDni($observer)
+	{
 		$data = $observer->getEvent()->getControllerAction()->getRequest()->getPost('billing', array());
 		$customerData = Mage::getSingleton('customer/session')->getCustomer();
-		$ssss =  $data['dni'];
-		if($customerData && $data['dni']){
-			Mage::getModel('mobbex/customfield')->saveCustomField($customerData->getId(),'dni','dni' ,$data['dni']);
-		}
+
+		if ($customerData && !empty($data['dni']))
+			Mage::getModel('mobbex/customfield')->saveCustomField($customerData->getId(), 'customer', 'dni', $data['dni']);
 
 		return true;
 	}

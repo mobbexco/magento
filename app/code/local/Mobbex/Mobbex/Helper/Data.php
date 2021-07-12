@@ -139,7 +139,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'name' => $order->getCustomerName(),
 			'email' => $order->getCustomerEmail(),
 			'phone' => !empty($order->getBillingAddress()) ? $order->getBillingAddress()->getTelephone() : null,
-			'dni' => Mage::getModel('mobbex/customfield')->getCustomField($order->getCustomerId(), 'dni', 'dni'),
+			'identification' => Mage::getModel('mobbex/customfield')->getCustomField($order->getCustomerId(), 'customer', 'dni'),
 		];
 
 		$return_url = $this->getModuleUrl('response', $queryParams);

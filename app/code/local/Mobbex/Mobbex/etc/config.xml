@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Mobbex_Mobbex>
-			<version>1.4.0</version>
+			<version>1.3.0</version>
 		</Mobbex_Mobbex>
 	</modules>
 	<global>
@@ -68,10 +68,9 @@
 		<layout>
             <updates>
             	<local module="Mobbex_Mobbex">
-	                <file>local.xml</file>         
+	                <file>local.xml</file>    
 					<file>mobbex.xml</file>     
-					<file>financingamount.xml</file>     
-					<file>dnimobbex.xml</file>                
+					<file>financingamount.xml</file>                               
 	            </local>
         	</updates>
         </layout>

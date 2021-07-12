@@ -4,5 +4,8 @@
         <reference name="head">
             <block type="mobbex/embed" name="embed" template="mobbex/embed.phtml" ifconfig="payment/mobbex/embed"/>
         </reference>
+        <reference name='checkout.onepage.billing'>
+            <block type='checkout/onepage_billing' name='form.additional.info' template='mobbex/billing_fields.phtml'></block>
+        </reference>
     </checkout_onepage_index>
 </layout>
