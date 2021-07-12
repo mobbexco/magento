@@ -30,6 +30,9 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
         foreach ($collection as $custom_field) {
         }
 
+        if ($searched_column == 'data' && is_string($custom_field) && is_array(json_decode($custom_field)))
+            $custom_field = json_decode($custom_field);
+
         return $custom_field;
     }
 
@@ -54,7 +57,7 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
         $custom_field->setData('row_id', $row_id);
         $custom_field->setData('object', $object);
         $custom_field->setData('field_name', $field_name);
-        $custom_field->setData('data', $data);
+        $custom_field->setData('data', is_array($data) ? json_encode($data) : $data);
 
         return $custom_field->save();
     }
