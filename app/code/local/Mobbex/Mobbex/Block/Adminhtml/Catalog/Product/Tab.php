@@ -35,7 +35,7 @@ class Mobbex_Mobbex_Block_Adminhtml_Catalog_Product_Tab extends Mage_Adminhtml_B
 
 	public function getTabTitle()
 	{
-		return $this->__('Click here to edit payment plans on this product');
+		return $this->__('Edit payment plans for this product');
 	}
 
 	public function canShowTab()
