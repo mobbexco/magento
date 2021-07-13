@@ -56,6 +56,15 @@
 		</payment>
 	</default>
 	<frontend>
+		<translate>
+			<modules>
+				<Mobbex_Mobbex>
+					<files>
+						<default>mobbex.csv</default>
+					</files>
+				</Mobbex_Mobbex>
+			</modules>
+		</translate>
 		<routers>
 			<mobbex>
 				<use>standard</use>
@@ -68,8 +77,8 @@
 		<layout>
             <updates>
             	<module>
-    				<file>mobbex.xml</file>
-    			</module>
+					<file>mobbex.xml</file>
+	            </module>
         	</updates>
         </layout>
 		<events>
@@ -85,6 +94,15 @@
         </events>
 	</frontend>
 	<adminhtml>
+		<translate>
+			<modules>
+				<Mobbex_Mobbex>
+					<files>
+						<default>mobbex.csv</default>
+					</files>
+				</Mobbex_Mobbex>
+			</modules>
+		</translate>
     	<layout>
     		<updates>
     			<module>
