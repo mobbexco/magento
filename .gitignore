@@ -1,2 +1,5 @@
 *.log
 *.zip
+.DS_STORE
+
+/.vscode
