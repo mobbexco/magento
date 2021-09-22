@@ -41,7 +41,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return [
             "name" => "magento_1",
-            "version" => $this::VERSION
+            "version" => $this::VERSION,
+            "platform_version" => Mage::getVersion(),
         ];
     }
 
@@ -176,38 +177,33 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 		$return_url = $this->getModuleUrl('response', $queryParams);
 
-		// Get domain from store URL
-		$base_url = Mage::getBaseUrl();
-		$domain = str_replace(['https://', 'http://'], '', $base_url);
-		if (substr($domain, -1) === '/') {
-			$domain = rtrim($domain, '/');
-		}
-
         // Create data
-        $data = array(
-            'reference' => $tracking_ref,
-            'currency' => 'ARS',
-            'description' => 'Orden #' . $order->getIncrementId(),
-			'test' => false, // TODO: Add to config
-            'return_url' => $return_url,
-            'items' => $items,
-            'webhook' => $this->getModuleUrl('notification', $queryParams),
-			'options' => [
-				'button' => (Mage::getStoreConfig('payment/mobbex/embed') == true),
-				'embed' => true,
-				'domain' => $domain,
-                'theme' => [
-					'type' => 'light', 
+        $data = [
+            'reference'	   => $tracking_ref,
+            'currency'	   => 'ARS',
+            'description'  => 'Orden #' . $order->getIncrementId(),
+			'test'		   => (Mage::getStoreConfig('payment/mobbex/test_mode') == true),
+            'return_url'   => $return_url,
+            'webhook'	   => $this->getModuleUrl('notification', $queryParams),
+            'items'		   => $items,
+			'total' 	   => round($order->getGrandTotal(), 2),
+			'customer' 	   => $customer,
+			'timeout' 	   => 5,
+			'installments' => $this->getInstallments($products),
+			'options'	   => [
+				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
+				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
+				'platform' => $this->getPlatform(),
+                'theme'    => [
+					'type'   => 'light', 
 					'colors' => null
 				],
-				'platform' => $this->getPlatform(),
+				'redirect' => [
+                    'success' => true,
+                    'failure' => false,
+                ],
 			],
-			'redirect' => 0,
-			'total' => round($order->getGrandTotal(), 2),
-			'customer' => $customer,
-			'timeout' => 5,
-			'installments' => $this->getInstallments($products),
-		);
+		];
 
 		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/checkout",
