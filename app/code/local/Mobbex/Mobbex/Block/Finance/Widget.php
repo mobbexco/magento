@@ -9,8 +9,9 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
 
 		parent::_construct();
 
-		$this->settings		 = Mage::helper('mobbex/settings');
-		$this->mobbex		 = Mage::helper('mobbex/data');
+		$this->settings = Mage::helper('mobbex/settings');
+		$this->mobbex   = Mage::helper('mobbex/data');
+        $this->sources  = $this->getSources();
 
     }
 
@@ -25,15 +26,15 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
         }
 
         //Get product data
-        $product_id = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
+        $product_id    = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
         $product_price = Mage::registry('current_product') ? Mage::registry('current_product')->getPrice() : false;
         
         //Get product plans
-        $inactive_plans = $this->mobbex->getSources($product_id);
-        $active_plans = $this->mobbex->getSources($product_id);
+        $inactive_plans = $this->mobbex->getInactivePlans($product_id);
+        $active_plans   = $this->mobbex->getActivePlans($product_id);
 
         //Get the sources filtered
-        $sources = $this->mobbex->getSources($product_price, $this->inactive_plans, $this->active_plans);
+        $sources = $this->mobbex->getSources($product_price, $inactive_plans, $active_plans);
         
         return $this->sources = $sources;
     }

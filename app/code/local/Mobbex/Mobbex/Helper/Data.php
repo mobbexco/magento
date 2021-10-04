@@ -260,12 +260,11 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getInactivePlans($productId)
     {
-        $product = $this->productRepository->getById($productId);
-
-        $inactivePlans = unserialize($this->customFields->getCustomField($productId, 'product', 'common_plans')) ?: [];
+        $product       = Mage::getModel('catalog/product')->load($productId);
+		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
 
         foreach ($product->getCategoryIds() as $categoryId)
-            $inactivePlans = array_merge($inactivePlans, unserialize($this->customFields->getCustomField($categoryId, 'category', 'common_plans')) ?: []);
+            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
 
         // Remove duplicated and return
         return array_unique($inactivePlans);
@@ -280,13 +279,11 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getActivePlans($productId)
     {
-        $product = $this->productRepository->getById($productId);
-
-        // Get plans from product and product categories
-        $activePlans = unserialize($this->customFields->getCustomField($productId, 'product', 'advanced_plans')) ?: [];
-
+        $product     = Mage::getModel('catalog/product')->load($productId);
+        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
+	
         foreach ($product->getCategoryIds() as $categoryId)
-            $activePlans = array_merge($activePlans, unserialize($this->customFields->getCustomField($categoryId, 'category', 'advanced_plans')) ?: []);
+            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
 
         // Remove duplicated and return
         return array_unique($activePlans);

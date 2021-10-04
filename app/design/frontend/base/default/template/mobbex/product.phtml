@@ -1,13 +1,3 @@
-<?php
-// $_helper = $this->helper('mobbex/data');
-// $taxi_id = $_helper->getCuit();
-// $_product = $this->getProduct();
-// $_price = $_product->getFinalPrice();
-// $buttonTitle = __('Ver Financiación');
-// $is_active = false;
-// if ($taxi_id) $is_active = Mage::getStoreConfig('payment/mobbex/financing');
-// $url_information = "https://mobbex.com/p/sources/widget/arg/" . $taxi_id . "/?total=" . $_price;
-?>
 
 <?php if (Mage::getStoreConfig('payment/mobbex/financing')) : ?>
     <div id="mbbxProductModal" class="mobbex-plans-modal">
