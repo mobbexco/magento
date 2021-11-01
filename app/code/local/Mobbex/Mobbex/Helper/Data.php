@@ -203,7 +203,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
                     'failure' => false,
                 ],
 			],
-			'multicard' => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 		];
 
 		curl_setopt_array($curl, [
