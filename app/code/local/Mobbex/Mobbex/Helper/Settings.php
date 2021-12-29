@@ -98,7 +98,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		$common_plans = $advanced_plans = [];
 
 		// Remove values saved with previus method
-		foreach ($this->helper::$ahora as $plan) {
+		foreach (Mobbex_Mobbex_Helper_Data::$ahora as $plan) {
 			$planId = $this->fields->getCustomField($id, $catalogType, $plan, 'customfield_id');
 
 			if ($planId) {
