@@ -251,6 +251,44 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	/**
+     * Retrieve active advanced plans from a product and its categories.
+     * 
+     * @param int $productId
+     * 
+     * @return array
+     */
+    public function getInactivePlans($productId)
+    {
+        $product       = Mage::getModel('catalog/product')->load($productId);
+		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
+
+        foreach ($product->getCategoryIds() as $categoryId)
+            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
+
+        // Remove duplicated and return
+        return array_unique($inactivePlans);
+    }
+
+    /**
+     * Retrieve active advanced plans from a product and its categories.
+     * 
+     * @param int $productId
+     * 
+     * @return array
+     */
+    public function getActivePlans($productId)
+    {
+        $product     = Mage::getModel('catalog/product')->load($productId);
+        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
+	
+        foreach ($product->getCategoryIds() as $categoryId)
+            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
+
+        // Remove duplicated and return
+        return array_unique($activePlans);
+    }
+
+	/**
      * Return the Cuit/Tax_id using the ApiKey to request via web service
      * @return String Cuit
      */
@@ -292,17 +330,21 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
 	/**
-	 * Get sources with common plans from mobbex.
+	 * Get sources with common and advanced filtered plans from mobbex.
 	 * 
 	 * @param null|int $total
+	 * @param null|array $inactivePlans
+	 * @param null|array $activePlans
 	 * 
 	 * @return array
 	 */
-	public function getSources($total = null)
+	public function getSources($total = null, $inactivePlans = null, $activePlans = null)
 	{
 		$curl = curl_init();
 
 		$data = $total ? '?total=' . $total : null;
+
+		$data .= self::getInstallmentsQuery($inactivePlans, $activePlans);
 
 		curl_setopt_array($curl, [
 			CURLOPT_URL 		   => "https://api.mobbex.com/p/sources$data",
@@ -374,4 +416,33 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 		return [];
 	}
+
+	/**
+     * Returns a query param with the installments of the product.
+     * @param array $inactivePlans
+     * @param array $activePlans
+     */
+    public static function getInstallmentsQuery($inactivePlans = null, $activePlans = null ) {
+        
+        $installments = [];
+        
+        //get plans
+        if($inactivePlans) {
+            foreach ($inactivePlans as $plan) {
+                $installments[] = "-$plan";
+            }
+        }
+
+        if($activePlans) {
+            foreach ($activePlans as $plan) {
+                $installments[] = "+uid:$plan";
+            } 
+        }
+
+        //Build query param
+        $query = http_build_query(['installments' => $installments]);
+        $query = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', $query);
+        
+        return $query;
+    }   
 }
