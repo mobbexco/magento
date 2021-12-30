@@ -122,7 +122,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                             $order->setTaxCanceled(0);
                             $order->setTotalCanceled(0);
     
-                            foreach ($order->getAllItems() as $item) {
+                            foreach ($items as $item) {
                                 $item->setQtyCanceled(0);
                                 $item->setTaxCanceled(0);
                                 $item->setHiddenTaxCanceled(0);
