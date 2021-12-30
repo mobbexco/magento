@@ -8,10 +8,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         $embed = Mage::getStoreConfig('payment/mobbex/embed');
         if (!$embed) {
             $this->loadLayout();
-    
+
             $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'mobbex', array('template' => 'mobbex/redirect.phtml'));
             $this->getLayout()->getBlock('content')->append($block);
-    
+
             $this->renderLayout();
         }
     }
@@ -77,7 +77,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 if (isset($orderId) && !empty($status)) {
 
                     //Save transaction information
-                    Mage::getModel('mobbex/transaction')->saveMobbexTransaction($orderId,json_encode($res));
+                    Mage::getModel('mobbex/transaction')->saveMobbexTransaction($orderId, json_encode($res));
 
                     $source_type = $res['payment']['source']['type'];
                     $source_name = $res['payment']['source']['name'];
@@ -87,7 +87,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     if (isset($res['payment']['source']['number'])) {
                         $source_number = ' ' . $res['payment']['source']['number'];
                     }
-                    
+
                     $user_name = isset($res['user']['name']) ? $res['user']['name'] : '';
                     $user_email = isset($res['user']['email']) ? $res['user']['email'] : '';
 
@@ -95,7 +95,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                     $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
                     $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
-                    
+
                     $order->addStatusHistoryComment($paymentComment);
                     $order->addStatusHistoryComment($userComment);
 
@@ -103,7 +103,32 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     if ($status == 2 || $status == 3 || $status == 100) {
                         $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true, 'Se aguarda recepción de pago. Mensaje: ' . $message);
                     } else if ($status == 4 || $status >= 200 && $status < 400) {
-                        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true, $message);
+                        
+                        //Uncancel order if is cancelled
+                        $items = $order->getAllItems();
+                        if($items[0]->getStatus() == 'Canceled') {
+
+                            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+                            $order->setStatus('pending');
+    
+                            $order->setBaseDiscountCanceled(0);
+                            $order->setBaseShippingCanceled(0);
+                            $order->setBaseSubtotalCanceled(0);
+                            $order->setBaseTaxCanceled(0);
+                            $order->setBaseTotalCanceled(0);
+                            $order->setDiscountCanceled(0);
+                            $order->setShippingCanceled(0);
+                            $order->setSubtotalCanceled(0);
+                            $order->setTaxCanceled(0);
+                            $order->setTotalCanceled(0);
+    
+                            foreach ($order->getAllItems() as $item) {
+                                $item->setQtyCanceled(0);
+                                $item->setTaxCanceled(0);
+                                $item->setHiddenTaxCanceled(0);
+                                $item->save();
+                            }
+                        }
 
                         // Prepare payment object
                         $payment = $order->getPayment();
