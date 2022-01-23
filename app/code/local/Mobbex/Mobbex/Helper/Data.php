@@ -16,16 +16,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$this->fields = Mage::getModel('mobbex/customfield');
 	}
 
-	public function getHeaders() {
-		$apiKey = Mage::getStoreConfig('payment/mobbex/api_key');
-		$accessToken = Mage::getStoreConfig('payment/mobbex/access_token');
-
-		return array(
+	public function getHeaders()
+	{
+		return [
             'cache-control: no-cache',
             'content-type: application/json',
-            'x-api-key: ' . $apiKey,
-            'x-access-token: ' . $accessToken,
-        );
+            'x-api-key: ' . \Mage::getStoreConfig('payment/mobbex/api_key'),
+            'x-access-token: ' . \Mage::getStoreConfig('payment/mobbex/access_token'),
+            'x-ecommerce-agent: Magento/' . \Mage::getVersion() . ' Plugin/' . $this::VERSION,
+		];
 	}
 
 	public function getModuleUrl($action, $queryParams) {
