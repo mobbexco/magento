@@ -37,13 +37,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	private function getPlatform()
-    {
-        return [
-            "name" => "magento_1",
-            "version" => $this::VERSION,
-            "platform_version" => Mage::getVersion(),
-        ];
-    }
+	{
+		return [
+			'name'	    => 'magento',
+			'version'   => $this::VERSION,
+			'ecommerce' => [
+				'magento' => Mage::getVersion(),
+			],
+		];
+	}
 
 	public function getInstallments($products)
 	{
