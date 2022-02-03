@@ -5,7 +5,7 @@
     $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id));
     $newFTotalCost = 0;
     $newTotal = 0;
-    if($data){
+    if($data['data']){
         $amount_paid = $data->payment->total ;
         $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
         $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
