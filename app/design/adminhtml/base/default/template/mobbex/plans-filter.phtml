@@ -33,4 +33,31 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="mbbx-subscription">
+		<div class="entry-edit-head">
+			<h4 class="icon-head head-edit.form fieldset-legend"><?= $this->__('Subscriptions') ?></h4>
+		</div>
+		<div class="fieldset fieldset-wide" id="mobbex_options">
+			<div class="hor-scroll">
+				<h3><?= $this->__('Check if the product is a subscription') ?></h3>
+				<label style="margin-top: 20px;" for="sub_enable"><?= $this->__('Subscription:') ?></label>
+				<select id="sub_enable" name="sub_enable"  onchange="document.querySelector('#subscription_uid').classList.toggle('mbbx-hidden')">
+					<option value="no" <?= $this->subscription['enable'] === 'no' ? 'selected' : '' ?>>No</option>
+					<option value="yes" <?= $this->subscription['enable'] === 'yes' ? 'selected' : '' ?>>Yes</option>
+				</select>
+				<div class="<?= $this->subscription['enable'] === 'no' ? 'mbbx-hidden' : '' ?>" id="subscription_uid" style="margin-top: 20px;">
+					<label style="margin-right: 10px;" for="sub_uid"><?= $this->__('Subscription UID:') ?></label>
+					<input type="text" name="sub_uid" id="sub_uid" value="<?= $this->subscription['uid'] ?>" >
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<style>
+		.mbbx-hidden {
+			display: none;
+		}
+	</style>
+
 </div>
