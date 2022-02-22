@@ -195,10 +195,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
 				'platform' => $this->getPlatform(),
-                'theme'    => [
-					'type'   => 'light', 
-					'colors' => null
-				],
+                'theme'    => $this->getTheme(),
 				'redirect' => [
                     'success' => true,
                     'failure' => false,
@@ -445,5 +442,19 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         $query = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', $query);
         
         return $query;
-    }   
+    }
+
+	/**
+     * @return array
+     */
+    private function getTheme()
+    {
+        return [
+            "type" => Mage::getStoreConfig('payment/mobbex/theme'),
+            "background" => Mage::getStoreConfig('payment/mobbex/background_color'),
+            "colors" => [
+                "primary" => Mage::getStoreConfig('payment/mobbex/primary_color'),
+            ],
+        ];
+    }
 }

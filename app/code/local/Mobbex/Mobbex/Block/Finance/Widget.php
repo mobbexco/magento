@@ -12,9 +12,27 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
 		$this->settings = Mage::helper('mobbex/settings');
 		$this->mobbex   = Mage::helper('mobbex/data');
         $this->sources  = $this->getSources();
+        $this->styles   = $this->getStyles();
 
     }
 
+    /**
+     * Return the styles for the widget.
+     * @return array
+     */
+    public function getStyles()
+    {
+        //Styles
+        $styles = [
+            'theme' => Mage::getStoreConfig('payment/mobbex/theme'),
+            'text'  => Mage::getStoreConfig('payment/mobbex/button_text'),
+            'logo'  => Mage::getStoreConfig('payment/mobbex/button_logo'),
+            'css'   => Mage::getStoreConfig('payment/mobbex/widget_style')
+        ];
+
+        return $styles;
+    }
+    
     /**
      * Return the Sources with the filtered plans
      * @return array
@@ -35,8 +53,8 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
 
         //Get the sources filtered
         $sources = $this->mobbex->getSources($product_price, $inactive_plans, $active_plans);
-        
-        return $this->sources = $sources;
+
+        return $sources;
     }
 
 }
