@@ -33,7 +33,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 	public function getReference($order)
     {
-        return 'mag_order_'.$order->getIncrementId().'_time_'.time();
+        return 'mag_order_'.$order->getIncrementId();
 	}
 
 	private function getPlatform()
