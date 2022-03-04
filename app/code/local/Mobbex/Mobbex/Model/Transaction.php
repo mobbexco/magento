@@ -22,7 +22,7 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
                 ->addFieldToFilter('order_id', $order_id)
                 ->addFieldToFilter('parent', 1);
 
-            return !empty($collection[0]) ? $collection[0] : false;
+            return $collection->getFirstItem()->getData() ? $collection->getFirstItem()->getData() : false;
         }
         $collection = $this->getCollection()
             ->addFieldToFilter('order_id', $order_id);

@@ -7,7 +7,7 @@ if($installer->tableExists('mobbex_transaction')){
 
     $installer->run("
     ALTER TABLE {$this->getTable('mobbex/transaction')}
-    ADD COLUMN `parent` TEXT NOT NULL,
+    ADD COLUMN `parent` TINYINT NOT NULL,
     ADD COLUMN `operation_type` TEXT NOT NULL,
     ADD COLUMN `payment_id` TEXT NOT NULL,
     ADD COLUMN `description` TEXT NOT NULL,
@@ -83,6 +83,9 @@ $installer->endSetup();
         ->addColumn('source_expiration', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
             ), 'Source expiration')
+        ->addColumn('source_url', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
+            'nullable'  => false,
+            ), 'Source url')
         ->addColumn('source_installment', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
             ), 'Source installment')
@@ -95,9 +98,6 @@ $installer->endSetup();
         ->addColumn('installment_count', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
             ), 'Installment count')
-        ->addColumn('Source_url', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
-            'nullable'  => false,
-            ), 'Source url')
         ->addColumn('cardholder', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
             ), 'Cardholder')
@@ -125,9 +125,6 @@ $installer->endSetup();
         ->addColumn('data', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
         ), 'Data')
-        ->addColumn('risk_analysis', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
-            'nullable'  => false,
-        ), 'Risk analysis')
         ->addColumn('created', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
             'nullable'  => false,
         ), 'Created')
