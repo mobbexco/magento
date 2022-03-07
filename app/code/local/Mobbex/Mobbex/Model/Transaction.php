@@ -56,11 +56,11 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
         $transaction->setData('source_reference', $data['source_reference']);
         $transaction->setData('source_number', $data['source_number']);
         $transaction->setData('source_expiration', $data['source_expiration']);
+        $transaction->setData('source_url', $data['source_url']);
         $transaction->setData('source_installment', $data['source_installment']);
         $transaction->setData('installment_name', $data['installment_name']);
         $transaction->setData('installment_amount', $data['installment_amount']);
         $transaction->setData('installment_count', $data['installment_count']);
-        $transaction->setData('source_url', $data['source_url']);
         $transaction->setData('cardholder', $data['cardholder']);
         $transaction->setData('entity_name', $data['entity_name']);
         $transaction->setData('entity_uid', $data['entity_uid']);
