@@ -107,9 +107,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                         //Uncancel order if is cancelled
                         $items = $order->getAllItems();
                         if($items[0]->getStatus() == 'Canceled') {
-
-                            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
-                            $order->setStatus('pending');
     
                             $order->setBaseDiscountCanceled(0);
                             $order->setBaseShippingCanceled(0);
@@ -129,6 +126,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                                 $item->save();
                             }
                         }
+
+                        //set order status
+                        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+                        $order->setStatus('processing');
 
                         // Prepare payment object
                         $payment = $order->getPayment();
