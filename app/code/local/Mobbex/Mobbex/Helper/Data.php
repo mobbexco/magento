@@ -191,6 +191,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'customer' 	   => $customer,
 			'timeout' 	   => 5,
 			'installments' => $this->getInstallments($products),
+			'multicard'    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
