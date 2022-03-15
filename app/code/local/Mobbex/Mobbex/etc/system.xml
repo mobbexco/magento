@@ -181,7 +181,7 @@
 
 						<widget_style translate="label">
 						<label>Finance Widget Style</label>
-						<comment>Set the styles of the finance widget respecting the CSS sintaxys.</comment>
+						<comment>Set the styles of the finance widget respecting the CSS syntaxis.</comment>
 						<frontend_type>textarea</frontend_type>
 						<sort_order>135</sort_order>
 						<show_in_default>1</show_in_default>
