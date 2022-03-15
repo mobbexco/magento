@@ -70,14 +70,14 @@ border: 1.5px solid #6f00ff; /* Grosor de linea, estilo de linea, color. */
 /*box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, .2);*/
 }
 
-/* Hover Options */
+/* Estilos al situar el cursor sobre el botón */
 #mbbxProductBtn:hover {
 color: #ffffff;
 background-color: #6f00ff;
 }
 
 /* Los colores pueden ser hexadecimales o rgb */
-/* Para que los estilos funcionen deben respetar la sintaxys de CSS.*/
+/* Para que los estilos funcionen deben respetar la sintaxis de CSS.*/
 				</widget_style>
 			</mobbex>
 		</payment>
