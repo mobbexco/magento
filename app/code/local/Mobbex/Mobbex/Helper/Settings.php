@@ -137,8 +137,10 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 
 	public function saveProductSubscription($id)
 	{
-		$this->fields->saveCustomField($id, 'product', 'subscription_enable', $_POST['sub_enable']);
-		$this->fields->saveCustomField($id, 'product', 'subscription_uid', $_POST['sub_uid']);
+		if(isset($_POST['sub_enable']))
+			$this->fields->saveCustomField($id, 'product', 'subscription_enable', $_POST['sub_enable']);
+		if(isset($_POST['sub_uid']))
+			$this->fields->saveCustomField($id, 'product', 'subscription_uid', $_POST['sub_uid']);
 
 		return true;
 	}
