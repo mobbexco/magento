@@ -26,7 +26,7 @@ class Mobbex_Mobbex_Block_Adminhtml_Catalog_Product_Tab extends Mage_Adminhtml_B
 		$this->advancedPlans = $this->settings->getAdvancedPlanFields($id);
 		$this->subscription  = $this->settings->getProductSubscription($id);
 
-		$this->setTemplate('mobbex/plans-filter.phtml');
+		$this->setTemplate('mobbex/product-settings.phtml');
 	}
 
 	public function getTabLabel()
