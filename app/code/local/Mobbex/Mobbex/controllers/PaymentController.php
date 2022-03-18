@@ -77,7 +77,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $message = $res['payment']['status']['message'] . ' ( Transacción: ' . $transaction_id . ' )';
                 
                 //Debug the response data
-                $this->mobbex->debug("Processing Webhook Data", compact($orderId, $res));
+                $this->mobbex->debug("Processing Webhook Data", compact('orderId', 'res'));
 
                 if (isset($orderId) && !empty($status)) {
 

@@ -231,8 +231,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         } else {
 			$res = json_decode($response, true);
 
-			if(!isset($res['data']) || !$res || empty($res['data']))
-				$this->debug("Failed getting checkout response data is empty", $res, true, true);
+			if(!isset($res['data']) || !$res || empty($res['data'])){
+				$this->debug("Failed getting checkout response data is empty", $res, true);
+				return;
+			}
 			
 			if($res['data']) {
 				$res['data']['return_url'] = $return_url;
@@ -375,8 +377,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		} else {
 			$res = json_decode($response, true);
 
-			if(!isset($res['data']) || !$res || empty($res['data']))
-			$this->debug("Failed getting sources response data is empty", $res, true, true);
+			if(!isset($res['data']) || !$res || empty($res['data'])){
+				$this->debug("Failed getting sources response data is empty", $res, true);
+				return;
+			}
 
 			if ($res['data']) {
 				return $res['data'];
@@ -419,8 +423,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		} else {
 			$res = json_decode($response, true);
 
-			if(!isset($res['data']) || !$res || empty($res['data']))
-				$this->debug("Failed getting sources response data is empty", $res, true, true);
+			if(!isset($res['data']) || !$res || empty($res['data'])){
+				$this->debug("Failed getting sources response data is empty", $res, true);
+				return;
+			}
 
 			if ($res['data']) {
 				return $res['data'];
