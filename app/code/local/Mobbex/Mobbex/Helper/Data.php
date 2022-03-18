@@ -231,6 +231,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             $this->debug("cURL Error #:" . $err, '', true);
         } else {
 			$res = json_decode($response, true);
+
+			if(!isset($res['data']) || !$res || empty($res['data']))
+				$this->debug("Failed getting checkout response data is empty", $res, true, true);
 			
 			if($res['data']) {
 				$res['data']['return_url'] = $return_url;
@@ -240,6 +243,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 				// Restore Order
 				if(Mage::getSingleton('checkout/session')->getLastRealOrderId()){
+
 					if ($lastQuoteId = Mage::getSingleton('checkout/session')->getLastQuoteId()){
 						$quote = Mage::getModel('sales/quote')->load($lastQuoteId);
 						$quote->setIsActive(true)->save();
@@ -373,6 +377,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		} else {
 			$res = json_decode($response, true);
 
+			if(!isset($res['data']) || !$res || empty($res['data']))
+			$this->debug("Failed getting sources response data is empty", $res, true, true);
+
 			if ($res['data']) {
 				return $res['data'];
 			}
@@ -413,6 +420,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			Mage::throwException('Curl Error #:' . $err);
 		} else {
 			$res = json_decode($response, true);
+
+			if(!isset($res['data']) || !$res || empty($res['data']))
+				$this->debug("Failed getting sources response data is empty", $res, true, true);
 
 			if ($res['data']) {
 				return $res['data'];
