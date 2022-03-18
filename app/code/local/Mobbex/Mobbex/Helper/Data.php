@@ -207,7 +207,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		];
 
 		//debug data
-		$this->debug('Checkout data:'. date('m/Y'));
 		$this->debug('Checkout data:', $data);
 
 		curl_setopt_array($curl, [
