@@ -238,8 +238,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				$res['data']['return_url'] = $return_url;
 				return $res['data'];
 			} else {
-				// Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('mobbex/payment/cancel', array('_secure' => true)));
-
+				
 				// Restore Order
 				if(Mage::getSingleton('checkout/session')->getLastRealOrderId()){
 
