@@ -11,14 +11,5 @@ class Mobbex_Mobbex_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     protected $_canCapture = true;
 	protected $_canRefund = true;
 
-	
-	public function getOrderPlaceRedirectUrl() {
-		$embed = Mage::getStoreConfig('payment/mobbex/embed');
-        if (!$embed) {
-			return Mage::getUrl('mobbex/payment/redirect', array('_secure' => true));
-		} else {
-			return null;
-		}
-	}
 }
 ?>

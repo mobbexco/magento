@@ -1,0 +1,18 @@
+<?php
+$order_url = Mage::getUrl('mobbex/payment/getCheckout', array('_secure' => true));
+$script_url = $this->getSkinUrl('js/mobbex_payment_methods.js');
+$embed = Mage::getStoreConfig('payment/mobbex/embed');
+?>
+
+<form id="mbbx_redirect_form" name="mobbexform" method="get"></form>
+<div id="mbbx-container"></div>
+
+<script type="text/javascript">
+	var orderUrl = '<?= $order_url ?>';
+	var embed = <?= $embed ?>;
+</script>
+
+<?php if(Mage::getStoreConfig('payment/mobbex/embed')): ?>
+	<script type="text/javascript" src="https://res.mobbex.com/js/embed/mobbex.embed@1.0.17.js"></script>
+<?php endif; ?>
+<script type="text/javascript" src="<?= $script_url ?>"></script>

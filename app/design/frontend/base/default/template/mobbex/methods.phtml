@@ -1,0 +1,26 @@
+<?php
+
+foreach ($this->data['methods'] as $method) {
+    ?>
+    <dt id="dt_method_mobbex_<?= $method['id']?>" style="display:flex;align-items: center;">
+
+    <input id="p_method_mobbex_<?= $method['id'] ?>" value="<?= $method['value'] ?>" 
+        type="radio" 
+        name="form_key"
+        class="radio mbbx-payment-method-input"
+        style="float: none;top:-4px;"
+        enabled
+        />
+    <label for="p_method_mobbex_<?= $method['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
+        <img src="<?= $method['image'] ?>" style="width:50px;border-radius:50%;margin-right:5px;">
+        <?= $method['name']?>
+    </label>
+
+    </dt>
+    <?php 
+}
+
+?>
+<script>
+    document.querySelector('#dt_method_mobbex').setAttribute('style', 'display:none;');
+</script>

@@ -50,7 +50,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	public function getInstallments($products)
 	{
 		$installments = $allCommonPlans = $allAdvancedPlans = [];
-
 		foreach (self::$ahora as $ahoraPlan) {
 			// Get 'ahora' plans from categories
 			foreach ($this->getAllCategories($products) as $catId) {
@@ -260,6 +259,132 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			}
         }
 	}
+
+	/**
+     * Create checkout when wallet is active,
+     *  using a quote instead of an order.
+     *  can't use an order object beacouse there is a duplication problem
+     * @return bool
+     */
+    public function createCheckoutFromQuote($quoteData)
+    {
+        $curl = curl_init();
+
+        // set quote description as #QUOTEID
+        $description = __('Quote #').$quoteData['entity_id'] ;
+
+        // get order amount
+        $orderAmount = round($quoteData['price'], 2);
+
+        // get customer data
+        $customer = [
+            'email' => $quoteData['email'], 
+            'name' => $quoteData['shipping_address']['firstname'],
+            //Customer id added for wallet usage
+            'uid' => $quoteData['customer_id'],
+            'identification' => Mage::getModel('mobbex/customfield')->getCustomField($quoteData['entity_id'], 'customer', 'dni'),
+        ];
+        if ($quoteData['shipping_address']){
+            if ($quoteData['shipping_address']['telephone']) {
+                $customer['phone'] = $quoteData['shipping_address']['telephone'];
+            }
+        }
+        //get quote to retrieve shipping amount
+        $quote_grand_total = $quoteData['quote']->getGrandTotal();
+        
+        $items = [];
+
+        foreach($quoteData['items'] as $product) {
+			
+			$prd = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
+			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($product->getProductId());
+
+			if($subscription['enable'] === 'yes'){
+				$items[] = [
+					'type'      => 'subscription',
+					'reference' => $subscription['uid']
+				];
+			} else {
+				$items[] = array(
+					"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
+					"description" => $product->getName(), 
+					"quantity" => $product->getQtyOrdered(), 
+					"total" => round($product->getPrice(),2) 
+				);
+			}
+		}
+        
+        if ($quoteData['shipping_total'] > 0) {
+            $items[] = [
+                'description' => 'Shipping Amount',
+                'total'       => $quoteData['shipping_total'],
+            ];
+        }elseif($quote_grand_total > $orderAmount){
+            $shipping_amount = $quote_grand_total - $orderAmount;
+            $items[] = [
+                'description' => 'Shipping Amount',
+                'total'       => ($shipping_amount),
+            ];
+            $orderAmount = $orderAmount + $shipping_amount;
+        }
+        
+        // Return Query Params
+		$queryParams = array('orderId' => $quoteData['entity_id']);
+        
+        // Create data
+        $data = [
+            'reference'    => 'mag_order_'.$quoteData['entity_id'],
+            'currency'     => 'ARS',
+            'description'  => $description,
+            'test'         => (Mage::getStoreConfig('payment/mobbex/test_mode') == true),
+            'return_url'   => '',
+            'webhook'      => '',
+            'items'        => $items,
+            'total'        => (float) $orderAmount,
+            'customer'     => $customer,
+            'timeout'      => 5,
+            'installments' => $this->getInstallments($quoteData['items']),
+            "multicard"    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
+            "options"      => [
+				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
+				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
+				'platform' => $this->getPlatform(),
+                'theme'    => [
+					'type'   => 'light', 
+					'colors' => null
+				],
+                "redirect"   => [
+                    "success"  => true,
+                    "failure"  => false,
+                ],
+            ],
+        ];
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.mobbex.com/p/checkout",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => $this->getHeaders(),
+        ]);
+        
+        $response = curl_exec($curl);
+        $err      = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            return false;
+        } else {
+            $res = json_decode($response, true);
+            return $res['data'];
+        }
+
+    }
 
 	/**
      * Retrieve active advanced plans from a product and its categories.
