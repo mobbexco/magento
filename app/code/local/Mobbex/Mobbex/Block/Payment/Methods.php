@@ -17,7 +17,7 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
         if($this->data)
             return $this->data;
         
-        $data = [];
+        $data = ['methods' => [], 'cards' => []];
         $checkoutData = $this->mobbex->createCheckoutFromQuote($this->getQuoteData());
 
         if(isset($checkoutData['paymentMethods'])){             
@@ -38,6 +38,22 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
                 'name'  => 'Pagar con Mobbex',
                 'image' => ''
             ]; 
+        }
+
+        if(isset($checkoutData['wallet'])) {
+           
+            foreach ($checkoutData['wallet'] as $key => $card) {
+                $data['cards'][] = [
+                    'id'           => 'wallet-card-' . $key,
+                    'value'        => 'card-' . $key,
+                    'name'         => $card['name'],
+                    'image'          => $card['source']['card']['product']['logo'],
+                    'maxlength'    => $card['source']['card']['product']['code']['length'],
+                    'placeholder'  => $card['source']['card']['product']['code']['name'],
+                    'hiddenValue'  => $card['card']['card_number'],
+                    'installments' => $card['installments']
+                ];
+            }
         }
 
         return $data;

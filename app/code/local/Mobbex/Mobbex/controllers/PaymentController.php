@@ -182,12 +182,11 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         // Get Checkout Data
         $checkout = Mage::helper('mobbex/data')->createCheckout($order);
 
-
-
-        $mobbex_data['returnUrl'] = $checkout['return_url'];
-        $mobbex_data['checkoutId'] = $checkout['id'];
-        $mobbex_data['orderId'] = $orderId;
-        $mobbex_data['url'] = $checkout['url'];
+        $mobbex_data['returnUrl']  = isset($checkout['return_url']) ? $checkout['return_url'] : '';
+        $mobbex_data['checkoutId'] = isset($checkout['id']) ? $checkout['id'] : '';
+        $mobbex_data['orderId']    = $orderId;
+        $mobbex_data['url']        = isset($checkout['url']) ? $checkout['url'] : '';
+        $mobbex_data['wallet']     = isset($checkout['wallet']) ? $checkout['wallet'] : '';
 
         // Return data in json
         $this->getResponse()->clearHeaders()->setHeader(

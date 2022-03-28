@@ -24,14 +24,18 @@ $(document).on('click', '.radio', function (e) {
     if(e.target.getAttribute('id') == "p_method_mobbex")
         return;
 
-    // $(".mobbex-wallet-form").hide()
     mbbxCurrentMehtod = '';
     mbbxCurrentCard = '';
+    document.querySelectorAll(".mobbex-wallet-form").forEach(element => {
+        element.classList.add('mbbx-hidden');
+    });
 
     if(e.target.classList.contains('mbbx-payment-method-input')){
         if (e.target.classList.contains("mbbx-card")) {
             mbbxCurrentCard = e.target.getAttribute('value');
-            // $(`#p_method_mobbex_${mbbxCurrentCard}`).show()
+            document.querySelector(`#${mbbxCurrentCard}`).classList.remove('mbbx-hidden');
+            document.querySelector(`#${mbbxCurrentCard} input`).disabled=false
+            document.querySelector(`#${mbbxCurrentCard} select`).disabled=false
         } else {
             mbbxCurrentMehtod = e.target.getAttribute('value');
         }
@@ -48,10 +52,12 @@ function processOrder() {
     new Ajax.Request(orderUrl, {
         method: "get",
         onSuccess: function(response){
-            if(embed){
-                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl, response.responseJSON.orderId)
+            if(wallet && mbbxCurrentCard){
+                executeWallet(response.responseJSON);
+            } else if(embed){
+                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl, response.responseJSON.orderId);
             } else {
-                mbbxRedirect(response.responseJSON.url)
+                mbbxRedirect(response.responseJSON.url);
             }
         },
         onFailure: function(){
@@ -64,6 +70,12 @@ function processOrder() {
     })
 }
 
+/**
+ * Render Mobbex Checkout in page.
+ * @param id 
+ * @param returnUrl 
+ * @param orderId 
+ */
 function renderMobbex (id, returnUrl, orderId) {
     let options = {
         id: id,
@@ -92,13 +104,39 @@ function renderMobbex (id, returnUrl, orderId) {
     mbbxEmbed.open()
 }
 
-
-function mbbxRedirect(url) {
+/**
+ * Redirect to Mobbex Checkout
+ * @param checkoutUrl 
+ */
+function mbbxRedirect(checkoutUrl) {
     let mobbexForm = document.querySelector('#mbbx_redirect_form');
     mobbexForm.setAttribute('action', url);
     if(mbbxCurrentMehtod)
         mobbexForm.innerHTML = `<input type='hidden' name='paymentMethod' value='${mbbxCurrentMehtod}'/>`
     mobbexForm.submit();
+}
+
+/**
+ * Call Mobbex API using sdk to make the payment
+ * with wallet card
+ * @param response 
+ */
+ function executeWallet(response) {
+    let updatedCard = response.wallet.find(card => card.card.card_number == document.querySelector(`#${mbbxCurrentCard} input[name=card-number]`).getAttribute('value'));
+
+    var options = {
+        intentToken: updatedCard.it,
+        installment: document.querySelector(`#${mbbxCurrentCard} select`).value,
+        securityCode: document.querySelector(`#${mbbxCurrentCard} input[name=security-code]`).value
+    };
+    
+    window.MobbexJS.operation.process(options)
+        .then(data => {
+            window.top.location = response.returnUrl + '&status=' + data.data.status.code;
+        })
+        .catch(error => {
+            location.href = response.returnUrl;
+        })
 }
 
 /* Place Order Events */

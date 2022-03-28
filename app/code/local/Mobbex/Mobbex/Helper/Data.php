@@ -180,6 +180,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$customer = [
 			'name' => $order->getCustomerName(),
 			'email' => $order->getCustomerEmail(),
+			'uid'   => $order->getCustomerId(),
 			'phone' => !empty($order->getBillingAddress()) ? $order->getBillingAddress()->getTelephone() : null,
 			'identification' => Mage::getModel('mobbex/customfield')->getCustomField($order->getCustomerId(), 'customer', 'dni'),
 		];
@@ -200,9 +201,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'timeout' 	   => 5,
 			'installments' => $this->getInstallments($products),
 			'multicard'    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
+			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
-				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
+				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
 				'platform' => $this->getPlatform(),
                 'theme'    => [
 					'type'   => 'light', 
@@ -345,9 +347,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             'timeout'      => 5,
             'installments' => $this->getInstallments($quoteData['items']),
             "multicard"    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
+			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
             "options"      => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
-				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
+				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
 				'platform' => $this->getPlatform(),
                 'theme'    => [
 					'type'   => 'light', 
@@ -360,7 +363,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             ],
         ];
 
-        curl_setopt_array($curl, [
+		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/checkout",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
