@@ -1,7 +1,7 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '1.4.2';
+    const VERSION = '1.4.3';
 
 	/**
 	* All 'ahora' plan keys.
@@ -145,14 +145,23 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$products = $order->getAllItems();
 		
         foreach($products as $product) {
+			
 			$prd = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
+			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($product->getProductId());
 
-            $items[] = array(
-				"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
-				"description" => $product->getName(), 
-				"quantity" => $product->getQtyOrdered(), 
-				"total" => round($product->getPrice(),2) 
-			);
+			if($subscription['enable'] === 'yes'){
+				$items[] = [
+					'type'      => 'subscription',
+					'reference' => $subscription['uid']
+				];
+			} else {
+				$items[] = array(
+					"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
+					"description" => $product->getName(), 
+					"quantity" => $product->getQtyOrdered(), 
+					"total" => round($product->getPrice(),2) 
+				);
+			}
 		}
 
 		// Add shipping item
@@ -191,6 +200,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'customer' 	   => $customer,
 			'timeout' 	   => 5,
 			'installments' => $this->getInstallments($products),
+			'multicard'    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),

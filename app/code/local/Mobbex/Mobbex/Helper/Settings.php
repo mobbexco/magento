@@ -87,6 +87,16 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		return $result;
 	}
 
+	public function getProductSubscription($id)
+	{
+		$subscription = [
+			'enable' => $this->fields->getCustomField($id, 'product', 'subscription_enable') ?: 'no',
+			'uid'    => $this->fields->getCustomField($id, 'product', 'subscription_uid') ?: ''
+		];
+
+		return $subscription;
+	}
+
 	/**
 	 * Save plan filter fields of product/category.
 	 * 
@@ -121,6 +131,14 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		// Save data
 		$this->fields->saveCustomField($id, $catalogType, 'common_plans', $common_plans);
 		$this->fields->saveCustomField($id, $catalogType, 'advanced_plans', $advanced_plans);
+
+		return true;
+	}
+
+	public function saveProductSubscription($id)
+	{
+		$this->fields->saveCustomField($id, 'product', 'subscription_enable', isset($_POST['sub_enable']) ? $_POST['sub_enable'] : '');
+		$this->fields->saveCustomField($id, 'product', 'subscription_uid', isset($_POST['sub_uid']) ? $_POST['sub_uid'] : '');
 
 		return true;
 	}
