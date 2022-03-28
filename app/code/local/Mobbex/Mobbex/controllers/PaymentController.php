@@ -2,6 +2,10 @@
 
 class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 {
+    public function __construct()
+    {
+        $this->mobbex = Mage::helper('mobbex/data');
+    }
     // The redirect action is triggered when someone places an order
     public function redirectAction()
     {
@@ -63,6 +67,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                 $res = $this->formatWebhookData($insMessage['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
 
+                
                 // Get the Reference ( Transaction ID )
                 $transaction_id = $res['payment_id'];
 
@@ -78,8 +83,8 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     return;
                 }
 
-                Mage::log('ORDER ID: ' . $orderId, null, 'mobbex_notification.log', true);
-                Mage::log($res['data'], null, 'mobbex_notification.log', true);
+                //Debug the response data
+                $this->mobbex->debug("Processing Webhook Data", compact('orderId', 'res'));
 
                 if (isset($orderId) && !empty($status)) {
 
@@ -95,7 +100,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $user_name  = $res['user']['name'];
                     $user_email = $res['user']['email'];
 
-                    Mage::log('Saving state for Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
+                    $this->mobbex->debug('Saving state for order: ', $order->getId());
 
                     $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
                     $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
@@ -157,7 +162,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                         $order->cancel()->setState(Mage_Sales_Model_Order::STATE_CANCELED, true, $message);
                     }
 
-                    Mage::log('Save Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
+                    $this->mobbex->debug('Save Order: ', $order->getId());
 
                     // Save the order
                     $order->save();
@@ -165,6 +170,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     Mage::getSingleton('checkout/session')->unsQuoteId();
                 }
             } catch (Exception $e) {
+                $this->mobbex->debug('Exception: ', $e, true);
                 $this->messageManager->addExceptionMessage($e, $e->getMessage());
             }
         }
