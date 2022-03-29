@@ -47,6 +47,7 @@ class Mobbex_Mobbex_Model_Observer
 			return;
 
 		$this->settings->savePlanFields($id);
+		$this->settings->saveProductSubscription($id);
 	}
 
 	public function saveCategoryTabData()
@@ -92,7 +93,7 @@ class Mobbex_Mobbex_Model_Observer
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
 			$orderId = $order->getData('increment_id');
 			$data = Mage::getModel('mobbex/transaction')->getMobbexTransaction($orderId);//get transaction data
-			if($data){
+			if(isset($data['data'])){
 				$payment = $order->getPayment();
 				$transactionId = $payment->getData('last_trans_id');
 				$amount = $creditmemo->getData('grand_total');	

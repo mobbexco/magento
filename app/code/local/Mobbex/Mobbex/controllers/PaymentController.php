@@ -61,37 +61,42 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $order = Mage::getModel('sales/order');
                 $order->loadByIncrementId($orderId);
 
-                $res = $insMessage['data'];
+                $res = $this->formatWebhookData($insMessage['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
 
+                
                 // Get the Reference ( Transaction ID )
-                $transaction_id = $res['payment']['id'];
+                $transaction_id = $res['payment_id'];
 
                 // Get the Status
-                $status = $res['payment']['status']['code'];
+                $status  = $res['status_code'];
+                $message = $res['status_message'] . ' ( Transacción: ' . $transaction_id . ' )';
 
-                $message = $res['payment']['status']['message'] . ' ( Transacción: ' . $transaction_id . ' )';
+                //Save transaction information
+                Mage::getModel('mobbex/transaction')->saveMobbexTransaction($res);
 
-                Mage::log('ORDER ID: ' . $orderId, null, 'mobbex_notification.log', true);
-                Mage::log($res, null, 'mobbex_notification.log', true);
+                //Return if the webhook is not parent
+                if($res['parent'] == false){
+                    return;
+                }
+
+                //Debug the response data
+                Mage::helper('mobbex/data')->debug("Processing Webhook Data", compact('orderId', 'res'));
 
                 if (isset($orderId) && !empty($status)) {
 
-                    //Save transaction information
-                    Mage::getModel('mobbex/transaction')->saveMobbexTransaction($orderId, json_encode($res));
-
-                    $source_type = $res['payment']['source']['type'];
-                    $source_name = $res['payment']['source']['name'];
+                    $source_type = $res['source_type'];
+                    $source_name = $res['source_name'];
 
                     // Get Source number in case of cards
                     $source_number = 'N/A';
-                    if (isset($res['payment']['source']['number'])) {
-                        $source_number = ' ' . $res['payment']['source']['number'];
+                    if (!empty($res['source_number'])) {
+                        $source_number = ' ' . $res['source_number'];
                     }
 
-                    $user_name = isset($res['user']['name']) ? $res['user']['name'] : '';
-                    $user_email = isset($res['user']['email']) ? $res['user']['email'] : '';
+                    $user_name  = $res['user']['name'];
+                    $user_email = $res['user']['email'];
 
-                    Mage::log('Saving state for Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
+                    Mage::helper('mobbex/data')->debug('Saving state for order: ', $order->getId());
 
                     $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
                     $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
@@ -109,8 +114,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                         //Uncancel order if is cancelled
                         $items = $order->getAllItems();
                         if($items[0]->getStatus() == 'Canceled') {
-
-                            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
                             $order->setBaseDiscountCanceled(0);
                             $order->setBaseShippingCanceled(0);
                             $order->setBaseSubtotalCanceled(0);
@@ -130,8 +133,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                             }
                         }
 
+                        //set order status
+                        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
                         $order->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_approved'));
-                        
+
                         // Prepare payment object
                         $payment = $order->getPayment();
                         $payment->setTransactionId($transaction_id);
@@ -156,7 +161,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                         $order->cancel()->setState(Mage::getStoreConfig('payment/mobbex/order_status_cancelled'), true, $message);
                     }
 
-                    Mage::log('Save Order: ' . $order->getId(), null, 'mobbex_notification.log', true);
+                    Mage::helper('mobbex/data')->debug('Save Order: ', $order->getId());
 
                     // Save the order
                     $order->save();
@@ -164,6 +169,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     Mage::getSingleton('checkout/session')->unsQuoteId();
                 }
             } catch (Exception $e) {
+                Mage::helper('mobbex/data')->debug('Exception: ', $e, true);
                 $this->messageManager->addExceptionMessage($e, $e->getMessage());
             }
         }
@@ -227,5 +233,76 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         }
 
         return $name;
+    }
+  
+    /**
+     * Format the webhook data in an array.
+     * 
+     * @param array $webhook_data
+     * @param int $order_id
+     * @param bool $multicard
+     * @param bool $multivendor
+     * @return array $data
+     * 
+     */
+    public function formatWebhookData($webhookData, $orderId, $multicard, $multivendor)
+    {
+        $data = [
+            'order_id'           => $orderId,
+            'parent'             => $this->isParent($webhookData['payment']['operation']['type'], $multicard, $multivendor) ? true : false,
+            'operation_type'     => isset($webhookData['payment']['operation']['type']) ? $webhookData['payment']['operation']['type'] : '',
+            'payment_id'         => isset($webhookData['payment']['id']) ? $webhookData['payment']['id'] : '',
+            'description'        => isset($webhookData['payment']['description']) ? $webhookData['payment']['description'] : '',
+            'status_code'        => isset($webhookData['payment']['status']['code']) ? $webhookData['payment']['status']['code'] : '',
+            'status_message'     => isset($webhookData['payment']['status']['message']) ? $webhookData['payment']['status']['message'] : '',
+            'source_name'        => isset($webhookData['payment']['source']['name']) ? $webhookData['payment']['source']['name'] : 'Mobbex',
+            'source_type'        => isset($webhookData['payment']['source']['type']) ? $webhookData['payment']['source']['type'] : 'Mobbex',
+            'source_reference'   => isset($webhookData['payment']['source']['reference']) ? $webhookData['payment']['source']['reference'] : '',
+            'source_number'      => isset($webhookData['payment']['source']['number']) ? $webhookData['payment']['source']['number'] : '',
+            'source_expiration'  => isset($webhookData['payment']['source']['expiration']) ? json_encode($webhookData['payment']['source']['expiration']) : '',
+            'source_installment' => isset($webhookData['payment']['source']['installment']) ? json_encode($webhookData['payment']['source']['installment']) : '',
+            'installment_name'   => isset($webhookData['payment']['source']['installment']['description']) ? json_encode($webhookData['payment']['source']['installment']['description']) : '',
+            'installment_amount' => isset($webhookData['payment']['source']['installment']['amount']) ? $webhookData['payment']['source']['installment']['amount'] : '',
+            'installment_count'  => isset($webhookData['payment']['source']['installment']['count']) ? $webhookData['payment']['source']['installment']['count'] : '',
+            'source_url'         => isset($webhookData['payment']['source']['url']) ? json_encode($webhookData['payment']['source']['url']) : '',
+            'cardholder'         => isset($webhookData['payment']['source']['cardholder']) ? json_encode(($webhookData['payment']['source']['cardholder'])) : '',
+            'entity_name'        => isset($webhookData['entity']['name']) ? $webhookData['entity']['name'] : '',
+            'entity_uid'         => isset($webhookData['entity']['uid']) ? $webhookData['entity']['uid'] : '',
+            'customer'           => isset($webhookData['customer']) ? json_encode($webhookData['customer']) : '',
+            'checkout_uid'       => isset($webhookData['checkout']['uid']) ? $webhookData['checkout']['uid'] : '',
+            'total'              => isset($webhookData['payment']['total']) ? $webhookData['payment']['total'] : '',
+            'currency'           => isset($webhookData['checkout']['currency']) ? $webhookData['checkout']['currency'] : '',
+            'risk_analysis'      => isset($webhookData['payment']['riskAnalysis']['level']) ? $webhookData['payment']['riskAnalysis']['level'] : '',
+            'data'               => json_encode($webhookData),
+            'created'            => isset($webhookData['payment']['created']) ? $webhookData['payment']['created'] : '',
+            'updated'            => isset($webhookData['payment']['updated']) ? $webhookData['payment']['created'] : '',
+            'user'               => [
+                'name' => isset($webhookData['user']['name']) ? $webhookData['user']['name'] : '', 
+                'email' => isset($webhookData['user']['email']) ? $webhookData['user']['email'] : '',
+            ],
+
+        ];
+
+        return $data;
+    }
+
+    /**
+     * Receives the webhook "opartion type" and return true if the webhook is parent and false if not
+     * 
+     * @param string $operationType
+     * @param bool $multicard
+     * @param bool $multivendor
+     * @return bool true|false
+     * @return bool true|false
+     * 
+     */
+    public function isParent($operationType, $multicard, $multivendor)
+    {
+        if ($operationType === "payment.v2" ){
+            if ($multicard || $multivendor != 'disable')
+                return false;
+        }
+
+        return true;
     }
 }
