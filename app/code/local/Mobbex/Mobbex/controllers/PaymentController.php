@@ -149,7 +149,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                         $order->sendNewOrderEmail();
                         $order->setEmailSent(true);
 
-                    } else if($statusName === 'refunded'){
+                    } else if($statusName === 'Refunded'){
                         // Cancel Sale
                         $order->cancel()->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_refunded'));
                     } else {
