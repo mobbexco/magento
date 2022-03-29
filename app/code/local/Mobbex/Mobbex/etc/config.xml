@@ -47,11 +47,14 @@
 			<mobbex>
 				<model>mobbex/standard</model>
 				<active>1</active>
-				<order_status>pending</order_status>
 				<title>Pagar utilizando Mobbex</title>
 				<payment_action>sale</payment_action>
 				<allowspecific>0</allowspecific>
 				<sort_order>1</sort_order>
+				<order_status_approved>processing</order_status_approved>
+                <order_status_in_process>pending</order_status_in_process>
+                <order_status_cancelled>canceled</order_status_cancelled>
+                <order_status_refunded>closed</order_status_refunded>
 			</mobbex>
 		</payment>
 	</default>
