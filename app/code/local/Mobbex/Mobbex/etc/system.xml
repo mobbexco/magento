@@ -37,6 +37,7 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</api_key>
+
 						<access_token translate="label">
 							<label>Access Token</label>
 							<frontend_type>text</frontend_type>
@@ -105,6 +106,7 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</allowspecific>
+
 						<specificcountry translate="label">
 							<label>Countries Payment Applicable From</label>
 							<frontend_type>multiselect</frontend_type>
@@ -114,9 +116,10 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 							<depends>
-								<allowspecific>1</allowspecific>
+							<allowspecific>1</allowspecific>
 							</depends>
 						</specificcountry>
+
 						<sort_order translate="label">
 							<label>Sort Order</label>
 							<frontend_type>text</frontend_type>
@@ -125,15 +128,24 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</sort_order>
-						<financing translate="label">
-							<label>Enable Financing Information</label>
+						<financing_product translate="label">
+							<label>Enable Financing Information on Product</label>
 							<frontend_type>select</frontend_type>
 							<source_model>adminhtml/system_config_source_yesno</source_model>
 							<sort_order>110</sort_order>
 							<show_in_default>1</show_in_default>
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
-						</financing>
+						</financing_product>
+						<financing_cart translate="label">
+							<label>Enable Financing Information on Cart</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>110</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</financing_cart>
 						<taxid translate="label">
 							<label>Tax ID</label>
 							<frontend_type>text</frontend_type>
@@ -142,6 +154,67 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</taxid>
+
+						<theme translate="label">
+						<label>Mobbex Theme</label>
+						<frontend_type>select</frontend_type>
+						<source_model>mobbex/Config_Source_Theme</source_model>
+						<comment>Mobbex appearance theme.</comment>
+						<sort_order>130</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>0</show_in_store>
+						</theme>
+
+						<primary_color translate="label">
+						<label>Mobbex primary color</label>
+						<frontend_type>text</frontend_type>
+						<comment>Mobbex primary color.</comment>
+						<sort_order>131</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>0</show_in_store>
+						</primary_color>
+
+						<background_color translate="label">
+						<label>Mobbex background color</label>
+						<frontend_type>text</frontend_type>
+						<comment>Mobbex background color.</comment>
+						<sort_order>132</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>0</show_in_store>
+						</background_color>
+
+						<button_logo translate="label">
+						<label>Finance Button Logo</label>
+						<comment>Finance widget button logo, leave it empty to remove it.</comment>
+						<frontend_type>text</frontend_type>
+						<sort_order>133</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>0</show_in_store>
+						</button_logo>
+
+						<button_text translate="label">
+						<label>Finance Button Text</label>
+						<comment>The text in the finance widget button.</comment>
+						<frontend_type>text</frontend_type>
+						<sort_order>134</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_store>0</show_in_store>
+						<show_in_website>1</show_in_website>
+						</button_text>
+
+						<widget_style translate="label">
+						<label>Finance Widget Style</label>
+						<comment>Set the styles of the finance widget respecting the CSS syntaxis.</comment>
+						<frontend_type>textarea</frontend_type>
+						<sort_order>135</sort_order>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>0</show_in_store>
+						</widget_style>
 
 						<order_status_approved translate="label">
 							<label>Order status for approved transactions</label>
@@ -182,7 +255,6 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</order_status_refunded>
-
 					</fields>
 				</mobbex>
 			</groups>
