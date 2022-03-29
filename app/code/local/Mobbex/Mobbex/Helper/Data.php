@@ -143,11 +143,13 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		
 		$items = array();
 		$products = $order->getAllItems();
-		
+
+
         foreach($products as $product) {
 			
-			$prd = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
+			$prd          = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
 			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($product->getProductId());
+			$entity       = Mage::helper('mobbex/settings')->getProductEntity($product);
 
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
@@ -156,10 +158,11 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				];
 			} else {
 				$items[] = array(
-					"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
+					"image"       => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
 					"description" => $product->getName(), 
-					"quantity" => $product->getQtyOrdered(), 
-					"total" => round($product->getPrice(),2) 
+					"quantity"    => $product->getQtyOrdered(), 
+					"total"       => round($product->getPrice(),2),
+					"entity"      => $entity,
 				);
 			}
 		}
@@ -201,6 +204,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'timeout' 	   => 5,
 			'installments' => $this->getInstallments($products),
 			'multicard'    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
+			'multivendor'  => Mage::getStoreConfig('payment/mobbex/multivendor'),
+			'merchants'    => Mage::helper('mobbex/settings')->getMerchants($items),
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
