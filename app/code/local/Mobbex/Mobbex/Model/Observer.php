@@ -47,6 +47,7 @@ class Mobbex_Mobbex_Model_Observer
 			return;
 
 		$this->settings->savePlanFields($id);
+		$this->settings->saveProductSubscription($id);
 	}
 
 	public function saveCategoryTabData()

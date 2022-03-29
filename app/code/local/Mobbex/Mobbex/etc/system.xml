@@ -57,6 +57,16 @@
 							<show_in_store>0</show_in_store>
 						</test_mode>
 
+						<debug_mode>
+							<label>Debug Mode</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>24</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</debug_mode>
+
 						<embed translate="label">
 							<label>Embed Mode</label>
 							<frontend_type>select</frontend_type>
@@ -205,7 +215,46 @@
 						<show_in_website>1</show_in_website>
 						<show_in_store>0</show_in_store>
 						</widget_style>
+
+						<order_status_approved translate="label">
+							<label>Order status for approved transactions</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_order_status</source_model>
+							<sort_order>121</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</order_status_approved>
+
+						<order_status_in_process translate="label">
+							<label>Order status for in process transactions</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_order_status</source_model>
+							<sort_order>122</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</order_status_in_process>
+
+						<order_status_cancelled translate="label">
+							<label>Order status for cancelled transactions</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_order_status</source_model>
+							<sort_order>123</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</order_status_cancelled>
 						
+						<order_status_refunded translate="label">
+							<label>Order status for refunded transactions</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_order_status</source_model>
+							<sort_order>124</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</order_status_refunded>
 					</fields>
 				</mobbex>
 			</groups>

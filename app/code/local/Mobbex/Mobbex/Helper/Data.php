@@ -30,14 +30,23 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$products = $order->getAllItems();
 		
         foreach($products as $product) {
+			
 			$prd = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
+			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($product->getProductId());
 
-            $items[] = array(
-				"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
-				"description" => $product->getName(), 
-				"quantity" => $product->getQtyOrdered(), 
-				"total" => round($product->getPrice(),2) 
-			);
+			if($subscription['enable'] === 'yes'){
+				$items[] = [
+					'type'      => 'subscription',
+					'reference' => $subscription['uid']
+				];
+			} else {
+				$items[] = array(
+					"image" => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
+					"description" => $product->getName(), 
+					"quantity" => $product->getQtyOrdered(), 
+					"total" => round($product->getPrice(),2) 
+				);
+			}
 		}
 
 		// Add shipping item
@@ -89,6 +98,9 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			],
 		];
 
+		//debug data
+		$this->debug('Checkout data:', $data);
+
 		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/checkout",
             CURLOPT_RETURNTRANSFER => true,
@@ -107,18 +119,23 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		curl_close($curl);
 		
         if ($err) {
-            d("cURL Error #:" . $err);
+            $this->debug("cURL Error #:" . $err, '', true);
         } else {
 			$res = json_decode($response, true);
+
+			if(!isset($res['data']) || !$res || empty($res['data'])){
+				$this->debug("Failed getting checkout response data is empty", $res, true);
+				return;
+			}
 			
 			if($res['data']) {
 				$res['data']['return_url'] = $return_url;
 				return $res['data'];
 			} else {
-				// Mage::app()->getFrontController()->getResponse()->setRedirect(Mage::getUrl('mobbex/payment/cancel', array('_secure' => true)));
-
+				
 				// Restore Order
 				if(Mage::getSingleton('checkout/session')->getLastRealOrderId()){
+
 					if ($lastQuoteId = Mage::getSingleton('checkout/session')->getLastQuoteId()){
 						$quote = Mage::getModel('sales/quote')->load($lastQuoteId);
 						$quote->setIsActive(true)->save();
@@ -224,8 +241,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$entityData)
             return [];
 
-		
-
 		$curl = curl_init();
 
         curl_setopt_array($curl, [
@@ -283,10 +298,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		curl_close($curl);
 
 		if ($err) {
-			Mage::log('Curl Error #:' . $err);
+			$this->debug('Curl Error #:', $err, true);
 			Mage::throwException('Curl Error #:' . $err);
 		} else {
 			$res = json_decode($response, true);
+
+			if(!isset($res['data']) || !$res || empty($res['data'])){
+				$this->debug("Failed getting sources response data is empty", $res, true);
+				return;
+			}
 
 			if ($res['data']) {
 				return $res['data'];
@@ -447,4 +467,29 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             ],
         ];
     }
+
+	// DEBUG MODE //
+	/**
+	 * Send Mobbex errors and other useful data to magento log system if debug mode is active.
+	 * 
+	 * @param string $message
+	 * @param mixed $data
+	 * @param bool $force
+	 * @param bool $die
+	 */
+	public function debug($message = 'debug', $data = null, $force = false, $die = false)
+	{
+		if((Mage::getStoreConfig('payment/mobbex/debug_mode') == false) && !$force)
+			return;
+
+		Mage::log(
+			"Mobbex: $message " . (is_string($data) ? $data : json_encode($data)),
+			null,
+			'mobbex_debug_'.date('m_Y').'.log',
+			true
+		);
+
+		if($die)
+			die($message);
+	}
 }
