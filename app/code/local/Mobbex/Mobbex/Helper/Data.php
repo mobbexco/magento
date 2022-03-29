@@ -364,8 +364,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			return Mage::log('Entity Data Obtaining cURL Error' . $error, "mobbex_error_" . date('m_Y') . ".log");	
 		$res = json_decode($response, true); 	
 		if (empty($res['data']))	
-			return Mage::log('Entity Data Obtaining Error', "mobbex_error_" . date('m_Y') . ".log");	
-		error_log('Log Message: ' . "\n" . json_encode($res, JSON_PRETTY_PRINT) . "\n", 3, 'log.log');
+			return Mage::log('Entity Data Obtaining Error', "mobbex_error_" . date('m_Y') . ".log");
 		
 		// Save data
 		$this->_config = new Mage_Core_Model_Config();
