@@ -1,3 +1,5 @@
 <?php 
 	include 'plans-filter.phtml';
 	include 'subscriptions.phtml';
+
+	$this->mobbex->executeHook('mobbexProductSettings', false, $id);

@@ -2,3 +2,5 @@
 	include 'plans-filter.phtml';
 	if(Mage::getStoreConfig('payment/mobbex/multivendor'))
 		include 'multivendor.phtml';
+
+	$this->mobbex->executeHook('mobbexCategorySettings', false, $id);

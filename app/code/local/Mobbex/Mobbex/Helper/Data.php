@@ -73,7 +73,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$return_url = $this->getModuleUrl('response', $queryParams);
 
         // Create data
-        $data = [
+        $data = $this->executeHook('mobbexCheckoutRequest', true, [
             'reference'	   => $tracking_ref,
             'currency'	   => 'ARS',
             'description'  => 'Orden #' . $order->getIncrementId(),
@@ -96,7 +96,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
                     'failure' => false,
                 ],
 			],
-		];
+		]);
 
 		//debug data
 		$this->debug('Checkout data:', $data);
@@ -492,4 +492,50 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		if($die)
 			die($message);
 	}
-}
+
+	/**
+     * Execute a hook and retrieve the response.
+     * 
+     * @param string $name The hook name (in camel case).
+     * @param bool $filter Filter first arg in each execution.
+     * @param mixed ...$args Arguments to pass.
+     * 
+     * @return mixed Last execution response or value filtered. Null on exceptions.
+     */
+    public function executeHook($name, $filter = false, ...$args)
+    {
+        try {
+            // Use snake case to search event
+            $eventName = ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $name)), '_');
+
+            // Get registered observers and first arg to return as default
+			$eventConfig = Mage::app()->getConfig()->getEventConfig('global', $eventName);
+            $value     = $filter ? reset($args) : false;
+
+			foreach ($eventConfig->observers->children() as $observerData) {
+
+				// Instance observer
+				$instanceMethod = 'get'.$observerData->type;
+				$observer       = Mage::{$instanceMethod}((string) $observerData->class);
+
+				// Get method to execute
+				$method = [$observer, (string) $observerData->method];
+
+				// Only execute if is callable
+				if (!is_callable($method))
+					continue;
+	
+				$value = call_user_func_array($method, $args);
+
+				if ($filter)
+					$args[0] = $value;
+
+			}
+
+            return $value;
+        } catch (\Exception $e) {
+            $this->debug('Mobbex Hook Error: ', $e->getMessage(), true);
+        }
+    }
+} 
+
