@@ -4,7 +4,7 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
 {
     public function _construct()
     {
-        $this->setTemplate('mobbex/test.phtml');
+        $this->setTemplate('mobbex/methods.phtml');
         parent::_construct();
 
         $this->mobbex = Mage::helper('mobbex/data');
@@ -91,7 +91,7 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
 
     public function getMethodLabelAfterHtml()
     {
-        return 'Label after method';
+        return null;
     }
 
     public function hasMethodTitle()
