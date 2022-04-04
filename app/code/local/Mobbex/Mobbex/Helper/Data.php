@@ -16,122 +16,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		$this->fields = Mage::getModel('mobbex/customfield');
 	}
 
-	public function getHeaders()
-	{
-		return [
-            'cache-control: no-cache',
-            'content-type: application/json',
-            'x-api-key: ' . \Mage::getStoreConfig('payment/mobbex/api_key'),
-            'x-access-token: ' . \Mage::getStoreConfig('payment/mobbex/access_token'),
-            'x-ecommerce-agent: Magento/' . \Mage::getVersion() . ' Plugin/' . $this::VERSION,
-		];
-	}
-
-	public function getModuleUrl($action, $queryParams) {
-		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true, '_query' => $queryParams)); 
-	}
-
-	public function getReference($order)
-    {
-        return 'mag_order_'.$order->getIncrementId();
-	}
-
-	private function getPlatform()
-	{
-		return [
-			'name'	    => 'magento',
-			'version'   => $this::VERSION,
-			'ecommerce' => [
-				'magento' => Mage::getVersion(),
-			],
-		];
-	}
-
-	public function getInstallments($products)
-	{
-		$installments = $allCommonPlans = $allAdvancedPlans = [];
-
-		foreach (self::$ahora as $ahoraPlan) {
-			// Get 'ahora' plans from categories
-			foreach ($this->getAllCategories($products) as $catId) {
-				// If category has plan selected
-				if ($this->fields->getCustomField($catId, 'category', $ahoraPlan) == 'yes') {
-					// Add to installments
-					$installments[] = '-' . $ahoraPlan;
-					continue 2;
-				}
-			}
-
-			// Get 'ahora' plans from products
-			foreach ($products as $product) {
-				// If product has plan selected
-				if ($this->fields->getCustomField($product->getProductId(), 'product', $ahoraPlan) == 'yes') {
-					// Add to installments
-					$installments[] = '-' . $ahoraPlan;
-					continue 2;
-				}
-			}
-		}
-
-		foreach ($products as $product) {
-			$productId = $product->getProductId();
-
-			// Get common and advanced plans from product
-			$commonPlans   = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
-			$advancedPlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
-
-			$allCatCommonPlans = $allCatAdvancedPlans = [];
-
-			// Get common and advanced plans from product categories
-			foreach ($product->getProduct()->getCategoryIds() as $catId) {
-				$catCommonPlans   = $this->fields->getCustomField($catId, 'category', 'common_plans') ?: [];
-				$catAdvancedPlans = $this->fields->getCustomField($catId, 'category', 'advanced_plans') ?: [];
-
-				$allCatCommonPlans   = array_merge($allCatCommonPlans, $catCommonPlans);
-				$allCatAdvancedPlans = array_merge($allCatAdvancedPlans, $catAdvancedPlans);
-			}
-
-			$allCommonPlans   = array_merge($allCommonPlans, $commonPlans, $allCatCommonPlans);
-			$allAdvancedPlans = array_merge($allAdvancedPlans, array_unique(array_merge($advancedPlans, $allCatAdvancedPlans)));
-		}
-
-		// Add common plans to installments
-		foreach ($allCommonPlans as $commonPlan) {
-			$installments[] = '-' . $commonPlan;
-		}
-
-		// Get all the advanced plans with their number of reps
-        foreach (array_count_values($allAdvancedPlans) as $plan => $reps) {
-            // Only if the plan is active on all products, add to installments
-            if ($reps == count($products))
-                $installments[] = '+uid:' . $plan;
-        }
-
-        return array_unique($installments);
-	}
-
-	/**
-	 * Return categories ids from an array of products
-	 * @param $listProducts : array
-	 * @return array
-	 */
-	private function getAllCategories($listProducts)
-	{
-		
-		$categories_id = array();
-		foreach ($listProducts as $product) {
-			//Search for the product object
-			$productId = $product->getProductId();
-			$prod = Mage::getModel('catalog/product')->load($productId);
-			$categories = $prod->getCategoryIds();//array of cateries ids
-			foreach ($categories as $cat_id) {
-				if(!in_array($cat_id, $categories_id)){
-					array_push($categories_id,$cat_id);
-				}
-			}
-		}
-		return $categories_id;
-	}
+	//** CHECKOUT **/
 
     public function createCheckout($order)
     {
@@ -210,10 +95,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace(['https://', 'http://'], '', rtrim(Mage::getBaseUrl(), '/')),
 				'platform' => $this->getPlatform(),
-                'theme'    => [
-					'type'   => 'light', 
-					'colors' => null
-				],
+                'theme'    => $this->getTheme(),
 				'redirect' => [
                     'success' => true,
                     'failure' => false,
@@ -275,44 +157,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	/**
-     * Retrieve active advanced plans from a product and its categories.
-     * 
-     * @param int $productId
-     * 
-     * @return array
-     */
-    public function getInactivePlans($productId)
-    {
-        $product       = Mage::getModel('catalog/product')->load($productId);
-		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
-
-        foreach ($product->getCategoryIds() as $categoryId)
-            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
-
-        // Remove duplicated and return
-        return array_unique($inactivePlans);
-    }
-
-    /**
-     * Retrieve active advanced plans from a product and its categories.
-     * 
-     * @param int $productId
-     * 
-     * @return array
-     */
-    public function getActivePlans($productId)
-    {
-        $product     = Mage::getModel('catalog/product')->load($productId);
-        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
-	
-        foreach ($product->getCategoryIds() as $categoryId)
-            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
-
-        // Remove duplicated and return
-        return array_unique($activePlans);
-    }
-
-	/**
      * Return the Cuit/Tax_id using the ApiKey to request via web service
      * @return String Cuit
      */
@@ -353,6 +197,39 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         return $cuit; 
     }
 
+	public function getHeaders()
+	{
+		return [
+            'cache-control: no-cache',
+            'content-type: application/json',
+            'x-api-key: ' . \Mage::getStoreConfig('payment/mobbex/api_key'),
+            'x-access-token: ' . \Mage::getStoreConfig('payment/mobbex/access_token'),
+            'x-ecommerce-agent: Magento/' . \Mage::getVersion() . ' Plugin/' . $this::VERSION,
+		];
+	}
+
+	public function getModuleUrl($action, $queryParams) {
+		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true, '_query' => $queryParams)); 
+	}
+
+	public function getReference($order)
+    {
+        return 'mag_order_'.$order->getIncrementId();
+	}
+
+	private function getPlatform()
+	{
+		return [
+			'name'	    => 'magento',
+			'version'   => $this::VERSION,
+			'ecommerce' => [
+				'magento' => Mage::getVersion(),
+			],
+		];
+	}
+
+	/** SOURCES **/
+
 	/**
 	 * Get sources with common and advanced filtered plans from mobbex.
 	 * 
@@ -362,47 +239,40 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	 * 
 	 * @return array
 	 */
-	public function getSources($total = null, $inactivePlans = null, $activePlans = null)
+	public function getSources($total = null, $installments = [])
 	{
+		$entityData = $this->getEntityData();
+
+        if (!$entityData)
+            return [];
+
 		$curl = curl_init();
 
-		$data = $total ? '?total=' . $total : null;
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => "https://api.mobbex.com/p/sources/list/$entityData[countryReference]/$entityData[tax_id]" . ($total ? "?total=$total" : ''),
+            CURLOPT_HTTPHEADER     => $this->getHeaders(),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => json_encode(compact('installments')),
+        ]);
 
-		$data .= self::getInstallmentsQuery($inactivePlans, $activePlans);
+        $response = curl_exec($curl);
+        $error    = curl_error($curl);
 
-		curl_setopt_array($curl, [
-			CURLOPT_URL 		   => "https://api.mobbex.com/p/sources$data",
-			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_ENCODING 	   => "",
-			CURLOPT_MAXREDIRS 	   => 10,
-			CURLOPT_TIMEOUT 	   => 30,
-			CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-			CURLOPT_CUSTOMREQUEST  => "GET",
-			CURLOPT_HTTPHEADER	   => $this->getHeaders()
-		]);
+        curl_close($curl);
 
-		$response = curl_exec($curl);
-		$err = curl_error($curl);
+        if ($error)
+            Mage::log('Sources Obtaining cURL Error' . $error, "mobbex_error_" . date('m_Y') . ".log");
 
-		curl_close($curl);
+        $result = json_decode($response, true);
 
-		if ($err) {
-			$this->debug('Curl Error #:', $err, true);
-			Mage::throwException('Curl Error #:' . $err);
-		} else {
-			$res = json_decode($response, true);
+		if (empty($result['result']))
+			Mage::log('Sources Obtaining Error', "mobbex_error_" . date('m_Y') . ".log");
 
-			if(!isset($res['data']) || !$res || empty($res['data'])){
-				$this->debug("Failed getting sources response data is empty", $res, true);
-				return;
-			}
-
-			if ($res['data']) {
-				return $res['data'];
-			}
-		}
-
-		return [];
+		return isset($result['data']) ? $result['data'] : [];
 	}
 
 	/**
@@ -452,33 +322,156 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	/**
-     * Returns a query param with the installments of the product.
-     * @param array $inactivePlans
-     * @param array $activePlans
+     * Retrieve installments checked on plans filter of each item.
+     * 
+     * @param array $items
+     * @param bool $isQuote
+     * 
+     * @return array
      */
-    public static function getInstallmentsQuery($inactivePlans = null, $activePlans = null ) {
-        
-        $installments = [];
-        
-        //get plans
-        if($inactivePlans) {
-            foreach ($inactivePlans as $plan) {
-                $installments[] = "-$plan";
-            }
+    public function getInstallments($items, $isQuote = false)
+    {
+        $installments = $inactivePlans = $activePlans = [];
+
+        // Get plans from order products
+        foreach ($items as $item) {
+            $id = is_string($item) ? $item : ($isQuote ? $item['product_id'] : $item->getProductId());
+
+            $inactivePlans = array_merge($inactivePlans, $this->getInactivePlans($id));
+            $activePlans   = array_merge($activePlans, $this->getActivePlans($id));
         }
 
-        if($activePlans) {
-            foreach ($activePlans as $plan) {
-                $installments[] = "+uid:$plan";
-            } 
+        // Add inactive (common) plans to installments
+        foreach ($inactivePlans as $plan)
+            $installments[] = '-' . $plan;
+
+        // Add active (advanced) plans to installments only if the plan is active on all products
+        foreach (array_count_values($activePlans) as $plan => $reps) {
+            if ($reps == count($items))
+                $installments[] = '+uid:' . $plan;
         }
 
-        //Build query param
-        $query = http_build_query(['installments' => $installments]);
-        $query = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', $query);
-        
-        return $query;
-    }   
+        // Remove duplicated plans and return
+        return array_values(array_unique($installments));
+    }
+
+	/**
+     * Get entity data from Mobbex API or db if possible.
+     * 
+     * @return string[] 
+     */
+	public function getEntityData()
+	{
+		// First, try to get from db
+    	$entityData = Mage::getStoreConfig('payment/mobbex/entity_data') ?: false;
+
+    	if ($entityData)	
+    	    return json_decode($entityData, true);
+    	
+		$curl = curl_init();
+
+    	curl_setopt_array($curl, [	
+			CURLOPT_URL            => "https://api.mobbex.com/p/entity/validate",
+    	    CURLOPT_HTTPHEADER     => $this->getHeaders(),
+    	    CURLOPT_RETURNTRANSFER => true,	
+			CURLOPT_ENCODING       => "",
+    	    CURLOPT_MAXREDIRS      => 10,
+    	    CURLOPT_TIMEOUT        => 30,
+    	    CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+    	    CURLOPT_CUSTOMREQUEST  => 'GET',
+    	]);	
+
+		$response = curl_exec($curl);
+		$error    = curl_error($curl);	
+    	curl_close($curl);	
+
+		if ($error)	
+			return Mage::log('Entity Data Obtaining cURL Error' . $error, "mobbex_error_" . date('m_Y') . ".log");	
+		$res = json_decode($response, true); 	
+		if (empty($res['data']))	
+			return Mage::log('Entity Data Obtaining Error', "mobbex_error_" . date('m_Y') . ".log");
+		
+		// Save data
+		$this->_config = new Mage_Core_Model_Config();
+		$this->_config->saveConfig('payment/mobbex/entity_data', json_encode($res['data']));
+
+		return $res['data'];
+	}
+
+	/**
+     * Retrieve active advanced plans from a product and its categories.
+     * 
+     * @param int $productId
+     * 
+     * @return array
+     */
+    public function getInactivePlans($productId)
+    {
+        $product       = Mage::getModel('catalog/product')->load($productId);
+		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
+
+        foreach ($product->getCategoryIds() as $categoryId)
+            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
+
+        // Remove duplicated and return
+        return array_unique($inactivePlans);
+    }
+
+    /**
+     * Retrieve active advanced plans from a product and its categories.
+     * 
+     * @param int $productId
+     * 
+     * @return array
+     */
+    public function getActivePlans($productId)
+    {
+        $product     = Mage::getModel('catalog/product')->load($productId);
+        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
+	
+        foreach ($product->getCategoryIds() as $categoryId)
+            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
+
+        // Remove duplicated and return
+        return array_unique($activePlans);
+    }
+
+		/**
+	 * Return categories ids from an array of products
+	 * @param $listProducts : array
+	 * @return array
+	 */
+	private function getAllCategories($listProducts)
+	{
+		
+		$categories_id = array();
+		foreach ($listProducts as $product) {
+			//Search for the product object
+			$productId = $product->getProductId();
+			$prod = Mage::getModel('catalog/product')->load($productId);
+			$categories = $prod->getCategoryIds();//array of cateries ids
+			foreach ($categories as $cat_id) {
+				if(!in_array($cat_id, $categories_id)){
+					array_push($categories_id,$cat_id);
+				}
+			}
+		}
+		return $categories_id;
+	}
+
+	/**
+     * @return array
+     */
+    private function getTheme()
+    {
+        return [
+            "type" => Mage::getStoreConfig('payment/mobbex/theme'),
+            "background" => Mage::getStoreConfig('payment/mobbex/background_color'),
+            "colors" => [
+                "primary" => Mage::getStoreConfig('payment/mobbex/primary_color'),
+            ],
+        ];
+    }
 
 	// DEBUG MODE //
 	/**
