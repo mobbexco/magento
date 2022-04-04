@@ -98,7 +98,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	}
 
 	/**
-	 * Get entity from product or category id.
+	 * Get entity an entity assigned to a product or category.
 	 * 
 	 * @param mixed $id 
 	 * @param string $catalogType 
@@ -111,7 +111,8 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	}
 
 	/**
-	 * Get entity of an specific product from product object.
+	 * Reiceives a product object & return the entity asigned to
+	 * if product didnt have an entity assigned, return the entity of his category.
 	 * 
 	 * @param object $product
 	 * 
