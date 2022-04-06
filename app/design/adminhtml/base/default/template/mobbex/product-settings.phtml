@@ -1,3 +1,5 @@
 <?php 
 	include 'plans-filter.phtml';
 	include 'subscriptions.phtml';
+	if(Mage::getStoreConfig('payment/mobbex/multivendor'))
+		include 'multivendor.phtml';

@@ -97,6 +97,16 @@
 							<show_in_store>0</show_in_store>
 						</multicard>
 
+						<multivendor translate="label">
+							<label>Multivendor</label>
+							<frontend_type>select</frontend_type>
+							<source_model>mobbex/system_config_source_multivendor</source_model>
+							<sort_order>24</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</multivendor>
+
 						<order_status translate="label">
 							<label>New Order Status</label>
 							<frontend_type>select</frontend_type>

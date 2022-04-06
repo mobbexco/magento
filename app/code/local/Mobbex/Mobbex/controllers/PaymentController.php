@@ -183,8 +183,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         $_order = new Mage_Sales_Model_Order();
         $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
         $order = $_order->loadByIncrementId($orderId);
-
-        // Get Checkout Data
+         // Get Checkout Data
         $checkout = Mage::helper('mobbex/data')->createCheckout($order);
 
         $mobbex_data['returnUrl']  = isset($checkout['return_url']) ? $checkout['return_url'] : '';
