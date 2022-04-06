@@ -2,19 +2,6 @@
 
 class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 {
-    // The redirect action is triggered when someone places an order
-    public function redirectAction()
-    {
-        $embed = Mage::getStoreConfig('payment/mobbex/embed');
-        if (!$embed) {
-            $this->loadLayout();
-
-            $block = $this->getLayout()->createBlock('Mage_Core_Block_Template', 'mobbex', array('template' => 'mobbex/redirect.phtml'));
-            $this->getLayout()->getBlock('content')->append($block);
-
-            $this->renderLayout();
-        }
-    }
 
     // The response action is triggered when your gateway sends back a response after processing the customer's payment
     public function responseAction()
@@ -200,9 +187,11 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         // Get Checkout Data
         $checkout = Mage::helper('mobbex/data')->createCheckout($order);
 
-        $mobbex_data['returnUrl'] = $checkout['return_url'];
-        $mobbex_data['checkoutId'] = $checkout['id'];
-        $mobbex_data['orderId'] = $orderId;
+        $mobbex_data['returnUrl']  = isset($checkout['return_url']) ? $checkout['return_url'] : '';
+        $mobbex_data['checkoutId'] = isset($checkout['id']) ? $checkout['id'] : '';
+        $mobbex_data['orderId']    = $orderId;
+        $mobbex_data['url']        = isset($checkout['url']) ? $checkout['url'] : '';
+        $mobbex_data['wallet']     = isset($checkout['wallet']) ? $checkout['wallet'] : '';
 
         // Return data in json
         $this->getResponse()->clearHeaders()->setHeader(
