@@ -20,7 +20,12 @@
     </sales_order_view>
     <catalog_product_view translate="label">
         <reference name="content"> 
-            <block type="mobbex/finance_widget" name="mobbex.product.widget" template="mobbex/product.phtml"/>
+            <block type="mobbex/finance_widget" name="mobbex.product.widget" template="mobbex/finance.phtml" />
         </reference>
     </catalog_product_view>
+    <checkout_cart_index translate="label">
+        <reference name="checkout.cart.methods"> 
+            <block type="mobbex/finance_widget" name="mobbex.product.widget" template="mobbex/finance.phtml" />
+        </reference>
+    </checkout_cart_index>
 </layout>
