@@ -284,44 +284,6 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
 	/**
-     * Retrieve active advanced plans from a product and its categories.
-     * 
-     * @param int $productId
-     * 
-     * @return array
-     */
-    public function getInactivePlans($productId)
-    {
-        $product       = Mage::getModel('catalog/product')->load($productId);
-		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
-
-        foreach ($product->getCategoryIds() as $categoryId)
-            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
-
-        // Remove duplicated and return
-        return array_unique($inactivePlans);
-    }
-
-    /**
-     * Retrieve active advanced plans from a product and its categories.
-     * 
-     * @param int $productId
-     * 
-     * @return array
-     */
-    public function getActivePlans($productId)
-    {
-        $product     = Mage::getModel('catalog/product')->load($productId);
-        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
-	
-        foreach ($product->getCategoryIds() as $categoryId)
-            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
-
-        // Remove duplicated and return
-        return array_unique($activePlans);
-    }
-
-	/**
      * Return the Cuit/Tax_id using the ApiKey to request via web service
      * @return String Cuit
      */

@@ -17,8 +17,8 @@ window.addEventListener('load', function () {
 
 /** PAYMENT METHODS SUBDIVISION EVENTS */
 // Current payment method & card
-let mbbxCurrentMehtod = '';
-let mbbxCurrentCard = '';
+var mbbxCurrentMehtod = '';
+var mbbxCurrentCard = '';
 
 $(document).on('click', '.radio', function (e) {
     if(e.target.getAttribute('id') == "p_method_mobbex")
@@ -110,7 +110,7 @@ function renderMobbex (id, returnUrl, orderId) {
  */
 function mbbxRedirect(checkoutUrl) {
     let mobbexForm = document.querySelector('#mbbx_redirect_form');
-    mobbexForm.setAttribute('action', url);
+    mobbexForm.setAttribute('action', checkoutUrl);
     if(mbbxCurrentMehtod)
         mobbexForm.innerHTML = `<input type='hidden' name='paymentMethod' value='${mbbxCurrentMehtod}'/>`
     mobbexForm.submit();
