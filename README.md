@@ -34,7 +34,7 @@ A continuación, un ejemplo utilizando el hook `mobbexCheckoutRequest`:
 ```php
 <?php
 
-class Mobbex_Mobbex_Model_Observer
+class Vendor_Module_Model_Observer
 {
     public function mobbexCheckoutRequest($body, $order)
     {
@@ -47,15 +47,15 @@ class Mobbex_Mobbex_Model_Observer
 
 Y un ejemplo de como se registra el evento en el archivo `config.xml`. Recuerde que aquí debe escribirse utilizando snake-case:
 ```xml
-            <event_area_selected>
+            <global>
                 <observers>
                     <observer_name>
-                        <type>type (singleton, model)</type>
-                        <class>mobbex/observer</class>
-                        <method>nameOfTheMethod</method>
+                        <type>singleton</type>
+                        <class>vendor/observer</class>
+                        <method>mobbexCheckoutRequest</method>
                     </observer_name>
                 </observers>
-            </event_area_selected>
+            </global>
 ```
 
 El módulo cuenta con los siguientes hooks actualmente:
