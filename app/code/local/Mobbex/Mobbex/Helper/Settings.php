@@ -98,6 +98,57 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	}
 
 	/**
+	 * Get entity an entity assigned to a product or category.
+	 * 
+	 * @param mixed $id 
+	 * @param string $catalogType 
+	 * 
+	 * @return string 
+	 */
+	public function getEntity($id, $catalogType = 'product')
+	{
+		return $this->fields->getCustomField($id, $catalogType, 'entity') ?: '';
+	}
+
+	/**
+	 * Reiceives a product object & return the entity asigned to
+	 * if product didnt have an entity assigned, return the entity of his category.
+	 * 
+	 * @param object $product
+	 * 
+	 * @return string $entity 
+	 */
+	public function getProductEntity($product)
+	{
+        if($this->fields->getCustomField($product->getProductId(), 'product', 'entity'))
+            return $this->fields->getCustomField($product->getProductId(), 'product', 'entity');
+
+        $categories = $product->getCategoryIds();
+        if($categories)
+            return $this->fields->getCustomField($categories[0], 'category', 'entity'); 
+
+        return '';
+	}
+
+    /**
+     * Get the merchants from item list.
+     * @param array
+     * @return array
+     */
+    public function getMerchants($items)
+    {
+        $merchants = [];
+
+        //Get the merchants from items list
+        foreach ($items as $item) {
+            if (!empty($item['entity']))
+                $merchants[] = ['uid' => $item['entity']];
+        }
+
+        return $merchants;
+	}
+
+	/**
 	 * Save plan filter fields of product/category.
 	 * 
 	 * @param mixed $id 
@@ -142,4 +193,12 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 
 		return true;
 	}
+
+	public function saveEntity($id, $catalogType = 'product')
+	{
+		$this->fields->saveCustomField($id, $catalogType, 'entity', isset($_POST['entity']) ? $_POST['entity'] : '');
+
+		return true;
+	}
+
 }

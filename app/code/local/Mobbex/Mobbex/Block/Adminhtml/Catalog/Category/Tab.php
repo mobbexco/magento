@@ -23,6 +23,8 @@ class Mobbex_Mobbex_Block_Adminhtml_Catalog_Category_Tab extends Mage_Adminhtml_
 		$this->commonPlans	 = $this->settings->getCommonPlanFields($id, 'category');
 		$this->advancedPlans = $this->settings->getAdvancedPlanFields($id, 'category');
 		$this->mobbex        = Mage::helper('mobbex/data'); 
-		$this->setTemplate('mobbex/plans-filter.phtml');
+		$this->entity        = $this->settings->getEntity($id, 'category');
+
+		$this->setTemplate('mobbex/category-settings.phtml');
 	}
 }
