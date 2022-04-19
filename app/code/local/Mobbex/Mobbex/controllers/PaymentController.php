@@ -37,130 +37,127 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
     public function notificationAction()
     {
-        if ($this->getRequest()->isPost()) {
 
-            try {
-                // Get Data
-                $insMessage = $this->getRequest()->getPost();
-                $orderId = $this->getRequest()->getParam('orderId');
+        try {
+            // Get Data
+            $postData = isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json' ? json_decode(file_get_contents('php://input'), true) : $this->getRequest()->getPost()['data'];
+            $orderId  = $this->getRequest()->getParam('orderId');
 
-                // Load the Order
-                $order = Mage::getModel('sales/order');
-                $order->loadByIncrementId($orderId);
+            // Load the Order
+            $order = Mage::getModel('sales/order');
+            $order->loadByIncrementId($orderId);
 
-                $res = $this->formatWebhookData($insMessage['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
-                
-                //Execute own hook to extend functionalities
-                Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $insMessage['data'], $order);
-                
-                // Get the Reference ( Transaction ID )
-                $transaction_id = $res['payment_id'];
+            $res = $this->formatWebhookData($postData, $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
+            
+            //Execute own hook to extend functionalities
+            Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $postData, $order);
 
-                // Get the Status
-                $status  = $res['status_code'];
-                $message = $res['status_message'] . ' ( Transacción: ' . $transaction_id . ' )';
+            // Get the Reference ( Transaction ID )
+            $transaction_id = $res['payment_id'];
 
-                //Save transaction information
-                Mage::getModel('mobbex/transaction')->saveMobbexTransaction($res);
+            // Get the Status
+            $status  = $res['status_code'];
+            $message = $res['status_message'] . ' ( Transacción: ' . $transaction_id . ' )';
 
-                //Return if the webhook is not parent
-                if($res['parent'] == false){
-                    return;
-                }
+            //Save transaction information
+            Mage::getModel('mobbex/transaction')->saveMobbexTransaction($res);
 
-                //Debug the response data
-                Mage::helper('mobbex/data')->debug("Processing Webhook Data", compact('orderId', 'res'));
-
-                if (isset($orderId) && !empty($status)) {
-
-                    $source_type = $res['source_type'];
-                    $source_name = $res['source_name'];
-
-                    // Get Source number in case of cards
-                    $source_number = 'N/A';
-                    if (!empty($res['source_number'])) {
-                        $source_number = ' ' . $res['source_number'];
-                    }
-
-                    $user_name  = $res['user']['name'];
-                    $user_email = $res['user']['email'];
-
-                    Mage::helper('mobbex/data')->debug('Saving state for order: ', $order->getId());
-
-                    $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
-                    $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
-
-                    $order->addStatusHistoryComment($paymentComment);
-                    $order->addStatusHistoryComment($userComment);
-
-                    $statusName = $this->getStatusName($order, $status);
-
-                    // Get Order status
-                    if ($statusName == 'inProcess') {
-                        $order->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_in_process'));
-                    } else if ($statusName === 'Approved') {
-                        
-                        //Uncancel order if is cancelled
-                        $items = $order->getAllItems();
-                        if($items[0]->getStatus() == 'Canceled') {
-                            $order->setBaseDiscountCanceled(0);
-                            $order->setBaseShippingCanceled(0);
-                            $order->setBaseSubtotalCanceled(0);
-                            $order->setBaseTaxCanceled(0);
-                            $order->setBaseTotalCanceled(0);
-                            $order->setDiscountCanceled(0);
-                            $order->setShippingCanceled(0);
-                            $order->setSubtotalCanceled(0);
-                            $order->setTaxCanceled(0);
-                            $order->setTotalCanceled(0);
-    
-                            foreach ($items as $item) {
-                                $item->setQtyCanceled(0);
-                                $item->setTaxCanceled(0);
-                                $item->setHiddenTaxCanceled(0);
-                                $item->save();
-                            }
-                        }
-
-                        //set order status
-                        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
-                        $order->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_approved'));
-
-                        // Prepare payment object
-                        $payment = $order->getPayment();
-                        $payment->setTransactionId($transaction_id);
-                        $payment->setLastTransId($transaction_id);
-                        $payment->setIsTransactionClosed(1);
-                        $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, array(
-                            'source' => $source_name,
-                            'source_number' => $source_number,
-                        ));
-
-                        // Save payment, transaction and order
-                        $payment->save();
-
-                        // Send notifications to the user
-                        $order->sendNewOrderEmail();
-                        $order->setEmailSent(true);
-
-                    } else if($statusName === 'Refunded'){
-                        // Cancel Sale
-                        $order->cancel()->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_refunded'));
-                    } else {
-                        $order->cancel()->setState(Mage::getStoreConfig('payment/mobbex/order_status_cancelled'), true, $message);
-                    }
-
-                    Mage::helper('mobbex/data')->debug('Save Order: ', $order->getId());
-
-                    // Save the order
-                    $order->save();
-
-                    Mage::getSingleton('checkout/session')->unsQuoteId();
-                }
-            } catch (Exception $e) {
-                Mage::helper('mobbex/data')->debug('Exception: ', $e, true);
-                $this->messageManager->addExceptionMessage($e, $e->getMessage());
+            //Return if the webhook is not parent
+            if ($res['parent'] == false) {
+                return;
             }
+
+            //Debug the response data
+            Mage::helper('mobbex/data')->debug("Processing Webhook Data", compact('orderId', 'res'));
+
+            if (isset($orderId) && !empty($status)) {
+
+                $source_type = $res['source_type'];
+                $source_name = $res['source_name'];
+
+                // Get Source number in case of cards
+                $source_number = 'N/A';
+                if (!empty($res['source_number'])) {
+                    $source_number = ' ' . $res['source_number'];
+                }
+
+                $user_name  = $res['user']['name'];
+                $user_email = $res['user']['email'];
+
+                Mage::helper('mobbex/data')->debug('Saving state for order: ', $order->getId());
+
+                $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
+                $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
+
+                $order->addStatusHistoryComment($paymentComment);
+                $order->addStatusHistoryComment($userComment);
+
+                $statusName = $this->getStatusName($order, $status);
+
+                // Get Order status
+                if ($statusName == 'inProcess') {
+                    $order->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_in_process'));
+                } else if ($statusName === 'Approved') {
+
+                    //Uncancel order if is cancelled
+                    $items = $order->getAllItems();
+                    if ($items[0]->getStatus() == 'Canceled') {
+                        $order->setBaseDiscountCanceled(0);
+                        $order->setBaseShippingCanceled(0);
+                        $order->setBaseSubtotalCanceled(0);
+                        $order->setBaseTaxCanceled(0);
+                        $order->setBaseTotalCanceled(0);
+                        $order->setDiscountCanceled(0);
+                        $order->setShippingCanceled(0);
+                        $order->setSubtotalCanceled(0);
+                        $order->setTaxCanceled(0);
+                        $order->setTotalCanceled(0);
+
+                        foreach ($items as $item) {
+                            $item->setQtyCanceled(0);
+                            $item->setTaxCanceled(0);
+                            $item->setHiddenTaxCanceled(0);
+                            $item->save();
+                        }
+                    }
+
+                    //set order status
+                    $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+                    $order->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_approved'));
+
+                    // Prepare payment object
+                    $payment = $order->getPayment();
+                    $payment->setTransactionId($transaction_id);
+                    $payment->setLastTransId($transaction_id);
+                    $payment->setIsTransactionClosed(1);
+                    $payment->setTransactionAdditionalInfo(Mage_Sales_Model_Order_Payment_Transaction::RAW_DETAILS, array(
+                        'source' => $source_name,
+                        'source_number' => $source_number,
+                    ));
+
+                    // Save payment, transaction and order
+                    $payment->save();
+
+                    // Send notifications to the user
+                    $order->sendNewOrderEmail();
+                    $order->setEmailSent(true);
+                } else if ($statusName === 'Refunded') {
+                    // Cancel Sale
+                    $order->cancel()->setStatus(Mage::getStoreConfig('payment/mobbex/order_status_refunded'));
+                } else {
+                    $order->cancel()->setState(Mage::getStoreConfig('payment/mobbex/order_status_cancelled'), true, $message);
+                }
+
+                Mage::helper('mobbex/data')->debug('Save Order: ', $order->getId());
+
+                // Save the order
+                $order->save();
+
+                Mage::getSingleton('checkout/session')->unsQuoteId();
+            }
+        } catch (Exception $e) {
+            Mage::helper('mobbex/data')->debug('Exception: ', $e, true);
+            $this->messageManager->addExceptionMessage($e, $e->getMessage());
         }
     }
 
@@ -185,7 +182,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         $_order = new Mage_Sales_Model_Order();
         $orderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
         $order = $_order->loadByIncrementId($orderId);
-         // Get Checkout Data
+        // Get Checkout Data
         $checkout = Mage::helper('mobbex/data')->createCheckout($order);
 
         $mobbex_data['returnUrl']  = isset($checkout['return_url']) ? $checkout['return_url'] : '';
@@ -224,7 +221,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
         return $name;
     }
-  
+
     /**
      * Format the webhook data in an array.
      * 
@@ -267,7 +264,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             'created'            => isset($webhookData['payment']['created']) ? $webhookData['payment']['created'] : '',
             'updated'            => isset($webhookData['payment']['updated']) ? $webhookData['payment']['created'] : '',
             'user'               => [
-                'name' => isset($webhookData['user']['name']) ? $webhookData['user']['name'] : '', 
+                'name' => isset($webhookData['user']['name']) ? $webhookData['user']['name'] : '',
                 'email' => isset($webhookData['user']['email']) ? $webhookData['user']['email'] : '',
             ],
 
@@ -288,7 +285,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
      */
     public function isParent($operationType, $multicard, $multivendor)
     {
-        if ($operationType === "payment.v2" ){
+        if ($operationType === "payment.v2") {
             if ($multicard || $multivendor != 'disable')
                 return false;
         }
