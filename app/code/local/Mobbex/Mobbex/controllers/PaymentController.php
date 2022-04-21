@@ -40,17 +40,17 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
         try {
             // Get Data
-            $postData = isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json' ? json_decode(file_get_contents('php://input'), true) : $this->getRequest()->getPost()['data'];
+            $postData = isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json' ? json_decode(file_get_contents('php://input'), true) : $this->getRequest()->getPost();
             $orderId  = $this->getRequest()->getParam('orderId');
 
             // Load the Order
             $order = Mage::getModel('sales/order');
             $order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData, $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
+            $res = $this->formatWebhookData($postData['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
             
             //Execute own hook to extend functionalities
-            Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $postData, $order);
+            Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $postData['data'], $order);
 
             // Get the Reference ( Transaction ID )
             $transaction_id = $res['payment_id'];
