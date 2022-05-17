@@ -642,9 +642,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
             // Get registered observers and first arg to return as default
 			$eventConfig = Mage::app()->getConfig()->getEventConfig('global', $eventName);
-            $value     = $filter ? reset($args) : false;
+            $value       = $filter ? reset($args) : false;
+			$observers   = $eventConfig->observers ? $eventConfig->observers->children() : [];
 
-			foreach ($eventConfig->observers->children() as $observerData) {
+			foreach ($observers as $observerData) {
 
 				// Instance observer
 				$instanceMethod = 'get'.$observerData->type;
