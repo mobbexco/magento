@@ -126,17 +126,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         if ($err) {
             $this->debug("cURL Error #:" . $err, '', true);
         } else {
-			$res = json_decode($response, true);
-
-			if(!isset($res['data']) || !$res || empty($res['data'])){
-				$this->debug("Failed getting checkout response data is empty", $res, true);
-				return;
-			}
 			
-			if($res['data']) {
+			$res = json_decode($response, true);
+			
+			if(!empty($res['data'])) {
 				$res['data']['return_url'] = $return_url;
 				return $res['data'];
+				
 			} else {
+				$this->debug("Failed getting checkout response data is empty", $res, true);
 				
 				// Restore Order
 				if(Mage::getSingleton('checkout/session')->getLastRealOrderId()){
@@ -148,10 +146,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 
 					// Send error message
 					Mage::getSingleton('core/session')->addError(Mage::helper('mobbex')->__('The payment has failed.'));
-
-					 //Redirect to cart
-					$this->_redirect('checkout/cart');
 				}
+				return false;
 			}
         }
 	}

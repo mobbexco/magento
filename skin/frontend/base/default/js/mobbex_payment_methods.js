@@ -62,6 +62,7 @@ function processOrder() {
         },
         onFailure: function(){
             checkout.setLoadWaiting(false)
+            window.top.location.reload();
         },
         onError: function(error){
             console.log(error)
@@ -80,6 +81,7 @@ function renderMobbex (id, returnUrl, orderId) {
     let options = {
         id: id,
         type: 'checkout',
+        paymentMethod: mbbxCurrentMehtod || null,
 
         onResult: (responseData) => {
             location.href = returnUrl + '&status=' + responseData.status.code + '&orderId=' + orderId
@@ -96,9 +98,6 @@ function renderMobbex (id, returnUrl, orderId) {
             location.href = returnUrl
         }
     }
-
-    if(mbbxCurrentMehtod)
-        options.paymentMethod = mbbxCurrentMehtod;
 
     let mbbxEmbed = window.MobbexEmbed.init(options)
     mbbxEmbed.open()
