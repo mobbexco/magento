@@ -10,6 +10,7 @@ class Mobbex_Mobbex_Model_Standard extends Mage_Payment_Model_Method_Abstract {
     protected $_canAuthorize = false;
     protected $_canCapture = true;
 	protected $_canRefund = true;
+    protected $_infoBlockType = 'mobbex/adminhtml_payment_info';
 
 }
 ?>

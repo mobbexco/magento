@@ -15,17 +15,22 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
      * 
      * @return array
      */
-    public function getMobbexTransaction($order_id, $parent = true)
+    public function getMobbexTransaction($order_id, $filter = [false])
     {
-        if($parent){
+        if($filter[0]){
             $collection = $this->getCollection()
                 ->addFieldToFilter('order_id', $order_id)
-                ->addFieldToFilter('parent', 1);
+                ->addFieldToFilter('parent', $filter[1])
+                ->getData();
 
-            return $collection->getFirstItem()->getData() ? $collection->getFirstItem()->getData() : false;
+            if($filter[1])
+                $collection = isset($collection[0]) ? $collection[0] : $collection;
+
+            return !empty($collection) ? $collection : false;
         }
         $collection = $this->getCollection()
-            ->addFieldToFilter('order_id', $order_id);
+            ->addFieldToFilter('order_id', $order_id)
+            ->getData();
 
         return !empty($collection) ? $collection : false;
     }

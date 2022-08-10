@@ -2,7 +2,7 @@
     $_order = $this->getOrder();
     $_order_id = $_order->getRealOrderId();
     //Save transaction information
-    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id));
+    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id,[true,true]));
     $newFTotalCost = 0;
     $newTotal = 0;
     if(isset($data['data'])){
@@ -14,7 +14,6 @@
     }
     
 ?>
-
 
 <script>    
     
