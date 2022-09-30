@@ -1,3 +1,4 @@
+<?php if($this->enable): ?>
 <div id="mbbxProductModal" class="mobbex-plans-modal <?= $this->styles['theme'] ?>">
         <div id="mbbxProductModalContent" class="">
             <div id="mbbxProductModalHeader">
@@ -49,6 +50,7 @@
         <?= $this->styles['text'] ?>
     </button>
 
+    
     <style>
         
         /* Custom styles */
@@ -65,23 +67,23 @@
             cursor: pointer;
             margin-bottom: 10px;
         }
-
+        
         .dark #closembbxProduct {
             color: white;
         }
-
+        
         #closembbxProduct:hover {
-
+            
             cursor: pointer;
         }
-
+        
         .scroll-lock {
             padding-right: 17px;
             overflow: hidden;
         }
-
+        
         /* MODAL STYLES */
-
+        
         /* The Modal (background) */
         #mbbxProductModal {
             display: none;
@@ -129,7 +131,7 @@
             flex-flow: wrap;
             align-items: center;
         }
-
+        
         /* Modal Scrollbar */
         #mbbxProductModalContent::-webkit-scrollbar {
             width: 20px;
@@ -157,7 +159,7 @@
             margin: 0;
             font-weight: bold;
         }
-
+        
         #mbbxProductModalBody td {
             width: 65%;
         }
@@ -167,7 +169,7 @@
             border-radius: 100%;
             margin-right: 10px;
         }
-
+        
         #mbbx-method-select {
             width: 100%;
             min-height: 40px;
@@ -181,7 +183,7 @@
             width: 80%;
             margin: 0 auto;
         }
-
+        
         .installmentsTable tr {
             width: 100%;
             padding: 10px;
@@ -192,11 +194,11 @@
             padding: 10px 0;
             width: 70%;
         }
-
+        
         .mbbxPlansPrice {
             text-align: end;
         }
-
+        
         /* DARK MODE  */
         .dark #mbbxProductModalContent,
         .dark #mbbxProductModalContent table td {
@@ -208,16 +210,16 @@
         .dark #mbbxProductModalContent .mobbexPaymentMethod {
             color: rgb(226, 226, 226);
         }
-    </style>
+        </style>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', () => {
-
+            
             // Get modal action buttons
             var openBtn = document.getElementById('mbbxProductBtn');
             var closeBtn = document.querySelector('#closembbxProduct');
             var mobbexPlansModal = document.querySelector('#mbbxProductModal');
-
+            
             // Add events to toggle modal
             mobbexPlansModal.addEventListener('click', function(e) {
                 if (e.target === closeBtn || e.target === mobbexPlansModal) {
@@ -229,18 +231,19 @@
             // Get sources and payment method selector 
             var sources = document.querySelectorAll('.mobbexSource');
             var methodSelect = document.getElementById('mbbx-method-select');
-
+            
             // Filter payment methods in the modal
             methodSelect.addEventListener('change', function() {
                 for (source of sources)
                     source.style.display = source.id != methodSelect.value && methodSelect.value != 0 ? 'none' : '';
-            });
+                });
         });
-
+        
         function toggleFinancialWidget(e) {
             e.target.preventDefault;
             document.querySelector('#mbbxProductModal').classList.toggle('active')
             document.querySelector('body').classList.toggle('scroll-lock');
         }
 
-    </script>
+        </script>
+        <?php endif; ?>
