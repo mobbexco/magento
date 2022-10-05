@@ -63,7 +63,7 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
     {
         $session        = Mage::getSingleton('checkout/session');
         $quote          = Mage::getModel('sales/quote')->load($session->getQuoteId());
-        $shipAdressData = $quote->getBillingAddress()->getData();
+        $billingData    = $quote->getBillingAddress()->getData();
         
         $quoteData = [
             'entity_id'        => $quote->getId(),
@@ -71,18 +71,15 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
             'price'            => $quote->getGrandTotal(),
             'currency_id'      => $quote->getStore()->getCurrentCurrency()->getCode(),
             'email'            => $quote->getCustomerEmail(),
-            'shipping_address' => [
-                'firstname'            => $shipAdressData['firstname'],
-                'lastname'             => $shipAdressData['lastname'],
-                'street'               => $shipAdressData['street'],
-                'city'                 => $shipAdressData['city'],
-                'region'               => $shipAdressData['region'],
-                'postcode'             => $shipAdressData['postcode'],
-                'telephone'            => $shipAdressData['telephone'],
+            'customer'         => [
+                'firstname'            => $billingData['firstname'],
+                'lastname'             => $billingData['lastname'],
+                'telephone'            => $billingData['telephone'],
                 'save_in_address_book' => 1
             ],
             'items'          => [],
             'shipping_total' => $quote->getShippingAddress()->getShippingAmount(),
+            'addresses'      => $this->mobbex->getAddresses([$billingData, $quote->getShippingAddress()->getData()]),
             'quote'          => $quote
         ];
 

@@ -90,6 +90,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'multivendor'  => Mage::getStoreConfig('payment/mobbex/multivendor'),
 			'merchants'    => Mage::helper('mobbex/settings')->getMerchants($items),
 			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
+			'addresses'    => $this->getAddresses([$order->getBillingAddress()->getData(), $order->getShippingAddress()->getData()]),
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
@@ -170,14 +171,14 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         // get customer data
         $customer = [
             'email' => $quoteData['email'], 
-            'name' => $quoteData['shipping_address']['firstname'],
+            'name' => $quoteData['customer']['firstname'],
             //Customer id added for wallet usage
             'uid' => $quoteData['customer_id'],
             'identification' => Mage::getModel('mobbex/customfield')->getCustomField($quoteData['entity_id'], 'customer', 'dni'),
         ];
-        if ($quoteData['shipping_address']){
-            if ($quoteData['shipping_address']['telephone']) {
-                $customer['phone'] = $quoteData['shipping_address']['telephone'];
+        if ($quoteData['customer']){
+            if ($quoteData['customer']['telephone']) {
+                $customer['phone'] = $quoteData['customer']['telephone'];
             }
         }
         //get quote to retrieve shipping amount
@@ -221,7 +222,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         
         // Return Query Params
 		$queryParams = array('orderId' => $quoteData['entity_id']);
-        
+
         // Create data
         $data = [
             'reference'    => 'mag_order_'.$quoteData['entity_id'],
@@ -237,6 +238,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             'installments' => $this->getInstallments($quoteData['items']),
             "multicard"    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
+			'addresses'    => $quoteData['addresses'],
             "options"      => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
@@ -277,6 +279,55 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
     }
+
+	/**
+
+	 * Get Addresses data for Mobebx Checkout.
+
+	 * @param array $addressesData
+
+	 * @return array $addresses
+
+	 */
+
+	public function getAddresses($addressesData)
+
+	{
+
+		$addresses = [];
+
+		foreach ($addressesData as $address) {
+
+			$region = Mage::getModel('directory/region')->load($address['region_id'])->getData();
+
+			$addresses[] = [
+				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
+				'country' => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
+				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
+				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
+				'streetNotes' => '',
+				'zipCode' => isset($address["postcode"]) ? $address["postcode"] : '',
+				'city' => isset($address["city"]) ? $address["city"] : '',
+				'state'  => (isset($address["country_id"]) && isset($region['code'])) ? str_replace($address["country_id"] . '-', '', $region['code']) : ''
+			];
+		}
+
+		return $addresses;
+	}
+
+	/**
+	 * Converts the WooCommerce country codes to 3-letter ISO codes.
+	 * 
+	 * @param string $code 2-Letter ISO code.
+	 * 
+	 * @return string|null
+	 */
+	public function convertCountryCode($code)
+	{
+		$countries = include ('iso-3166/country-codes.php') ?: [];
+
+		return isset($countries[$code]) ? $countries[$code] : null;
+	}
 
 	/**
      * Return the Cuit/Tax_id using the ApiKey to request via web service
