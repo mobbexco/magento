@@ -23,16 +23,13 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 		
         // Create an unique id
 		$tracking_ref = $this->getReference($order);
+
+		$products = $items = array();
 		
-		$items = array();
-		$products = $order->getAllItems();
+        foreach($order->getAllItems() as $item) {
 
-
-        foreach($products as $product) {
-			
-			$prd          = Mage::helper('catalog/product')->getProduct($product->getId(), null, null);
-			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($product->getProductId());
-			$entity       = Mage::helper('mobbex/settings')->getProductEntity($product);
+			$subscription = Mage::helper('mobbex/settings')->getProductSubscription($item->getProductId());
+			$entity       = Mage::helper('mobbex/settings')->getProductEntity($item);
 
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
@@ -41,13 +38,15 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 				];
 			} else {
 				$items[] = array(
-					"image"       => (string)Mage::helper('catalog/image')->init($prd, 'image')->resize(150), 
-					"description" => $product->getName(), 
-					"quantity"    => $product->getQtyOrdered(), 
-					"total"       => round($product->getPrice(),2),
+					"image"       => (string)Mage::helper('catalog/image')->init($item->getProduct(), 'image')->resize(150), 
+					"description" => $item->getName(), 
+					"quantity"    => $item->getQtyOrdered(), 
+					"total"       => round($item->getPrice(),2),
 					"entity"      => $entity,
 				);
 			}
+
+			$products[] = $item->getProduct();
 		}
 
 		// Add shipping item
@@ -448,20 +447,17 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve installments checked on plans filter of each item.
      * 
      * @param array $items
-     * @param bool $isQuote
      * 
      * @return array
      */
-    public function getInstallments($items, $isQuote = false)
+    public function getInstallments($items)
     {
         $installments = $inactivePlans = $activePlans = [];
 
         // Get plans from order products
         foreach ($items as $item) {
-            $id = is_string($item) ? $item : ($isQuote ? $item['product_id'] : $item->getProductId());
-
-            $inactivePlans = array_merge($inactivePlans, $this->getInactivePlans($id));
-            $activePlans   = array_merge($activePlans, $this->getActivePlans($id));
+            $inactivePlans = array_merge($inactivePlans, $this->getInactivePlans($item->getId()));
+            $activePlans   = array_merge($activePlans, $this->getActivePlans($item->getId()));
         }
 
         // Add inactive (common) plans to installments

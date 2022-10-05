@@ -81,10 +81,14 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
                 'telephone'            => $shipAdressData['telephone'],
                 'save_in_address_book' => 1
             ],
-            'items'          => $quote->getItemsCollection(),
+            'items'          => [],
             'shipping_total' => $quote->getShippingAddress()->getShippingAmount(),
             'quote'          => $quote
         ];
+
+        foreach ($quote->getAllVisibleItems() as $item)
+            $quoteData['items'][] = $item->getProduct();
+
 
         return $quoteData;
     }
