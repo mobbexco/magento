@@ -47,7 +47,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             $order = Mage::getModel('sales/order');
             $order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), 'disable');
+            $res = $this->formatWebhookData($postData['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), Mage::getStoreConfig('payment/mobbex/multivendor'));
             
             //Execute own hook to extend functionalities
             Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $postData['data'], $order);
@@ -286,7 +286,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     public function isParent($operationType, $multicard, $multivendor)
     {
         if ($operationType === "payment.v2") {
-            if ($multicard || $multivendor != 'disable')
+            if ($multicard || $multivendor)
                 return false;
         }
 
