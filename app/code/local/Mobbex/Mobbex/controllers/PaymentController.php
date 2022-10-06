@@ -157,7 +157,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
         } catch (Exception $e) {
             Mage::helper('mobbex/data')->debug('Exception: ', $e, true);
-            $this->messageManager->addExceptionMessage($e, $e->getMessage());
         }
     }
 
