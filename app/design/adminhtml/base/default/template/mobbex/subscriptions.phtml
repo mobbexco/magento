@@ -7,12 +7,12 @@
 				<h3><?= $this->__('Check if the product is a subscription') ?></h3>
 				<label style="margin-top: 20px;" for="sub_enable"><?= $this->__('Subscription:') ?></label>
 				<select id="sub_enable" name="sub_enable"  onchange="document.querySelector('#subscription_uid').classList.toggle('mbbx-hidden')">
-					<option value="no" <?= $this->subscription['enable'] === 'no' ? 'selected' : '' ?>>No</option>
-					<option value="yes" <?= $this->subscription['enable'] === 'yes' ? 'selected' : '' ?>>Yes</option>
+					<option value="no" <?= $is_subscription === 'no' ? 'selected' : '' ?>>No</option>
+					<option value="yes" <?= $is_subscription === 'yes' ? 'selected' : '' ?>>Yes</option>
 				</select>
-				<div class="<?= $this->subscription['enable'] === 'no' ? 'mbbx-hidden' : '' ?>" id="subscription_uid" style="margin-top: 20px;">
+				<div class="<?= $is_subscription === 'no' ? 'mbbx-hidden' : '' ?>" id="subscription_uid" style="margin-top: 20px;">
 					<label style="margin-right: 10px;" for="sub_uid"><?= $this->__('Subscription UID:') ?></label>
-					<input type="text" name="sub_uid" id="sub_uid" value="<?= $this->subscription['uid'] ?>" >
+					<input type="text" name="sub_uid" id="sub_uid" value="<?= $subscription_uid ?>" >
 				</div>
 			</div>
 		</div>

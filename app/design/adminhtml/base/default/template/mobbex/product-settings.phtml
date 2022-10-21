@@ -1,7 +1,12 @@
-<?php 
-	include 'plans-filter.phtml';
-	include 'subscriptions.phtml';
+<?php
+foreach ($this->settings->catalogSettings as $value)
+	${$value} = $this->settings->getCatalogSetting($this->idProduct, $value);
 
-	$this->mobbex->executeHook('mobbexProductSettings', false, $id);
-	if(Mage::getStoreConfig('payment/mobbex/multivendor'))
-		include 'multivendor.phtml';
+extract(\Mobbex\Repository::getPlansFilterFields($id, $common_plans, $advanced_plans));
+
+include 'plans-filter.phtml';
+include 'subscriptions.phtml';
+if($this->settings->get('multivendor'))
+	include 'multivendor.phtml';
+
+$this->helper->executeHook('mobbexProductSettings', false, $id);

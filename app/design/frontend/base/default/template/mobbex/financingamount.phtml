@@ -3,11 +3,11 @@
     $_order = $this->getOrder();
     $_order_id= $_order->getRealOrderId();
     //Save transaction information
-    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id,[true,true]));
+    $data = Mage::getModel('mobbex/transaction')->getMobbexTransaction($_order_id,[true,true]);
     $newFTotalCost = 0;
     $newTotal = 0;
     if(isset($data['data'])){
-        $amount_paid = $data->payment->total ;
+        $amount_paid = $data['total'] ;
         $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
         $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
         $newFTotalCost =  $amount_paid - ($subTotal + $shipTotal); //Fininancing Total Cost

@@ -2,203 +2,151 @@
 
 class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 {
-	/** @var Mobbex_Mobbex_Helper_Data */
-	public $helper;
+	/** @var Mobbex_Mobbex_Helper_Instantiator */
+	public $instantiator;
 
-	/** @var Mobbex_Mobbex_Model_Customfield */
-	public $fields;
+	/** Module configuration paths */
+	public $settingPaths = [
+		'enabled'                 => 'payment/mobbex/active',
+		'title'                   => 'payment/mobbex/title',
+		'api_key'                 => 'payment/mobbex/api_key',
+		'access_token'            => 'payment/mobbex/access_token',
+		'test'                    => 'payment/mobbex/test_mode',
+		'debug_mode'              => 'payment/mobbex/debug_mode',
+		'embed'                   => 'payment/mobbex/embed',
+		'wallet'                  => 'payment/mobbex/wallet',
+		'multicard'               => 'payment/mobbex/multicard',
+		'multivendor'             => 'payment/mobbex/multivendor',
+		'order_status'            => 'payment/mobbex/order_status',
+		'alllowspecific'          => 'payment/mobbex/alllowspecific',
+		'specificcountry'         => 'payment/mobbex/specificcountry',
+		'sort_order'              => 'payment/mobbex/sort_order',
+		'financing_product'       => 'payment/mobbex/financing_product',
+		'financing_cart'          => 'payment/mobbex/financing_cart',
+		'tax_id'                  => 'payment/mobbex/taxid',
+		'theme_type'              => 'payment/mobbex/theme',
+		'primary_color'           => 'payment/mobbex/primary_color',
+		'background_color'        => 'payment/mobbex/background_color',
+		'button_logo'             => 'payment/mobbex/button_logo',
+		'button_text'             => 'payment/mobbex/button_text',
+		'widget_style'            => 'payment/mobbex/widget_style',
+		'order_status_approved'   => 'payment/mobbex/order_status_approved',
+		'order_status_in_process' => 'payment/mobbex/order_status_in_process',
+		'order_status_cancelled'  => 'payment/mobbex/order_status_cancelled',
+		'order_status_refunded'   => 'payment/mobbex/order_status_refunded',
+	];
+
+	/** Mobbex Catalog Settings */
+	public $catalogSettings = ['common_plans', 'advanced_plans', 'entity', 'is_subscription', 'subscription_uid'];
 
 	public function __construct()
 	{
 		// Init class properties
-		$this->helper = Mage::helper('mobbex/data');
-		$this->fields = Mage::getModel('mobbex/customfield');
-	}
-
-    /**
-	 * Get advanced plans fields data for
-	 * use in product/category config.
-     * 
-     * @param string $id ID of catalog object.
-     * @param string $catalogType Type of catalog object.
-	 * 
-	 * @return array 
-	 */
-	public function getCommonPlanFields($id, $catalogType = 'product')
-	{
-		$result = [];
-
-		// Get sources list from API and current saved configuration from db
-		$sources 	  = $this->helper->getSources();
-		$checkedPlans = $this->fields->getCustomField($id, $catalogType, 'common_plans') ?: [];
-
-		// Create common plan fields
-		foreach ($sources as $source) {
-			$plans = !empty($source['installments']['list']) ? $source['installments']['list'] : [];
-
-			foreach ($plans as $plan) {
-				$planId	= "common_plan_{$plan['reference']}";
-
-				// Create field data
-				$result[$planId] = [
-					'label' => $plan['description'] ?: $plan['name'],
-					'value' => (!in_array($plan['reference'], $checkedPlans) && $this->fields->getCustomField($id, $catalogType, $plan['reference']) !== 'yes'),
-				];
-			}
-		}
-
-		return $result;
+		\Mage::helper('mobbex/instantiator')->setProperties($this, ['customField']);
 	}
 
 	/**
-	 * Get advanced plans fields data for
-	 * use in product/category config.
-     * 
-     * @param string $id ID of catalog object.
-     * @param string $catalogType Type of catalog object.
+	 * Get a config value from db.
 	 * 
-	 * @return array 
+	 * @param string $path Config identifier. @see $this::$configurationPaths
+	 * @param string $store Store code.
+	 * 
+	 * @return mixed
 	 */
-	public function getAdvancedPlanFields($id, $catalogType = 'product')
+	public function get($name)
 	{
-		$result = [];
-
-		// Get sources list from API and current saved configuration from db
-		$sources 	  = $this->helper->getSourcesAdvanced();
-		$checkedPlans = $this->fields->getCustomField($id, $catalogType, 'advanced_plans') ?: [];
-
-		// Create advanced plan fields
-		foreach ($sources as $source) {
-			$plans      = !empty($source['installments']) ? $source['installments'] : [];
-			$reference  = $source['source']['reference'];
-			$sourceName = $source['source']['name'];
-
-			foreach ($plans as $plan) {
-				$planId	= "advanced_plan_{$plan['uid']}";
-
-				// Create field data
-				$result[$reference][$sourceName][$planId] = [
-					'label' => $plan['description'] ?: $plan['name'],
-					'value' => (is_array($checkedPlans) && in_array($plan['uid'], $checkedPlans)),
-				];
-			}
-		}
-
-		return $result;
+		return Mage::getStoreConfig($this->settingPaths[$name]);
 	}
 
-	public function getProductSubscription($id)
+	/**
+	 * Get all module configuration values from db.
+	 * 
+	 * @return array
+	 */
+	public function getAll()
 	{
-		$subscription = [
-			'enable' => $this->fields->getCustomField($id, 'product', 'subscription_enable') ?: 'no',
-			'uid'    => $this->fields->getCustomField($id, 'product', 'subscription_uid') ?: ''
+		$settings = [];
+		foreach ($this->settingPaths as $name => $value)
+			$settings[$name] = $this->get($name);
+
+		return $settings;
+	}
+
+	/** CATALOG SETTINGS */
+
+	/**
+	 * Retrieve the given product/category option.
+	 * 
+	 * @param int|string $id
+	 * @param string $object
+	 * @param string $catalogType
+	 * 
+	 * @return array|string
+	 */
+	public function getCatalogSetting($id, $object, $catalogType = 'product')
+	{
+		if (strpos($object, '_plans'))
+			return unserialize($this->customField->getCustomField($id, $catalogType, $object)) ?: [];
+
+		return $this->customField->getCustomField($id, $catalogType, $object) ?: '';
+	}
+
+	/**
+	 * Save mobbex configuration for a given product or category.
+	 * 
+	 * @param int|string $id
+	 * @param string $catalogType
+	 */
+	public function saveCatalogSettings($id, $catalogType = 'product')
+	{
+		$configs = [
+			'entity'         => isset($_POST['entity']) ? $_POST['entity'] : '',
+			'common_plans'   => [],
+			'advanced_plans' => []
 		];
 
-		return $subscription;
-	}
-
-	/**
-	 * Get entity an entity assigned to a product or category.
-	 * 
-	 * @param mixed $id 
-	 * @param string $catalogType 
-	 * 
-	 * @return string 
-	 */
-	public function getEntity($id, $catalogType = 'product')
-	{
-		return $this->fields->getCustomField($id, $catalogType, 'entity') ?: '';
-	}
-
-	/**
-	 * Reiceives a product object & return the entity asigned to
-	 * if product didnt have an entity assigned, return the entity of his category.
-	 * 
-	 * @param object $product
-	 * 
-	 * @return string $entity 
-	 */
-	public function getProductEntity($product)
-	{
-        if($this->fields->getCustomField($product->getProductId(), 'product', 'entity'))
-            return $this->fields->getCustomField($product->getProductId(), 'product', 'entity');
-
-        $categories = $product->getCategoryIds();
-        if($categories)
-            return $this->fields->getCustomField($categories[0], 'category', 'entity'); 
-
-        return '';
-	}
-
-    /**
-     * Get the merchants from item list.
-     * @param array
-     * @return array
-     */
-    public function getMerchants($items)
-    {
-        $merchants = [];
-
-        //Get the merchants from items list
-        foreach ($items as $item) {
-            if (!empty($item['entity']))
-                $merchants[] = ['uid' => $item['entity']];
-        }
-
-        return $merchants;
-	}
-
-	/**
-	 * Save plan filter fields of product/category.
-	 * 
-	 * @param mixed $id 
-	 * @param string $catalogType 
-	 */
-	public function savePlanFields($id, $catalogType = 'product')
-	{
-		$common_plans = $advanced_plans = [];
-
-		// Remove values saved with previus method
-		foreach (Mobbex_Mobbex_Helper_Data::$ahora as $plan) {
-			$planId = $this->fields->getCustomField($id, $catalogType, $plan, 'customfield_id');
-
-			if ($planId) {
-				$this->fields->load($planId);
-				$this->fields->delete();
-			}
+		if($catalogType === 'product'){
+			$configs["is_subscription"] = isset($_POST['sub_enable']) ? $_POST['sub_enable'] : '';
+			$configs["subscription_uid"]    = isset($_POST['sub_uid']) ? $_POST['sub_uid'] : '';
 		}
 
-		// Get posted values
+		//Get Plans
 		foreach ($_POST as $key => $value) {
 			if (strpos($key, 'common_plan_') !== false && $value === 'no') {
 				$uid = explode('common_plan_', $key)[1];
-				$common_plans[] = $uid;
-			} else if (strpos($key, 'advanced_plan_') !== false && $value === 'on'){
+				$configs['common_plans'][] = $uid;
+			} else if (strpos($key, 'advanced_plan_') !== false && $value === 'on') {
 				$uid = explode('advanced_plan_', $key)[1];
-				$advanced_plans[] = $uid;
+				$configs['advanced_plans'][] = $uid;
 			}
 		}
 
-		// Save data
-		$this->fields->saveCustomField($id, $catalogType, 'common_plans', $common_plans);
-		$this->fields->saveCustomField($id, $catalogType, 'advanced_plans', $advanced_plans);
+		foreach (['advanced_plans', 'common_plans'] as $plan)
+			$configs[$plan] = serialize($configs[$plan]);
 
-		return true;
+		foreach ($configs as $key => $value)
+			$this->customField->saveCustomField($id, 'product', $key, $value);
 	}
 
-	public function saveProductSubscription($id)
+	/**
+	 * Get active plans for a given products.
+	 * @param array $products
+	 * @return array $array
+	 */
+	public function getProductPlans($products)
 	{
-		$this->fields->saveCustomField($id, 'product', 'subscription_enable', isset($_POST['sub_enable']) ? $_POST['sub_enable'] : '');
-		$this->fields->saveCustomField($id, 'product', 'subscription_uid', isset($_POST['sub_uid']) ? $_POST['sub_uid'] : '');
+		$common_plans = $advanced_plans = [];
 
-		return true;
+		foreach ($products as $product) {
+			foreach (['common_plans', 'advanced_plans'] as $value) {
+				//Get product active plans
+				${$value} = array_merge($this->getCatalogSetting($product->getId(), $value), ${$value});
+				//Get product category active plans
+				foreach ($product->getCategoryIds() as $categoryId)
+					${$value} = array_unique(array_merge(${$value}, $this->getCatalogSetting($categoryId, $value, 'category')));
+			}
+		}
+
+		return compact('common_plans', 'advanced_plans');
 	}
-
-	public function saveEntity($id, $catalogType = 'product')
-	{
-		$this->fields->saveCustomField($id, $catalogType, 'entity', isset($_POST['entity']) ? $_POST['entity'] : '');
-
-		return true;
-	}
-
 }

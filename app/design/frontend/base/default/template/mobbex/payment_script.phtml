@@ -1,8 +1,9 @@
 <?php
+$settings   = Mage::helper('mobbex/settings');
 $order_url  = Mage::getUrl('mobbex/payment/getCheckout', array('_secure' => true));
 $script_url = $this->getSkinUrl('js/mobbex_payment_methods.js');
-$embed      = Mage::getStoreConfig('payment/mobbex/embed');
-$wallet     = Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn();
+$embed      = $settings->get('embed');
+$wallet     = $settings->get('wallet') && Mage::getSingleton('customer/session')->isLoggedIn();
 ?>
 
 <form id="mbbx_redirect_form" name="mobbexform" method="get"></form>
@@ -10,7 +11,7 @@ $wallet     = Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleto
 
 <script type="text/javascript">
 	var orderUrl = '<?= $order_url ?>';
-	var embed    = <?= $embed ?>;
+	var embed    = <?= (int) $embed ?>;
 	var wallet   = <?= (int) $wallet ?>;
 </script>
 

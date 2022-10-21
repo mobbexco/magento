@@ -5,7 +5,8 @@
         parent::_construct();
         $this->setTemplate('mobbex/info.phtml');
 
-        $this->mobbexTransaction = Mage::getModel('mobbex/transaction');
+        // Init class properties
+        \Mage::helper('mobbex/instantiator')->setProperties($this, ['mobbexTransaction']);
     }
 
     /**
@@ -17,18 +18,21 @@
     {
         if(!$cards)
             return false;
-        $filter = [];
-        $data = [];
-        foreach ($cards as $key => $card) {
+
+        $filter = $data = [];
+
+        foreach ($cards as $key => $card)
             $filter['_' . $key] = $card['payment_id'];
-        }
+
         $filter = array_unique($filter);
+
         foreach ($cards as $key => $card) {
             $pos = '_' . $key;
             if (isset($filter[$pos])) {
                 $data[] = $card;
             }
         }
+
         return $data;
     }
 }

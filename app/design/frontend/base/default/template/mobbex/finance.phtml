@@ -1,5 +1,5 @@
 <?php if($this->enable): ?>
-<div id="mbbxProductModal" class="mobbex-plans-modal <?= $this->styles['theme'] ?>">
+<div id="mbbxProductModal" class="mobbex-plans-modal <?= $this->styles['theme_type'] ?>">
         <div id="mbbxProductModalContent" class="">
             <div id="mbbxProductModalHeader">
                 <label id="mobbex_select_title" for="mbbx-method-select">Seleccione un método de pago</label>
@@ -20,7 +20,7 @@
                     <?php if (!empty($source['source']['name'])) : ?>
                         <div id="<?= $source['source']['reference'] ?>" class="mobbexSource">
                             <p class="mobbexPaymentMethod">
-                                <img src="https://res.mobbex.com/images/sources/<?= $source['source']['reference'] ?>.jpg"><?= $source['source']['name'] ?>
+                                <img src="https://res.mobbex.com/images/sources/jpg/<?= $source['source']['reference'] ?>.jpg"><?= $source['source']['name'] ?>
                             </p>
                             <?php if (!empty($source['installments']['list'])) : ?>
                                 <table class="installmentsTable">
@@ -44,17 +44,17 @@
     </div>
 
     <button type="button" id="mbbxProductBtn" onclick="toggleFinancialWidget(event)">
-        <?php if($this->styles['logo']): ?>
-        <img src="<?= $this->styles['logo'] ?>" alt="" width="40" height="40" style="margin-right: 10px; border-radius: 40px;">
+        <?php if($this->styles['button_logo']): ?>
+        <img src="<?= $this->styles['button_logo'] ?>" alt="" width="40" height="40" style="margin-right: 10px; border-radius: 40px;">
         <?php endif; ?>
-        <?= $this->styles['text'] ?>
+        <?= $this->styles['button_text'] ?>
     </button>
 
     
     <style>
         
         /* Custom styles */
-        <?= $this->styles['css'] ?>
+        <?= $this->styles['widget_style'] ?>
         
         /* CLOSE-OPEN BUTTONS */
         #mbbxProductBtn {

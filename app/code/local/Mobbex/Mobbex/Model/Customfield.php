@@ -20,20 +20,13 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
      */
     public function getCustomField($row_id, $object, $field_name, $searched_column = 'data')
     {
-
         $collection = $this->getCollection()
             ->addFieldToFilter('row_id', $row_id)
             ->addFieldToFilter('object', $object)
             ->addFieldToFilter('field_name', $field_name)
             ->getColumnValues($searched_column);
 
-        foreach ($collection as $custom_field) {
-        }
-
-        if ($searched_column == 'data' && is_string($custom_field) && is_array(json_decode($custom_field)))
-            $custom_field = json_decode($custom_field);
-
-        return $custom_field;
+        return !empty($collection[0]) ? $collection[0] : false;
     }
 
     /**
