@@ -7,6 +7,20 @@
 
         // Init class properties
         \Mage::helper('mobbex/instantiator')->setProperties($this, ['mobbexTransaction']);
+
+    }
+
+    /**
+     * Return the payment data from mobbex transaction model.
+     * @return array $data
+     */
+    public function getPaymentData()
+    {
+        $data           = $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true, true]);
+        $data['cards']  = $this->filterCards($data && $data['operation_type'] == 'payment.multiple-sources' ? $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true, false]) : false);
+        $data['coupon'] = isset($data['entity_uid']) && isset($data['payment_id']) ? "https://mobbex.com/console/" . $data['entity_uid'] . "/operations/?oid=" . $data['payment_id'] : '';
+
+        return $data;
     }
 
     /**
