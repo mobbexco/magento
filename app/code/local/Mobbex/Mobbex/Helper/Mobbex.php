@@ -262,6 +262,10 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 	}
 
 	public function getModuleUrl($action, $queryParams) {
+
+		if ($this->settings->get('debug_mode'))
+			$queryParams['XDEBUG_SESSION_START'] = 'PHPSTORM';
+
 		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true, '_query' => $queryParams)); 
 	}
 
