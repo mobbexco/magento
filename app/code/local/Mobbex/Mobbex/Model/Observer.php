@@ -122,8 +122,8 @@ class Mobbex_Mobbex_Model_Observer
 			]) ?: [];
 
 			return !empty($result);
-		} catch (\Mobbex\Exception $e) {
-			$this->logger->debug('error', $e->getMessage(), $e->data);
+		} catch (\Exception $e) {
+			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
 		}
 	}
 }

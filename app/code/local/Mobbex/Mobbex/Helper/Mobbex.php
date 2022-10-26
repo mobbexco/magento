@@ -173,8 +173,8 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			return $mobbexCheckout->response;
 
-		} catch (\Mobbex\Exception $e) {
-			$this->logger->debug('error', $e->getMessage(), $e->data);
+		} catch (\Exception $e) {
+			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
 		}
 
     }

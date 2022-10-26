@@ -12,33 +12,39 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     // The response action is triggered when your gateway sends back a response after processing the customer's payment
     public function responseAction()
     {
-        $orderId = $this->getRequest()->getParam('orderId');
-        $status  = $this->getRequest()->getParam('status');
+        try {
+            
+            //debug
+            $this->logger->debug('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
+            //get params
+            extract($this->getRequest()->getParams());
+            //load order
+            $this->_order->loadByIncrementId($orderId);
 
-        $this->_order->loadByIncrementId($orderId);
+            // Success or Waiting: Results must be received with Webhook
+            if ($status > 1 && $status < 400) {
+                $this->_redirect('checkout/onepage/success', array('_secure' => true));
+            } else {
+                // Restore last order
+                if ($this->_checkoutSession->getLastRealOrderId()) {
 
-        //debug
-        $this->logger->debug('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
+                    if ($lastQuoteId = $this->_checkoutSession->getLastQuoteId()) {
+                        $quote = $this->_quote->load($lastQuoteId);
+                        $quote->setIsActive(true)->save();
+                    }
 
-        // Success or Waiting: Results must be received with Webhook
-        if ($status > 1 && $status < 400) {
-            $this->_redirect('checkout/onepage/success', array('_secure' => true));
-        } else {
-            // Restore last order
-            if ($this->_checkoutSession->getLastRealOrderId()) {
-                
-                if ($lastQuoteId = $this->_checkoutSession->getLastQuoteId()) {
-                    $quote = $this->_quote->load($lastQuoteId);
-                    $quote->setIsActive(true)->save();
+                    // Send error message
+                    $this->logger->debug('error', 'The payment has failed');
+
+                    //Redirect to cart
+                    $this->_redirect('checkout/cart', array('_secure' => true));
                 }
-
-                // Send error message
-                $this->logger->debug('error', 'The payment has failed');
-
-                //Redirect to cart
-                $this->_redirect('checkout/cart', array('_secure' => true));
             }
+
+        } catch (\Exception $e) {
+            $this->logger->debug('error', $e->getMessage);
         }
+
     }
 
     public function notificationAction()
@@ -203,8 +209,8 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 Mage::helper('core')->jsonEncode($mobbex_data)
             );
             
-        } catch (\Mobbex\Exception $e) {
-            $this->logger->debug('error', $e->getMessage(), $e->data);
+        } catch (\Exception $e) {
+            $this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
             return false;
         }
 

@@ -22,19 +22,19 @@ class Mobbex_Mobbex_Helper_Instantiator extends Mage_Core_Helper_Abstract
     ];
 
     /**
-     * Create an instance of slected classes & set them as properties of the current class.
+     * Create an instance of slected classes & set them as propertys of the current class.
      * @param Object $object
      * @param array $properties
      */
     public function setProperties($object, $properties)
     {
-        foreach ($properties as $propertie) {
+        foreach ($properties as $property) {
             foreach ($this->type as $key => $value) {
-                if (in_array($propertie, $value))
+                if (in_array($property, $value))
                     $method = $key;
             }
-            $object->$propertie = Mage::$method($this->classes[$propertie]);
-            if ($propertie === 'sdk')
+            $object->$property = Mage::$method($this->classes[$property]);
+            if ($property === 'sdk')
                 $object->sdk->init();
         }
     }
