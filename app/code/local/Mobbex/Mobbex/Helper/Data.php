@@ -281,34 +281,29 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
 	/**
-
 	 * Get Addresses data for Mobebx Checkout.
-
+	 * 
 	 * @param array $addressesData
-
+	 * 
 	 * @return array $addresses
-
 	 */
-
 	public function getAddresses($addressesData)
-
 	{
-
 		$addresses = [];
 
 		foreach ($addressesData as $address) {
-
 			$region = Mage::getModel('directory/region')->load($address['region_id'])->getData();
+            $street = trim(!empty($address['street']) ? $address['street'] : '');
 
 			$addresses[] = [
-				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
-				'country' => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
-				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
-				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
-				'streetNotes' => '',
-				'zipCode' => isset($address["postcode"]) ? $address["postcode"] : '',
-				'city' => isset($address["city"]) ? $address["city"] : '',
-				'state'  => (isset($address["country_id"]) && isset($region['code'])) ? str_replace($address["country_id"] . '-', '', $region['code']) : ''
+				'type'         => isset($address["address_type"]) ? $address["address_type"] : '',
+				'country'      => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
+				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', $street)),
+				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', $street), '', $street),
+				'streetNotes'  => '',
+				'zipCode'      => isset($address["postcode"]) ? $address["postcode"] : '',
+				'city'         => isset($address["city"]) ? $address["city"] : '',
+				'state'        => (isset($address["country_id"]) && isset($region['code'])) ? str_replace((string) $address["country_id"] . '-', '', (string) $region['code']) : ''
 			];
 		}
 
