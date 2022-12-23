@@ -17,6 +17,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		'wallet'                  => 'payment/mobbex/wallet',
 		'multicard'               => 'payment/mobbex/multicard',
 		'multivendor'             => 'payment/mobbex/multivendor',
+		'payment_mode'            => 'payment/mobbex/payment_mode',
 		'order_status'            => 'payment/mobbex/order_status',
 		'alllowspecific'          => 'payment/mobbex/alllowspecific',
 		'specificcountry'         => 'payment/mobbex/specificcountry',
