@@ -81,7 +81,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		);
 
 		//debug data
-		$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+		$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 		return $mobbexCheckout->response;
 	}
@@ -169,12 +169,12 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 			);
 
 			//debug data
-			$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+			$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 			return $mobbexCheckout->response;
 
 		} catch (\Exception $e) {
-			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+			$this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
 		}
 
     }
@@ -307,7 +307,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
             return $value;
         } catch (\Exception $e) {
-            $this->logger->debug('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
+            $this->logger->log('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
         }
     }
 } 

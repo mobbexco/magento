@@ -15,7 +15,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         try {
             
             //debug
-            $this->logger->debug('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
+            $this->logger->log('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
             //get params
             extract($this->getRequest()->getParams());
             //load order
@@ -34,7 +34,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     }
 
                     // Send error message
-                    $this->logger->debug('error', 'The payment has failed');
+                    $this->logger->log('error', 'The payment has failed');
 
                     //Redirect to cart
                     $this->_redirect('checkout/cart', array('_secure' => true));
@@ -42,7 +42,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage);
+            $this->logger->log('error', $e->getMessage);
         }
 
     }
@@ -78,7 +78,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
             //Debug the response data
-            $this->logger->debug("debug", "Payment Controller > notificationAction | Processing Webhook Data: ", compact('orderId', 'res'));
+            $this->logger->log("debug", "Payment Controller > notificationAction | Processing Webhook Data: ", compact('orderId', 'res'));
 
             if (isset($orderId) && !empty($status)) {
 
@@ -92,7 +92,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $user_name  = $res['user']['name'];
                 $user_email = $res['user']['email'];
 
-                $this->logger->debug("debug", "Payment Controller > notificationAction | Saving state for order: " . $this->_order->getId());
+                $this->logger->log("debug", "Payment Controller > notificationAction | Saving state for order: " . $this->_order->getId());
 
                 $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
                 $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
@@ -155,7 +155,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $this->_order->cancel()->setState($this->settings->get('order_status_cancelled'), true, $message);
                 }
 
-                $this->logger->debug('debug', 'Payment Controller > notificationAction | Save Order: ' . $this->_order->getId());
+                $this->logger->log('debug', 'Payment Controller > notificationAction | Save Order: ' . $this->_order->getId());
 
                 // Save the order
                 $this->_order->save();
@@ -163,7 +163,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $this->_checkoutSession->unsQuoteId();
             }
         } catch (Exception $e) {
-            $this->logger->debug('Error', 'Payment Controller > notificationAction | Exception: ', $e->getMessage());
+            $this->logger->log('Error', 'Payment Controller > notificationAction | Exception: ', $e->getMessage());
         }
     }
 
@@ -178,7 +178,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
         }
 
-        $this->logger->debug('debug', 'Payment Controller > cancelAction | Order Cancelled', ['order_id' => $this->_order->getId()]);
+        $this->logger->log('debug', 'Payment Controller > cancelAction | Order Cancelled', ['order_id' => $this->_order->getId()]);
 
         Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => true));
     }
@@ -210,7 +210,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             );
             
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+            $this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
             return false;
         }
 
