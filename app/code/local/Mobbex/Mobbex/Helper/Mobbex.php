@@ -234,7 +234,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			$addresses[] = [
 				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
-				'country' => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
+				'country' => isset($address["country_id"]) ? \Mobbex\Repository::convertCountryCode($address["country_id"]) : '',
 				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
 				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
 				'streetNotes' => '',
