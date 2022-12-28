@@ -564,7 +564,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	}
 
 	/**
-     * Retrieve active advanced plans from a product and its categories.
+     * Retrieve active common plans from a product and its categories.
      * 
      * @param int $productId
      * 
@@ -573,10 +573,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     public function getInactivePlans($productId)
     {
         $product       = Mage::getModel('catalog/product')->load($productId);
-		$inactivePlans = $this->fields->getCustomField($productId, 'product', 'common_plans') ?: [];
+		$inactivePlans = json_decode($this->fields->getCustomField($productId, 'product', 'common_plans'), true) ?: [];
 
         foreach ($product->getCategoryIds() as $categoryId)
-            $inactivePlans = array_merge($inactivePlans, $this->fields->getCustomField($categoryId, 'category', 'common_plans') ?: []);
+            $inactivePlans = array_merge($inactivePlans, json_decode($this->fields->getCustomField($categoryId, 'category', 'common_plans'), true) ?: []);
 
         // Remove duplicated and return
         return array_unique($inactivePlans);
@@ -592,10 +592,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
     public function getActivePlans($productId)
     {
         $product     = Mage::getModel('catalog/product')->load($productId);
-        $activePlans = $this->fields->getCustomField($productId, 'product', 'advanced_plans') ?: [];
+        $activePlans = json_decode($this->fields->getCustomField($productId, 'product', 'advanced_plans'), true) ?: [];
 	
         foreach ($product->getCategoryIds() as $categoryId)
-            $activePlans = array_merge($activePlans, $this->fields->getCustomField($categoryId, 'category', 'advanced_plans') ?: []);
+            $activePlans = array_merge($activePlans, json_decode($this->fields->getCustomField($categoryId, 'category', 'advanced_plans'), true) ?: []);
 
         // Remove duplicated and return
         return array_unique($activePlans);

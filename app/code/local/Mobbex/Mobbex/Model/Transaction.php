@@ -8,10 +8,10 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get custom transaction data, if $parent is false return all the data that match with $order_id
+     * Get custom transaction data
      * 
      * @param int $order_id
-     * @param bool $parent
+     * @param bool $filter
      * 
      * @return array
      */

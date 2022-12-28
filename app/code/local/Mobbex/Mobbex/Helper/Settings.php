@@ -16,7 +16,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	}
 
     /**
-	 * Get advanced plans fields data for
+	 * Get common plans fields data for
 	 * use in product/category config.
      * 
      * @param string $id ID of catalog object.
@@ -30,7 +30,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 
 		// Get sources list from API and current saved configuration from db
 		$sources 	  = $this->helper->getSources();
-		$checkedPlans = $this->fields->getCustomField($id, $catalogType, 'common_plans') ?: [];
+		$checkedPlans = json_decode($this->fields->getCustomField($id, $catalogType, 'common_plans'), true) ?: [];
 
 		// Create common plan fields
 		foreach ($sources as $source) {
@@ -65,7 +65,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 
 		// Get sources list from API and current saved configuration from db
 		$sources 	  = $this->helper->getSourcesAdvanced();
-		$checkedPlans = $this->fields->getCustomField($id, $catalogType, 'advanced_plans') ?: [];
+		$checkedPlans = json_decode($this->fields->getCustomField($id, $catalogType, 'advanced_plans'), true) ?: [];
 
 		// Create advanced plan fields
 		foreach ($sources as $source) {

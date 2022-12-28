@@ -8,7 +8,6 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
     {
         parent::_construct();
 
-        $this->setTemplate('mobbex/product.phtml');
         $this->settings        = Mage::helper('mobbex/settings');
         $this->mobbex          = $this->settings->helper;
         $this->checkoutSession = Mage::getSingleton('checkout/session');
