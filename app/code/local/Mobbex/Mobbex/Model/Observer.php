@@ -94,7 +94,7 @@ class Mobbex_Mobbex_Model_Observer
 			$creditmemo = $observer->getEvent()->getCreditmemo();
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
 			$orderId = $order->getData('increment_id');
-			$data = Mage::getModel('mobbex/transaction')->getMobbexTransaction($orderId,[true,true]);//get transaction data
+			$data = Mage::getModel('mobbex/transaction')->getMobbexTransaction(['order_id' => $orderId, 'parent' => 1]);//get transaction data
 			if(isset($data['data'])){
 				$payment = $order->getPayment();
 				$transactionId = $payment->getData('last_trans_id');
