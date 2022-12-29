@@ -22,7 +22,7 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
         foreach ($filter as $key => $value)
             $collection->addFieldToFilter($key, $value);
         //Get model data
-        $data = isset($filter['parent']) && $filter['parent'] ? $collection->getData()[0] : $collection->getData();
+        $data = isset($filter['parent']) && isset($collection->getData()[0]) && $filter['parent'] ? $collection->getData()[0] : $collection->getData();
 
         return !empty($data) ? $data : false;
     }
