@@ -3,7 +3,6 @@
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('mobbex/info.phtml');
 
         $this->mobbexTransaction = Mage::getModel('mobbex/transaction');
     }
