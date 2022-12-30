@@ -1,6 +1,6 @@
 <?php
-    $mobbexData = $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true,true]);
-    $cards      = $this->filterCards($mobbexData && $mobbexData['operation_type'] == 'payment.multiple-sources' ? $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true,false]) : false);
+    $mobbexData = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId(), 'parent' => 1]);
+    $cards      = $this->filterCards($mobbexData && $mobbexData['operation_type'] == 'payment.multiple-sources' ? $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId()]) : false);
     $coupon     = isset($mobbexData['entity_uid']) && isset($mobbexData['payment_id']) ? "https://mobbex.com/console/" . $mobbexData['entity_uid'] . "/operations/?oid=" . $mobbexData['payment_id'] : '';
 ?>
 
