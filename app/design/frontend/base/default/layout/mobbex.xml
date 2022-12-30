@@ -1,13 +1,23 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <checkout_onepage_index>
-        <reference name="head">
+        <reference name="content">
             <block type="Mage_Core_Block_Template" name="payment_script" template="mobbex/payment_script.phtml"/>
         </reference>
         <reference name='checkout.onepage.billing'>
             <block type='checkout/onepage_billing' name='form.additional.info' template='mobbex/billing_fields.phtml'></block>
         </reference>
     </checkout_onepage_index>
+    <onestepcheckout_index_index>
+        <reference name="content">
+            <block type="Mage_Core_Block_Template" name="payment_script" template="mobbex/payment_script.phtml"/>
+        </reference>
+    </onestepcheckout_index_index>
+    <firecheckout_index_index>
+        <reference name="content">
+            <block type="Mage_Core_Block_Template" name="payment_script" template="mobbex/payment_script.phtml"/>
+        </reference>
+    </firecheckout_index_index>
     <checkout_onepage_paymentmethod>
         <reference name="root">
             <block type="mobbex/payment_methods" name="payment.method.mobbex" template="mobbex/methods.phtml"/>
