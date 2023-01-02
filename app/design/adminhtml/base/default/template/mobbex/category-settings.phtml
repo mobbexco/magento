@@ -3,4 +3,4 @@
 	if(Mage::getStoreConfig('payment/mobbex/multivendor'))
 		include 'multivendor.phtml';
 
-	$this->mobbex->executeHook('mobbexCategorySettings', false, $id);
+	$this->mobbex->executeHook('mobbexCategorySettings', false, $this->id);
