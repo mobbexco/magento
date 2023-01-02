@@ -2,6 +2,6 @@
 	include 'plans-filter.phtml';
 	include 'subscriptions.phtml';
 
-	$this->mobbex->executeHook('mobbexProductSettings', false, $id);
+	$this->mobbex->executeHook('mobbexProductSettings', false, $this->id);
 	if(Mage::getStoreConfig('payment/mobbex/multivendor'))
 		include 'multivendor.phtml';
