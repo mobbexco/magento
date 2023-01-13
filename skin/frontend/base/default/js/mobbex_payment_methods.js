@@ -1,18 +1,37 @@
 window.addEventListener('load', function () {
-    // Catch checkout section change
-    Checkout.prototype.gotoSection = Checkout.prototype.gotoSection.wrap(
-        function (parentMethod, section, reloadProgressBlock) {
-            parentMethod(section, reloadProgressBlock, reloadProgressBlock);
-
-            // If it's review section and mobbex was selected
-            if (section == 'review' && getFormData()["payment[method]"] == "mobbex") {
-                // Add event to init embed checkout
-                document.getElementById('review-buttons-container').children[0].onclick = function() {
-                    formRequest();
+        // Catch checkout section change
+        if((typeof Checkout !== 'undefined')){
+            Checkout.prototype.gotoSection = Checkout.prototype.gotoSection.wrap(
+                function (parentMethod, section, reloadProgressBlock) {
+                    parentMethod(section, reloadProgressBlock, reloadProgressBlock);
+        
+                    // If it's review section and mobbex was selected
+                    if (section == 'review' && getFormData()["payment[method]"] == "mobbex") {
+                        // Add event to init embed checkout
+                        document.getElementById('review-buttons-container').children[0].onclick = function() {
+                            formRequest();
+                        }
+                    }
                 }
-            }
+            );
         }
-    );
+
+        //Firecheckout integration
+        document.observe('firecheckout:saveBefore', function (e) {
+
+            checkout.setLoadWaiting(true)
+
+            if (e.memo.forceSave) {
+                return;
+            }
+            
+            if (payment.getCurrentMethod() === 'mobbex') {
+                e.memo.stopFurtherProcessing = true;
+                firecheckoutOrderSave();
+                return false;
+            }   
+
+        });
 });
 
 /** PAYMENT METHODS SUBDIVISION EVENTS */
@@ -163,4 +182,20 @@ function formRequest() {
             checkout.setLoadWaiting(false)
         }
     })
+}
+
+/**
+ * Save the order in case that Firecheckout Plugin is active.
+ */
+function firecheckoutOrderSave() {
+    new Ajax.Request(checkout.urls.save, {
+        method:'post',
+        parameters: checkout.getFormData(),
+        onSuccess: function(response){
+            processOrder();
+        },
+        onFailure: function(response){
+            console.log(response)
+        }
+    });
 }
