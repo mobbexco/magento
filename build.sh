@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VER="2.0.1"
+VER="2.0.2"
 
 # Create 1.6 version
 MAGE_V="1.6-1.9"
