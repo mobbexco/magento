@@ -1,24 +1,17 @@
 <?php
-    $_order = $this->getOrder();
-    $_order_id = $_order->getRealOrderId();
-    //Save transaction information
-    $data = Mage::getModel('mobbex/transaction')->getMobbexTransaction(['order_id' => $_order_id, 'parent' => 1]);
-    $newFTotalCost = 0;
-    $newTotal = 0;
-    if(isset($data['data'])){
-        $amount_paid = $data->payment->total ;
-        $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
-        $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
-        $newFTotalCost =  $amount_paid - ($subTotal + $shipTotal); //Fininancing Total Cost
-        $newTotal = $newFTotalCost + $subTotal + $shipTotal; // New total
-    }
-    
+
+// Get transaction information
+    $order = $this->getOrder();
+    $trx   = Mage::getModel('mobbex/transaction')->getMobbexTransaction(['order_id' => $order->getRealOrderId(), 'parent' => 1]);
+
+    if (empty($trx['total']))
+        return;
 ?>
 
 <script>    
     
-    var financingCost = <?php echo $newFTotalCost; ?>;
-    var newTotal = <?php echo $newTotal; ?>;
+    var financingCost = <?= $trx['total'] - $order->getGrandTotal() ?>;
+    var newTotal = <?= $trx['total'] ?>;
     // Find a <table> element by class
     var tableTotal = document.getElementsByClassName("order-totals")[0].getElementsByTagName("tfoot");
 

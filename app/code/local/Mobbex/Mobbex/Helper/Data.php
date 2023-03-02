@@ -1,7 +1,7 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '2.0.1';
+    const VERSION = '2.0.2';
 
 	/**
 	* All 'ahora' plan keys.
@@ -91,6 +91,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			'merchants'    => Mage::helper('mobbex/settings')->getMerchants($items),
 			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
 			'addresses'    => $this->getAddresses([$order->getBillingAddress()->getData(), $order->getShippingAddress()->getData()]),
+			'webhooksType' => 'all',
 			'options'	   => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
@@ -239,6 +240,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             "multicard"    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
 			'addresses'    => $quoteData['addresses'],
+			'webhooksType' => 'none',
             "options"      => [
 				'embed'    => (Mage::getStoreConfig('payment/mobbex/embed') == true),
 				'domain'   => str_replace('www.', '', parse_url(Mage::getBaseUrl(), PHP_URL_HOST)),
