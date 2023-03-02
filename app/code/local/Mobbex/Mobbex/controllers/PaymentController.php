@@ -67,6 +67,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
+            // Exit if it is a expired operation and the order has already been paid
+            if ($status == 401 && $order->getTotalPaid() > 0)
+                return;
+
             //Debug the response data
             Mage::helper('mobbex/data')->debug("Processing Webhook Data", compact('orderId', 'res'));
 
@@ -137,6 +141,17 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                     // Save payment, transaction and order
                     $payment->save();
+
+                    // Create invoice if not exists
+                    if (!$order->hasInvoices()) {
+                        $invoice = $order->prepareInvoice()
+                            ->register()
+                            ->capture()
+                            ->addComment($message, 1, 1)
+                            ->save();
+    
+                        $order->addRelatedObject($invoice);
+                    }
 
                     // Send notifications to the user
                     $order->sendNewOrderEmail();
