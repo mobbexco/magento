@@ -84,7 +84,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             'items'		   => $items,
 			'total' 	   => round($order->getGrandTotal(), 2),
 			'customer' 	   => $customer,
-			'timeout' 	   => 5,
+            'timeout'      => Mage::getStoreConfig('payment/mobbex/timeout') ? (int)Mage::getStoreConfig('payment/mobbex/timeout') : 5,
 			'installments' => $this->getInstallments($products),
 			'multicard'    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			'multivendor'  => Mage::getStoreConfig('payment/mobbex/multivendor'),
@@ -235,7 +235,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
             'items'        => $items,
             'total'        => (float) $orderAmount,
             'customer'     => $customer,
-            'timeout'      => 5,
+            'timeout'      => Mage::getStoreConfig('payment/mobbex/timeout') ? (int)Mage::getStoreConfig('payment/mobbex/timeout') : 5,
             'installments' => $this->getInstallments($quoteData['items']),
             "multicard"    => (Mage::getStoreConfig('payment/mobbex/multicard') == true),
 			"wallet"       => ((bool) Mage::getStoreConfig('payment/mobbex/wallet') && Mage::getSingleton('customer/session')->isLoggedIn()),
@@ -255,7 +255,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
                 ],
             ],
         ];
-
+		
 		curl_setopt_array($curl, [
             CURLOPT_URL => "https://api.mobbex.com/p/checkout",
             CURLOPT_RETURNTRANSFER => true,
