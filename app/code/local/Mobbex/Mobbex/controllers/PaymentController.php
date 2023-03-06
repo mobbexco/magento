@@ -37,7 +37,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
     public function notificationAction()
     {
-
         try {
             // Get Data
             $postData = isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json' ? json_decode(file_get_contents('php://input'), true) : $this->getRequest()->getPost();
@@ -47,8 +46,8 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             $order = Mage::getModel('sales/order');
             $order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), Mage::getStoreConfig('payment/mobbex/multivendor'));
-            
+            $res = Mage::getModel('mobbex/transaction')->formatWebhookData($postData['data'], $orderId, (Mage::getStoreConfig('payment/mobbex/multicard') == true), Mage::getStoreConfig('payment/mobbex/multivendor'));
+
             //Execute own hook to extend functionalities
             Mage::helper('mobbex/data')->executeHook('mobbexWebhookReceived', false, $postData['data'], $order);
 
@@ -234,68 +233,5 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         }
 
         return $name;
-    }
-
-    /**
-     * Format the webhook data in an array.
-     * 
-     * @param array $webhook_data
-     * @param int $order_id
-     * @param bool $multicard
-     * @param bool $multivendor
-     * @return array $data
-     * 
-     */
-    public function formatWebhookData($webhookData, $orderId, $multicard, $multivendor)
-    {
-        $data = [
-            'order_id'           => $orderId,
-            'parent'             => isset($webhookData['payment']['id']) ? $this->isParent($webhookData['payment']['id']) : false,
-            'operation_type'     => isset($webhookData['payment']['operation']['type']) ? $webhookData['payment']['operation']['type'] : '',
-            'payment_id'         => isset($webhookData['payment']['id']) ? $webhookData['payment']['id'] : '',
-            'description'        => isset($webhookData['payment']['description']) ? $webhookData['payment']['description'] : '',
-            'status_code'        => isset($webhookData['payment']['status']['code']) ? $webhookData['payment']['status']['code'] : '',
-            'status_message'     => isset($webhookData['payment']['status']['message']) ? $webhookData['payment']['status']['message'] : '',
-            'source_name'        => isset($webhookData['payment']['source']['name']) ? $webhookData['payment']['source']['name'] : 'Mobbex',
-            'source_type'        => isset($webhookData['payment']['source']['type']) ? $webhookData['payment']['source']['type'] : 'Mobbex',
-            'source_reference'   => isset($webhookData['payment']['source']['reference']) ? $webhookData['payment']['source']['reference'] : '',
-            'source_number'      => isset($webhookData['payment']['source']['number']) ? $webhookData['payment']['source']['number'] : '',
-            'source_expiration'  => isset($webhookData['payment']['source']['expiration']) ? json_encode($webhookData['payment']['source']['expiration']) : '',
-            'source_installment' => isset($webhookData['payment']['source']['installment']) ? json_encode($webhookData['payment']['source']['installment']) : '',
-            'installment_name'   => isset($webhookData['payment']['source']['installment']['description']) ? json_encode($webhookData['payment']['source']['installment']['description']) : '',
-            'installment_amount' => isset($webhookData['payment']['source']['installment']['amount']) ? $webhookData['payment']['source']['installment']['amount'] : '',
-            'installment_count'  => isset($webhookData['payment']['source']['installment']['count']) ? $webhookData['payment']['source']['installment']['count'] : '',
-            'source_url'         => isset($webhookData['payment']['source']['url']) ? json_encode($webhookData['payment']['source']['url']) : '',
-            'cardholder'         => isset($webhookData['payment']['source']['cardholder']) ? json_encode(($webhookData['payment']['source']['cardholder'])) : '',
-            'entity_name'        => isset($webhookData['entity']['name']) ? $webhookData['entity']['name'] : '',
-            'entity_uid'         => isset($webhookData['entity']['uid']) ? $webhookData['entity']['uid'] : '',
-            'customer'           => isset($webhookData['customer']) ? json_encode($webhookData['customer']) : '',
-            'checkout_uid'       => isset($webhookData['checkout']['uid']) ? $webhookData['checkout']['uid'] : '',
-            'total'              => isset($webhookData['payment']['total']) ? $webhookData['payment']['total'] : '',
-            'currency'           => isset($webhookData['checkout']['currency']) ? $webhookData['checkout']['currency'] : '',
-            'risk_analysis'      => isset($webhookData['payment']['riskAnalysis']['level']) ? $webhookData['payment']['riskAnalysis']['level'] : '',
-            'data'               => json_encode($webhookData),
-            'created'            => isset($webhookData['payment']['created']) ? $webhookData['payment']['created'] : '',
-            'updated'            => isset($webhookData['payment']['updated']) ? $webhookData['payment']['created'] : '',
-            'user'               => [
-                'name' => isset($webhookData['user']['name']) ? $webhookData['user']['name'] : '',
-                'email' => isset($webhookData['user']['email']) ? $webhookData['user']['email'] : '',
-            ],
-
-        ];
-
-        return $data;
-    }
-
-    /**
-     * Check if webhook is parent type using him payment id.
-     * 
-     * @param string $paymentId
-     * 
-     * @return bool
-     */
-    public function isParent($paymentId)
-    {
-        return strpos($paymentId, 'CHD-') !== 0;
     }
 }
