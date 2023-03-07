@@ -57,6 +57,7 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
      */
     public function getMobbexChilds($childs, $orderId)
     {
+        $childsData = [];
         foreach ($childs as $child)
             $childsData[] = $this->formatWebhookData($child, $orderId);
 
@@ -121,7 +122,6 @@ class Mobbex_Mobbex_Model_Transaction extends Mage_Core_Model_Abstract
                 'email' => isset($webhookData['user']['email']) ? $webhookData['user']['email'] : '',
             ],
         ];
-        Mage::log($data, null, 'log.log', true);
         return $data;
     }
 }
