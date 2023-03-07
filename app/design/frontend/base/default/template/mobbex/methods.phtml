@@ -1,6 +1,6 @@
 <?php
 
-foreach ($this->data['methods'] as $method) {
+foreach ($this->data['methods'] as $method) :
     ?>
     <dt id="dt_method_mobbex_<?= $method['id']?>" style="display:flex;align-items: center;">
 
@@ -19,9 +19,9 @@ foreach ($this->data['methods'] as $method) {
 
     </dt>
     <?php 
-}
+endforeach;
 
-foreach ($this->data['cards'] as $card) {
+foreach ($this->data['cards'] as $card) :
     ?>
     <dt id="dt_method_mobbex_<?=$card['id']?>">
         <div class="card" style="display:flex;align-items: center;">
@@ -57,7 +57,7 @@ foreach ($this->data['cards'] as $card) {
         </div>
     </dt>
     <?php
-}
+endforeach;
 ?>
 
 <style>
