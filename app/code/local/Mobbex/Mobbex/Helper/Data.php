@@ -1,7 +1,7 @@
 <?php
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '2.0.2';
+    const VERSION = '2.1.0';
 
 	/**
 	* All 'ahora' plan keys.
