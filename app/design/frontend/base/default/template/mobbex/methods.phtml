@@ -22,41 +22,43 @@ foreach ($this->data['methods'] as $method) :
 endforeach;
 
 foreach ($this->data['cards'] as $card) :
+    if (!empty($card['installments'])):
     ?>
-    <dt id="dt_method_mobbex_<?=$card['id']?>">
-        <div class="card" style="display:flex;align-items: center;">
-            <input id="p_method_mobbex_<?= $card['id'] ?>" value="<?= $card['value'] ?>" 
-                type="radio" 
-                name="form_key"
-                class="radio mbbx-payment-method-input mbbx-card"
-                style="float: none;top:-4px;"
-                />
-            <label for="p_method_mobbex_<?= $card['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
-                <?php if($card['image']): ?>
-                    <img src="<?= $card['image'] ?>" style="width:50px;border-radius:50%;margin-right:5px;">
-                <?php endif; ?>
-                <?= $card['name']?>
-            </label>
-        </div>
-        <div class="mobbex-wallet-form mbbx-hidden" 
-             id="<?=$card['value']?>"
-             style="margin-left: 25px;">
-            <select name="installment" style="height:30px; max-width: 200px; padding: 0 9px;">
-                <?php foreach ($card['installments'] as $installment): ?>
-                    <div class="mbbx-card-installments">
-                        <option value="<?=$installment['reference']?>"><?=$installment['name']?></option>
-                    </div>
-                <?php endforeach; ?>
-            </select>
-            <input style="margin: 20px 0; max-width: 100px;" type="password"
-                maxlenght="<?=$card['maxlenght']?>" 
-                placeholder="<?=$card['placeholder']?>" 
-                name="security-code" 
-                required >
-            <input type="hidden" name="card-number" value="<?=$card['hiddenValue']?>">
-        </div>
-    </dt>
-    <?php
+        <dt id="dt_method_mobbex_<?=$card['id']?>">
+            <div class="card" style="display:flex;align-items: center;">
+                <input id="p_method_mobbex_<?= $card['id'] ?>" value="<?= $card['value'] ?>" 
+                    type="radio" 
+                    name="form_key"
+                    class="radio mbbx-payment-method-input mbbx-card"
+                    style="float: none;top:-4px;"
+                    />
+                <label for="p_method_mobbex_<?= $card['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
+                    <?php if($card['image']): ?>
+                        <img src="<?= $card['image'] ?>" style="width:50px;border-radius:50%;margin-right:5px;">
+                    <?php endif; ?>
+                    <?= $card['name']?>
+                </label>
+            </div>
+            <div class="mobbex-wallet-form mbbx-hidden" 
+                id="<?=$card['value']?>"
+                style="margin-left: 25px;">
+                <select name="installment" style="height:30px; max-width: 200px; padding: 0 9px;">
+                    <?php foreach ($card['installments'] as $installment): ?>
+                        <div class="mbbx-card-installments">
+                            <option value="<?=$installment['reference']?>"><?=$installment['name']?></option>
+                        </div>
+                    <?php endforeach; ?>
+                </select>
+                <input style="margin: 20px 0; max-width: 100px;" type="password"
+                    maxlenght="<?=$card['maxlenght']?>" 
+                    placeholder="<?=$card['placeholder']?>" 
+                    name="security-code" 
+                    required >
+                <input type="hidden" name="card-number" value="<?=$card['hiddenValue']?>">
+            </div>
+        </dt>
+        <?php
+    endif;
 endforeach;
 ?>
 
