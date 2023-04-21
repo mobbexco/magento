@@ -65,7 +65,10 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		extract($this->settings->getProductPlans($products));
 
 		// Return Query Params
-		$queryParams = array('orderId' => $this->_order->getIncrementId());
+		$queryParams = array(
+			'orderId'   => $this->_order->getIncrementId(),
+			'mbbxToken' => \Mobbex\Repository::generateToken()
+		);
 		
 		//Create Mobbex Checkout
 		$mobbexCheckout = new \Mobbex\Modules\Checkout(
