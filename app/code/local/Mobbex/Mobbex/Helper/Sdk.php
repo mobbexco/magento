@@ -6,7 +6,7 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
     public $instantiator;
 
     public function __construct() {
-        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper']);
+        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'cache']);
     }
 
     /**
@@ -21,6 +21,9 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
             'webpay'  => 2.0,
             'sdk'     => \Composer\InstalledVersions::getVersion('mobbexco/php-plugins-sdk'),
         ], $this->settings->getAll(), [$this->helper, 'executeHook']);
+
+        //Load models
+        \Mobbex\Platform::loadModels($this->cache);
 
         // Init api conector
         \Mobbex\Api::init();
