@@ -1,4 +1,6 @@
-<?php class Mobbex_Mobbex_Block_Adminhtml_Payment_Info extends Mage_Payment_Block_Info
+<?php
+
+class Mobbex_Mobbex_Block_Adminhtml_Payment_Info extends Mage_Payment_Block_Info
 {
     protected function _construct()
     {

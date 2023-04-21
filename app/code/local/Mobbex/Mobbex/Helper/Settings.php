@@ -43,6 +43,8 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	{
 		// Init class properties
 		\Mage::helper('mobbex/instantiator')->setProperties($this, ['customField']);
+		$this->helper = \Mage::helper('mobbex/data');
+		$this->fields = \Mage::getModel('mobbex/customfield');
 	}
 
 	/**
@@ -55,7 +57,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	 */
 	public function get($name)
 	{
-		return Mage::getStoreConfig($this->settingPaths[$name]);
+		return \Mage::getStoreConfig($this->settingPaths[$name]);
 	}
 
 	/**

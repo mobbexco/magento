@@ -77,6 +77,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
+            // Exit if it is a expired operation and the order has already been paid
+            if ($status == 401 && $order->getTotalPaid() > 0)
+                return;
+
             //Debug the response data
             $this->logger->debug("debug", "Payment Controller > notificationAction | Processing Webhook Data: ", compact('orderId', 'res'));
 
@@ -143,6 +147,17 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                     // Save payment, transaction and order
                     $payment->save();
+
+                    // Create invoice if not exists
+                    if (!$order->hasInvoices()) {
+                        $invoice = $order->prepareInvoice()
+                            ->register()
+                            ->capture()
+                            ->addComment($message, 1, 1)
+                            ->save();
+    
+                        $order->addRelatedObject($invoice);
+                    }
 
                     // Send notifications to the user
                     $this->_order->sendNewOrderEmail();
@@ -251,7 +266,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     {
         $data = [
             'order_id'           => $orderId,
-            'parent'             => $this->isParent($webhookData['payment']['operation']['type'], $multicard, $multivendor) ? true : false,
+            'parent'             => isset($webhookData['payment']['id']) ? $this->isParent($webhookData['payment']['id']) : false,
             'operation_type'     => isset($webhookData['payment']['operation']['type']) ? $webhookData['payment']['operation']['type'] : '',
             'payment_id'         => isset($webhookData['payment']['id']) ? $webhookData['payment']['id'] : '',
             'description'        => isset($webhookData['payment']['description']) ? $webhookData['payment']['description'] : '',
@@ -289,22 +304,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Receives the webhook "opartion type" and return true if the webhook is parent and false if not
+     * Check if webhook is parent type using him payment id.
      * 
-     * @param string $operationType
-     * @param bool $multicard
-     * @param bool $multivendor
-     * @return bool true|false
-     * @return bool true|false
+     * @param string $paymentId
      * 
+     * @return bool
      */
-    public function isParent($operationType, $multicard, $multivendor)
+    public function isParent($paymentId)
     {
-        if ($operationType === "payment.v2") {
-            if ($multicard || $multivendor)
-                return false;
-        }
-
-        return true;
+        return strpos($paymentId, 'CHD-') !== 0;
     }
 }

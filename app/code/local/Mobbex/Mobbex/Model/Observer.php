@@ -42,7 +42,7 @@ class Mobbex_Mobbex_Model_Observer
 
 		self::$_singletonFlag = true;
 
-		$id = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
+		$id = \Mage::registry('current_product') ? \Mage::registry('current_product')->getId() : false;
 
 		// Exit if it's associated products save
 		if (empty($id))
@@ -58,7 +58,7 @@ class Mobbex_Mobbex_Model_Observer
 
 		self::$_singletonFlag = true;
 
-		$id = Mage::registry('current_category') ? Mage::registry('current_category')->getId() : false;
+		$id = \Mage::registry('current_category') ? \Mage::registry('current_category')->getId() : false;
 
 		if (empty($id))
 			return;
@@ -93,8 +93,8 @@ class Mobbex_Mobbex_Model_Observer
 			$creditmemo = $observer->getEvent()->getCreditmemo();
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
 			$orderId = $order->getData('increment_id');
-			$data = $this->mobbexTransaction->getMobbexTransaction($orderId, [true, true]); //get transaction data
-			if (isset($data['data'])) {
+			$data = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $orderId, 'parent' => 1]);//get transaction data
+			if(isset($data['data'])){
 				$payment = $order->getPayment();
 				$transactionId = $payment->getData('last_trans_id');
 				$amount = $creditmemo->getData('grand_total');
