@@ -61,10 +61,10 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
             ];
         }
 
-		//Get products active plans
+		// Get products active plans
 		extract($this->settings->getProductPlans($products));
 
-		// Return Query Params
+		// Return order id and token Query Params
 		$queryParams = array(
 			'orderId'   => $this->_order->getIncrementId(),
 			'mbbxToken' => \Mobbex\Repository::generateToken()

@@ -52,6 +52,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         try {
             // Get Data
             $postData = isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/json' ? json_decode(file_get_contents('php://input'), true) : $this->getRequest()->getPost();
+            // Get order id and token from query param
             $orderId  = $this->getRequest()->getParam('orderId');
             $token    = $this->getRequest()->getParam('mbbxToken');
 
