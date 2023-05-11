@@ -8,7 +8,7 @@ foreach (['cache'] as $table) {
         str_replace(
             'DB_PREFIX_',
             (string) \Mage::getConfig()->getTablePrefix(),
-            file_get_contents(__DIR__ . "/../../vendor/mobbexco/php-plugins-sdk/src/sql/mobbex_$table.sql")
+            file_get_contents(__DIR__ . "/../../vendor/mobbexco/php-plugins-sdk/src/sql/$table.sql")
         )
     );
 }
