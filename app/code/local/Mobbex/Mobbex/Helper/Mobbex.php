@@ -35,7 +35,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			$product      = $item->getProduct();
 			$products[]   = $product;
-			$subscription = $this->getProductSubscription($product->getId());
+			$subscription = $this->settings->getProductSubscription($product->getId());
 
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
@@ -48,7 +48,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 					"description" => $item->getName(), 
 					"quantity"    => $item->getQtyOrdered(), 
 					"total"       => round($item->getPrice(),2),
-					"entity"      => $this->getEntity($product),
+					"entity"      => $this->settings->getProductEntity($product),
 				);
 			}
 		}
@@ -77,7 +77,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 			\Mobbex\Repository::getInstallments($orderedItems, $common_plans, $advanced_plans),
 			$customer,
 			$this->getAddresses([$this->_order->getBillingAddress()->getData(), $this->_order->getShippingAddress()->getData()]),
-			'mobbexProcessPayment'
+			'mobbexCheckoutRequest'
 		);
 
 		//debug data
@@ -117,7 +117,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		
         foreach($quoteData['items'] as $product) {
 			
-			$subscription = $this->getProductSubscription($product->getId());
+			$subscription = $this->settings->getProductSubscription($product->getId());
 			
 			if($subscription['enable'] === 'yes'){
 				
@@ -165,7 +165,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 				\Mobbex\Repository::getInstallments($quoteData['items'], $common_plans, $advanced_plans),
 				$customer,
 				$quoteData['addresses'],
-				'mobbexProcessPayment'
+				'mobbexCheckoutRequest'
 			);
 
 			//debug data
@@ -178,40 +178,6 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		}
 
     }
-
-	/**
-	 * Get yhe entity of a product
-	 * @param object $product
-	 * @return string $entity
-	 */
-	public function getEntity($product)
-	{
-		if ($this->settings->getCatalogSetting($product->getId(), 'entity'))
-			return $this->settings->getCatalogSetting($product->getId(), 'entity');
-
-		$categories = $product->getCategoryIds();
-		foreach ($categories as $category) {
-			if ($this->settings->getCatalogSetting($category, 'entity', 'category'))
-				return $this->settings->getCatalogSetting($category, 'entity', 'category');
-		}
-
-		return '';
-	}
-
-	/**
-	 * Retrieve product subscription data.
-	 * 
-	 * @param int|string $id
-	 * 
-	 * @return array
-	 */
-	public function getProductSubscription($id)
-	{
-		foreach (['is_subscription', 'subscription_uid'] as $value)
-			${$value} = $this->settings->getCatalogSetting($id, $value);
-
-		return ['enable' => $is_subscription, 'uid' => $subscription_uid];
-	}
 
 	/**
 

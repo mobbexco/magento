@@ -11,7 +11,7 @@ class Mobbex_Mobbex_Model_Observer
 	public function __construct()
 	{
 		// Init class properties
-		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'customField', 'mobbexTransaction', '_checkoutSession']);
+		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'customField', 'mobbexTransaction', '_checkoutSession', 'logger', 'sdk']);
 	}
 
 	/**

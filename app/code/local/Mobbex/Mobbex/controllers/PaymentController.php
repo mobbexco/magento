@@ -78,7 +78,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
             // Exit if it is a expired operation and the order has already been paid
-            if ($status == 401 && $order->getTotalPaid() > 0)
+            if ($status == 401 && $this->_order->getTotalPaid() > 0)
                 return;
 
             //Debug the response data
@@ -149,14 +149,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $payment->save();
 
                     // Create invoice if not exists
-                    if (!$order->hasInvoices()) {
-                        $invoice = $order->prepareInvoice()
+                    if (!$this->_order->hasInvoices()) {
+                        $invoice = $this->_order->prepareInvoice()
                             ->register()
                             ->capture()
                             ->addComment($message, 1, 1)
                             ->save();
     
-                        $order->addRelatedObject($invoice);
+                        $this->_order->addRelatedObject($invoice);
                     }
 
                     // Send notifications to the user

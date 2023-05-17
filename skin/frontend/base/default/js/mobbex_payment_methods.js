@@ -109,17 +109,8 @@ function renderMobbex(id, returnUrl, orderId) {
         onClose: () => {
             checkout.setLoadWaiting(false)
             location.href = returnUrl + '&status=500'
-        },
-
-        onError: (error) => {
-            console.log(error)
-            checkout.setLoadWaiting(false)
-            location.href = returnUrl + '&status=500'
         }
     }
-
-    if (mbbxCurrentMehtod)
-        options.paymentMethod = mbbxCurrentMehtod;
 
     let mbbxEmbed = window.MobbexEmbed.init(options)
     mbbxEmbed.open()

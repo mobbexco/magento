@@ -1,5 +1,5 @@
 <?php if($this->enable): ?>
-<div id="mbbxProductModal" class="mobbex-plans-modal <?= $this->styles['theme_type'] ?>">
+<div id="mbbxProductModal" class="mobbex-plans-modal <?= $this->configs['theme'] ?>">
         <div id="mbbxProductModalContent" class="">
             <div id="mbbxProductModalHeader">
                 <label id="mobbex_select_title" for="mbbx-method-select">Seleccione un método de pago</label>
@@ -44,17 +44,17 @@
     </div>
 
     <button type="button" id="mbbxProductBtn" onclick="toggleFinancialWidget(event)">
-        <?php if($this->styles['button_logo']): ?>
-        <img src="<?= $this->styles['button_logo'] ?>" alt="" width="40" height="40" style="margin-right: 10px; border-radius: 40px;">
+        <?php if($this->configs['button_logo']): ?>
+        <img src="<?= $this->configs['button_logo'] ?>" alt="" width="40" height="40" style="margin-right: 10px; border-radius: 40px;">
         <?php endif; ?>
-        <?= $this->styles['button_text'] ?>
+        <?= $this->configs['button_text'] ?>
     </button>
 
     
     <style>
         
         /* Custom styles */
-        <?= $this->styles['widget_style'] ?>
+        <?= $this->configs['widget_style'] ?>
         
         /* CLOSE-OPEN BUTTONS */
         #mbbxProductBtn {
