@@ -144,7 +144,7 @@ class Mobbex_Mobbex_Model_Observer
 			//Show capture button
 			$url = $this->helper->getModuleUrl('capture', ['order_id' => $order->getIncrementId()]);
 			$block->addButton('mobbex_capture', array(
-				'label'     => Mage::helper('mobbex')->__('Capture'),
+				'label'     => $this->helper->__('Capture'),
 				'onclick'   => "setLocation('$url')",
 				'class'     => 'go'
 			));
