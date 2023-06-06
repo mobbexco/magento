@@ -1,7 +1,5 @@
 {
-    "autoload": {
-        "psr-4": {
-            "Mobbexco\\Magento1\\": "src/"
-        }
+    "require": {
+        "mobbexco/php-plugins-sdk": "1.0"
     }
 }
