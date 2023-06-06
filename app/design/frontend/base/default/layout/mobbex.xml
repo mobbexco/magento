@@ -4,8 +4,8 @@
         <reference name="content">
             <block type="Mage_Core_Block_Template" name="payment.script.mobbex" template="mobbex/payment_script.phtml"/>
         </reference>
-        <reference name='checkout.onepage.billing'>
-            <block type='checkout/onepage_billing' name='checkout.fields.mobbex' template='mobbex/billing_fields.phtml'></block>
+        <reference name='form.additional.info'>
+            <block type='core/template' name='checkout.fields.mobbex' template='mobbex/billing_fields.phtml'/>
         </reference>
     </checkout_onepage_index>
     <onestepcheckout_index_index>
