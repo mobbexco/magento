@@ -23,7 +23,6 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		'sort_order'              => 'payment/mobbex/sort_order',
 		'financing_product'       => 'payment/mobbex/financing_product',
 		'financing_cart'          => 'payment/mobbex/financing_cart',
-		'tax_id'                  => 'payment/mobbex/taxid',
 		'theme'                   => 'payment/mobbex/theme',
 		'color'                   => 'payment/mobbex/primary_color',
 		'background'              => 'payment/mobbex/background_color',

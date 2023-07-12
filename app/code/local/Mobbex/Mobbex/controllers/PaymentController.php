@@ -42,7 +42,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage);
+            $this->logger->debug('error', 'Payment Controller > responseAction | ' . $e->getMessage());
         }
 
     }
@@ -57,7 +57,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             // Load the Order
             $this->_order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData['data'], $orderId, (!!$this->settings->get('multicard')), !!$this->settings->get('multivendor'));
+            $res = $this->formatWebhookData($postData['data'], $orderId);
             
             //Execute own hook to extend functionalities
             $this->helper->executeHook('mobbexWebhookReceived', false, $postData['data'], $this->_order);
@@ -211,7 +211,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
             $mobbex_data['returnUrl']  = $this->helper->getModuleUrl('response', ['orderId' => $orderId]);
             $mobbex_data['checkoutId'] = isset($checkout['id']) ? $checkout['id'] : '';
-            $mobbex_data['orderId']    = $orderId;
             $mobbex_data['url']        = isset($checkout['url']) ? $checkout['url'] : '';
             $mobbex_data['wallet']     = isset($checkout['wallet']) ? $checkout['wallet'] : '';
 
@@ -262,7 +261,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
      * @return array $data
      * 
      */
-    public function formatWebhookData($webhookData, $orderId, $multicard, $multivendor)
+    public function formatWebhookData($webhookData, $orderId)
     {
         $data = [
             'order_id'           => $orderId,
