@@ -11,6 +11,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		'title'                   => 'payment/mobbex/title',
 		'api_key'                 => 'payment/mobbex/api_key',
 		'access_token'            => 'payment/mobbex/access_token',
+		'site_id'                 => 'payment/mobbex/site_id',
 		'test'                    => 'payment/mobbex/test_mode',
 		'debug_mode'              => 'payment/mobbex/debug_mode',
 		'embed'                   => 'payment/mobbex/embed',
