@@ -11,6 +11,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		'title'                   => 'payment/mobbex/title',
 		'api_key'                 => 'payment/mobbex/api_key',
 		'access_token'            => 'payment/mobbex/access_token',
+		'site_id'                 => 'payment/mobbex/site_id',
 		'test'                    => 'payment/mobbex/test_mode',
 		'debug_mode'              => 'payment/mobbex/debug_mode',
 		'embed'                   => 'payment/mobbex/embed',
@@ -24,10 +25,9 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		'sort_order'              => 'payment/mobbex/sort_order',
 		'financing_product'       => 'payment/mobbex/financing_product',
 		'financing_cart'          => 'payment/mobbex/financing_cart',
-		'tax_id'                  => 'payment/mobbex/taxid',
-		'theme_type'              => 'payment/mobbex/theme',
-		'primary_color'           => 'payment/mobbex/primary_color',
-		'background_color'        => 'payment/mobbex/background_color',
+		'theme'                   => 'payment/mobbex/theme',
+		'color'                   => 'payment/mobbex/primary_color',
+		'background'              => 'payment/mobbex/background_color',
 		'button_logo'             => 'payment/mobbex/button_logo',
 		'button_text'             => 'payment/mobbex/button_text',
 		'widget_style'            => 'payment/mobbex/widget_style',
@@ -44,6 +44,8 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	{
 		// Init class properties
 		\Mage::helper('mobbex/instantiator')->setProperties($this, ['customField']);
+		$this->helper = \Mage::helper('mobbex/data');
+		$this->fields = \Mage::getModel('mobbex/customfield');
 	}
 
 	/**
@@ -56,7 +58,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	 */
 	public function get($name)
 	{
-		return Mage::getStoreConfig($this->settingPaths[$name]);
+		return \Mage::getStoreConfig($this->settingPaths[$name]);
 	}
 
 	/**
@@ -129,6 +131,8 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 			$this->customField->saveCustomField($id, 'product', $key, $value);
 	}
 
+	/** CATALOG SETTINGS */
+
 	/**
 	 * Get active plans for a given products.
 	 * @param array $products
@@ -149,5 +153,41 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 		}
 
 		return compact('common_plans', 'advanced_plans');
+	}
+
+	/**
+	 * Get the entity of a specific product
+	 * 
+	 * @param object $product
+	 * 
+	 * @return string $entity
+	 */
+	public function getProductEntity($product)
+	{
+		if ($this->getCatalogSetting($product->getId(), 'entity'))
+		return $this->getCatalogSetting($product->getId(), 'entity');
+
+		$categories = $product->getCategoryIds();
+		foreach ($categories as $category) {
+			if ($this->getCatalogSetting($category, 'entity', 'category'))
+			return $this->getCatalogSetting($category, 'entity', 'category');
+		}
+
+		return '';
+	}
+
+	/**
+	 * Retrieve specific product subscription data.
+	 * 
+	 * @param int|string $id
+	 * 
+	 * @return array
+	 */
+	public function getProductSubscription($id)
+	{
+		foreach (['is_subscription', 'subscription_uid'] as $value)
+			${$value} = $this->getCatalogSetting($id, $value);
+
+		return ['enable' => $is_subscription, 'uid' => $subscription_uid];
 	}
 }

@@ -1,8 +1,4 @@
-<?php
-    $mobbexData = $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true,true]);
-    $cards      = $this->filterCards($mobbexData && $mobbexData['operation_type'] == 'payment.multiple-sources' ? $this->mobbexTransaction->getMobbexTransaction($this->getInfo()->getOrder()->getIncrementId(), [true,false]) : false);
-    $coupon     = isset($mobbexData['entity_uid']) && isset($mobbexData['payment_id']) ? "https://mobbex.com/console/" . $mobbexData['entity_uid'] . "/operations/?oid=" . $mobbexData['payment_id'] : '';
-?>
+<?php $data = $this->getPaymentData() ?>
 
 <table>
 <tr>
@@ -10,22 +6,26 @@
 </tr>
 <tr>
     <td>Transaction ID:</td>
-    <td><?= isset($mobbexData['payment_id']) ? $mobbexData['payment_id'] : '' ?></td>
+    <td><?= isset($data['payment_id']) ? $data['payment_id'] : '' ?></td>
 </tr>
 <tr>
     <td>Total:</td>
-    <td><?= isset($mobbexData['total']) ? $mobbexData['total'] : '' ?></td>
+    <td><?= isset($data['total']) ? $data['total'] : '' ?></td>
+</tr>
+<tr>
+    <td>Status Message:</td>
+    <td><?= isset($data['status_message']) ? $data['status_message'] : '' ?></td>
 </tr>
 <tr>
     <th>Payment Sources</th>
 </tr>
 <tr>
     <td>Payment Metdod:</td>
-    <td><?= isset($mobbexData['source_type']) ? $mobbexData['source_type'] : '' ?></td>
+    <td><?= isset($data['source_type']) ? $data['source_type'] : '' ?></td>
 </tr>
 
-<?php if($cards) : ?>
-    <?php foreach($cards as $key => $card): ?>
+<?php if($data['cards']) : ?>
+    <?php foreach($data['cards'] as $key => $card): ?>
         <?php if($card['source_name'] !== "multicard"): ?>
             <tr>
                 <th><?= 'Card '.($key + 1)  ?></th>
@@ -51,15 +51,15 @@
 <?php else : ?>
     <tr>
         <td>Source name:</td>
-        <td><?= isset($mobbexData['source_name']) ? $mobbexData['source_name'] : '' ?></td>
+        <td><?= isset($data['source_name']) ? $data['source_name'] : '' ?></td>
     </tr>
     <tr>
         <td>Source Info:</td>
-        <td><?= isset($mobbexData['source_number']) ? $mobbexData['source_number'] : '' ?></td>
+        <td><?= isset($data['source_number']) ? $data['source_number'] : '' ?></td>
     </tr>
     <tr>
         <td>Source Installment:</td>
-        <td><?= isset($mobbexData['source_installment']) ? json_decode($mobbexData['source_installment'], true)['description'] . ' ' . json_decode($mobbexData['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
+        <td><?= isset($data['source_installment']) ? json_decode($data['source_installment'], true)['description'] . ' ' . json_decode($data['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
     </tr>
 <?php endif; ?>
 
@@ -68,10 +68,10 @@
 </tr>
 <tr>
     <td>Risk Analysis:</td>
-    <td><?= isset($mobbexData['risk_analysis']) ? $mobbexData['risk_analysis'] : '' ?></td>
+    <td><?= isset($data['risk_analysis']) ? $data['risk_analysis'] : '' ?></td>
 </tr>
 <tr>
     <td>Coupon:</td>
-    <td><a href="<?= $coupon ?>">View</a></td>
+    <td><a href="<?= $data['coupon'] ?>">View</a></td>
 </tr>
 </table>

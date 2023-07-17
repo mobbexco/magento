@@ -42,7 +42,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage);
+            $this->logger->debug('error', 'Payment Controller > responseAction | ' . $e->getMessage());
         }
 
     }
@@ -57,7 +57,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             // Load the Order
             $this->_order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData['data'], $orderId, (!!$this->settings->get('multicard')), !!$this->settings->get('multivendor'));
+            $res = $this->formatWebhookData($postData['data'], $orderId);
             
             //Execute own hook to extend functionalities
             $this->helper->executeHook('mobbexWebhookReceived', false, $postData['data'], $this->_order);
@@ -74,6 +74,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
             //Return if the webhook is not parent
             if ($res['parent'] == false)
+                return;
+
+            // Exit if it is a expired operation and the order has already been paid
+            if ($status == 401 && $this->_order->getTotalPaid() > 0)
                 return;
 
             //Debug the response data
@@ -142,6 +146,17 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
                     // Save payment, transaction and order
                     $payment->save();
+
+                    // Create invoice if not exists
+                    if (!$this->_order->hasInvoices()) {
+                        $invoice = $this->_order->prepareInvoice()
+                            ->register()
+                            ->capture()
+                            ->addComment($message, 1, 1)
+                            ->save();
+    
+                        $this->_order->addRelatedObject($invoice);
+                    }
 
                     // Send notifications to the user
                     $this->_order->sendNewOrderEmail();
@@ -225,7 +240,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
             $mobbex_data['returnUrl']  = $this->helper->getModuleUrl('response', ['orderId' => $orderId]);
             $mobbex_data['checkoutId'] = isset($checkout['id']) ? $checkout['id'] : '';
-            $mobbex_data['orderId']    = $orderId;
             $mobbex_data['url']        = isset($checkout['url']) ? $checkout['url'] : '';
             $mobbex_data['wallet']     = isset($checkout['wallet']) ? $checkout['wallet'] : '';
 
@@ -277,11 +291,11 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
      * @return array $data
      * 
      */
-    public function formatWebhookData($webhookData, $orderId, $multicard, $multivendor)
+    public function formatWebhookData($webhookData, $orderId)
     {
         $data = [
             'order_id'           => $orderId,
-            'parent'             => $this->isParent($webhookData['payment']['operation']['type'], $multicard, $multivendor) ? true : false,
+            'parent'             => isset($webhookData['payment']['id']) ? $this->isParent($webhookData['payment']['id']) : false,
             'operation_type'     => isset($webhookData['payment']['operation']['type']) ? $webhookData['payment']['operation']['type'] : '',
             'payment_id'         => isset($webhookData['payment']['id']) ? $webhookData['payment']['id'] : '',
             'description'        => isset($webhookData['payment']['description']) ? $webhookData['payment']['description'] : '',
@@ -319,22 +333,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Receives the webhook "opartion type" and return true if the webhook is parent and false if not
+     * Check if webhook is parent type using him payment id.
      * 
-     * @param string $operationType
-     * @param bool $multicard
-     * @param bool $multivendor
-     * @return bool true|false
-     * @return bool true|false
+     * @param string $paymentId
      * 
+     * @return bool
      */
-    public function isParent($operationType, $multicard, $multivendor)
+    public function isParent($paymentId)
     {
-        if ($operationType === "payment.v2") {
-            if ($multicard || $multivendor)
-                return false;
-        }
-
-        return true;
+        return strpos($paymentId, 'CHD-') !== 0;
     }
 }

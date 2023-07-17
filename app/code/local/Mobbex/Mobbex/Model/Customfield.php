@@ -26,7 +26,7 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
             ->addFieldToFilter('field_name', $field_name)
             ->getColumnValues($searched_column);
 
-        return !empty($collection[0]) ? $collection[0] : false;
+        return isset($collection[0]) ? $collection[0] : false;
     }
 
     /**

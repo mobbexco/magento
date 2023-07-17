@@ -16,8 +16,7 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
         //init widget
         $this->action = strpos(Mage::helper('core/url')->getCurrentUrl(), 'cart') ? 'cart' : 'product';
         $this->initWidget();
-        foreach (['theme_type', 'button_text', 'button_logo', 'widget_style'] as $property)
-            $this->styles[$property] = $this->settings->get($property);
+        $this->configs = $this->settings->getAll();
 
     }
 
