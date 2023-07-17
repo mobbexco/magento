@@ -7,21 +7,22 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
         $this->setTemplate('mobbex/methods.phtml');
         parent::_construct();
 
-        $this->mobbex = Mage::helper('mobbex/data');
+        // Init class properties
+        Mage::helper('mobbex/instantiator')->setProperties($this, ['sdk', 'helper', 'logger', '_checkoutSession', '_quote']);
+
         $this->data = $this->getMobbexMethods();
-        
     }
 
     public function getMobbexMethods()
     {
-        if($this->data)
+        if ($this->data)
             return $this->data;
-        
-        $data = ['methods' => [], 'cards' => []];
-        $checkoutData = $this->mobbex->createCheckoutFromQuote($this->getQuoteData());
 
-        if(isset($checkoutData['paymentMethods'])){             
-        
+        $data = ['methods' => [], 'cards' => []];
+        $checkoutData = $this->helper->createCheckoutFromQuote($this->getQuoteData());
+
+        if (isset($checkoutData['paymentMethods'])) {
+
             foreach ($checkoutData['paymentMethods'] as $method) {
                 $data['methods'][] = [
                     'id'    => $method['subgroup'],
@@ -30,18 +31,17 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
                     'image' => $method['subgroup_logo']
                 ];
             }
-
         } else {
             $data['methods'][] = [
                 'id'    => 'mobbex',
                 'value' => '',
                 'name'  => 'Pagar con Mobbex',
                 'image' => ''
-            ]; 
+            ];
         }
 
-        if(isset($checkoutData['wallet'])) {
-           
+        if (isset($checkoutData['wallet'])) {
+
             foreach ($checkoutData['wallet'] as $key => $card) {
                 $data['cards'][] = [
                     'id'           => 'wallet-card-' . $key,
@@ -61,10 +61,9 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
 
     public function getQuoteData()
     {
-        $session        = Mage::getSingleton('checkout/session');
-        $quote          = Mage::getModel('sales/quote')->load($session->getQuoteId());
+        $quote          = $this->_quote->load($this->_checkoutSession->getQuoteId());
         $billingData    = $quote->getBillingAddress()->getData();
-        
+
         $quoteData = [
             'entity_id'        => $quote->getId(),
             'customer_id'      => $quote->getCustomer()->getId(),
@@ -79,13 +78,12 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
             ],
             'items'          => [],
             'shipping_total' => $quote->getShippingAddress()->getShippingAmount(),
-            'addresses'      => $this->mobbex->getAddresses([$billingData, $quote->getShippingAddress()->getData()]),
+            'addresses'      => $this->helper->getAddresses([$billingData, $quote->getShippingAddress()->getData()]),
             'quote'          => $quote
         ];
 
         foreach ($quote->getAllVisibleItems() as $item)
             $quoteData['items'][] = $item->getProduct();
-
 
         return $quoteData;
     }

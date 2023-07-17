@@ -28,6 +28,15 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
 						</title>
+						
+						<timeout translate="label">
+							<label>Checkout Timeout</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>136</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</timeout>
 
 						<api_key translate="label">
 							<label>API Key</label>
@@ -106,6 +115,15 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</multivendor>
+
+						<site_id translate="label">
+							<label>Identificador del Sitio</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>25</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+						</site_id>
 
 						<order_status translate="label">
 							<label>New Order Status</label>

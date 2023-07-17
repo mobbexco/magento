@@ -20,7 +20,6 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
      */
     public function getCustomField($row_id, $object, $field_name, $searched_column = 'data')
     {
-
         $collection = $this->getCollection()
             ->addFieldToFilter('row_id', $row_id)
             ->addFieldToFilter('object', $object)

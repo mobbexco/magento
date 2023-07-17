@@ -3,48 +3,47 @@
 class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
 {
 
+    public $styles = [];
 
     public function _construct()
     {
         parent::_construct();
+        $this->setTemplate('mobbex/finance.phtml');
 
-        $this->settings        = Mage::helper('mobbex/settings');
-        $this->mobbex          = $this->settings->helper;
-        $this->checkoutSession = Mage::getSingleton('checkout/session');
-        $this->action          = strpos(Mage::helper('core/url')->getCurrentUrl(), 'cart') ? 'cart' : 'product';
-
+        // Init class properties
+        \Mage::helper('mobbex/instantiator')->setProperties($this, ['sdk', 'settings', '_checkoutSession']);
+        
         //init widget
+        $this->action = strpos(Mage::helper('core/url')->getCurrentUrl(), 'cart') ? 'cart' : 'product';
         $this->initWidget();
+        $this->configs = $this->settings->getAll();
+
     }
 
     public function initWidget()
     {
-        if ((!Mage::getStoreConfig('payment/mobbex/financing_product') && $this->action === 'product') || (!Mage::getStoreConfig('payment/mobbex/financing_cart') && $this->action === 'cart'))
+        if ((!$this->settings->get('financing_product') && $this->action === 'product') || (!$this->settings->get('financing_cart') && $this->action === 'cart'))
             return $this->enable = false;
 
         // Get current objects
         $product = Mage::registry('current_product');
-        $quote   = $this->checkoutSession->getQuote();
-
+        $quote   = $this->_checkoutSession->getQuote();
+        
         if ($this->action == 'product' ? !$product->isSaleable() : !$quote->hasItems())
             return $this->enable = false;
-
-        $total   = $this->action === 'product' ?   $product->getPrice() : $quote->getGrandTotal();
+        
+        $total    = $this->action === 'product' ?   $product->getPrice() : $quote->getGrandTotal();
         $products = $this->action === 'product' ? [$product] : [];
-
+        
         if ($this->action === 'cart') {
             foreach ($quote->getAllVisibleItems() as $item)
-                $products[] = $item->getProduct();
+            $products[] = $item->getProduct();
         }
-
-        $this->sources = $this->mobbex->getSources($total, $this->mobbex->getInstallments($products));
-        $this->styles  = [
-            'theme' => Mage::getStoreConfig('payment/mobbex/theme'),
-            'text'  => Mage::getStoreConfig('payment/mobbex/button_text'),
-            'logo'  => Mage::getStoreConfig('payment/mobbex/button_logo'),
-            'css'   => Mage::getStoreConfig('payment/mobbex/widget_style')
-        ];
-
+        
+        extract($this->settings->getProductPlans($products));
+        $this->sources = \Mobbex\Repository::getSources($total, \Mobbex\Repository::getInstallments($this->products, $common_plans, $advanced_plans));
+        
         return $this->enable = true;
     }
+    
 }

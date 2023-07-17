@@ -3,40 +3,76 @@
 		<h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Plans Configuration') ?></h4>
 	</div>
 	<div class="fieldset fieldset-wide" id="mobbex_options">
-		<div class="hor-scroll">
-			<h3><?= $this->__('Select the plans you want to appear in the checkout') ?></h3>
-			<div class="mbbx_plans_cont">
-				<div class="mbbx_plan_list">
-					<p><?= $this->__('Common plans') ?></p>
-					<?php foreach ($this->commonPlans as $planId => $data) : ?>
-						<div>
-							<input type="hidden" name="<?= $planId ?>" value="no">
-							<input type='checkbox' name='<?= $planId ?>' id='<?= $planId ?>' <?= ($data['value'] ? 'checked' : '') ?>>
-							<label for='<?= $planId ?>'><?= $data['label'] ?></label>
-						</div>
-					<?php endforeach; ?>
-				</div>
-				<div class="mbbx_plan_list">
-					<p><?= $this->__('Plans with advanced rules') ?></p>
-					<?php foreach ($this->advancedPlans as $sourceRef => $sourceData) : ?>
-						<div class='mbbx_plan_source'>
-							<img src='https://res.mobbex.com/images/sources/<?= $sourceRef ?>.png'><?= key($sourceData) ?>
-						</div>
-						<?php foreach (reset($sourceData) as $planId => $data) : ?>
-							<div>
-								<input type='checkbox' name='<?= $planId ?>' id='<?= $planId ?>' <?= ($data['value'] ? 'checked' : '') ?>>
-								<label for='<?= $planId ?>'><?= $data['label'] ?></label>
+		<table class="mbbx-plans-cont">
+			<tbody>
+				<tr style="text-align: center;">
+					<td><?= __('Planes comunes') ?></td>
+					<td><?= __('Planes con reglas avanzadas') ?></td>
+				</tr>
+				<tr>
+					<td class="mbbx-plans">
+						<?php foreach ($commonFields as $field) : ?>
+							<div class="mbbx-plan">
+								<input type="hidden" name="<?= $field['id'] ?>" value="no">
+								<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>" data-form-part="<?= $form ?>">
+								<label for="<?= $field['id'] ?>"><?= $field['label'] ?></label>
 							</div>
 						<?php endforeach; ?>
-					<?php endforeach; ?>
-				</div>
-			</div>
-		</div>
+					</td>
+					<td class="mbbx-plans">
+						<?php foreach ($advancedFields as $sourceRef => $fields) : ?>
+							<div class="mbbx-plan-source">
+								<img src="https://res.mobbex.com/images/sources/png/<?= $sourceRef ?>.png">
+								<p><?= $sourceNames[$sourceRef] ?></p>
+							</div>
+							<?php foreach ($fields as $field) : ?>
+								<div class="mbbx-plan-advanced">
+									<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>" data-form-part="<?= $form ?>">
+									<label for="<?= $field['id'] ?>"><?= $field['label'] ?></label>
+								</div>
+							<?php endforeach; ?>
+						<?php endforeach; ?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
 
 	<style>
 		.mbbx-hidden {
 			display: none;
+		}
+
+		.mbbx-plans-cont {
+			border: 1px gainsboro solid;
+			width: 500px;
+		}
+
+		.mbbx-plans-cont tbody {
+			vertical-align: top
+		}
+
+		.mbbx-plans-cont td {
+			width: 50%;
+			border: 1px gainsboro solid;
+			padding: 15px;
+		}
+
+		.mbbx-plans-cont label {
+			font-weight: 400 !important;
+		}
+
+		.mbbx-plan-advanced {
+			padding-left: 20px;
+		}
+
+		.mbbx-plan-source * {
+			display: inline;
+		}
+
+		.mbbx-plan-source img {
+			width: 30px;
+			border-radius: 100%;
 		}
 	</style>
 
