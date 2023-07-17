@@ -74,7 +74,7 @@ function processOrder() {
             if (wallet && mbbxCurrentCard) {
                 executeWallet(response.responseJSON);
             } else if (embed) {
-                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl, response.responseJSON.orderId);
+                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl);
             } else {
                 mbbxRedirect(response.responseJSON.url);
             }
@@ -96,25 +96,19 @@ function processOrder() {
 * @param returnUrl 
 * @param orderId 
 */
-function renderMobbex(id, returnUrl, orderId) {
+function renderMobbex(id, returnUrl) {
     let options = {
         id: id,
         type: 'checkout',
         paymentMethod: mbbxCurrentMethod || null,
 
         onResult: (responseData) => {
-            location.href = returnUrl + '&status=' + responseData.status.code + '&orderId=' + orderId
+            location.href = returnUrl + '&status=' + responseData.status.code
         },
 
         onClose: () => {
             checkout.setLoadWaiting(false)
-            location.href = returnUrl
-        },
-
-        onError: (error) => {
-            console.log(error)
-            checkout.setLoadWaiting(false)
-            location.href = returnUrl
+            location.href = returnUrl + '&status=500'
         }
     }
 
@@ -153,7 +147,7 @@ function executeWallet(response) {
             window.top.location = response.returnUrl + '&status=' + data.data.status.code;
         })
         .catch(error => {
-            location.href = response.returnUrl;
+            location.href = response.returnUrl + '&status=500';
         })
 }
 
