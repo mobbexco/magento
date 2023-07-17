@@ -73,9 +73,8 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             $this->mobbexTransaction->saveMobbexTransaction($res);
 
             //Return if the webhook is not parent
-            if ($res['parent'] == false) {
+            if ($res['parent'] == false)
                 return;
-            }
 
             // Exit if it is a expired operation and the order has already been paid
             if ($status == 401 && $this->_order->getTotalPaid() > 0)
@@ -166,6 +165,9 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 } else if ($statusName === 'Refunded') {
                     // Cancel Sale
                     $this->_order->cancel()->setStatus($this->settings->get('order_status_refunded'));
+                } else if($statusName === 'Authorized') {
+                    //set order status
+                    $this->_order->setStatus('authorized_mobbex');
                 } else {
                     $this->_order->cancel()->setState($this->settings->get('order_status_cancelled'), true, $message);
                 }
@@ -180,6 +182,33 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         } catch (Exception $e) {
             $this->logger->debug('Error', 'Payment Controller > notificationAction | Exception: ', $e->getMessage());
         }
+    }
+
+    public function captureAction()
+    {
+        try {
+            // Get order with him id
+            $id = $this->getRequest()->getParam('order_id');
+            $this->_order->loadByIncrementId($id);
+
+            // Get transaction data from db
+            $transaction = $this->mobbexTransaction->getMobbexTransaction($id, [1, 1]);
+
+            // Make capture request
+            $result = \Mobbex\Api::request([
+                'method' => 'POST',
+                'uri'    => "operations/$transaction[payment_id]/capture",
+                'body'   => ['total' => $this->_order->getGrandTotal()],
+            ]);
+
+            if (!$result)
+                throw new \Exception('Uncaught Exception on Mobbex Request', 500);
+        } catch (\Exception $e) {
+            // Add message to admin panel and debug
+            $this->logger->debug('err', $e->getMessage(), isset($e->data) ? $e->data : []);
+        }
+
+        return Mage::app()->getResponse()->setRedirect(Mage::helper('adminhtml')->getUrl("adminhtml/sales_order/view", array('order_id' => $this->_order->getId())));
     }
 
     // The cancel action is triggered when an order is to be cancelled
@@ -240,13 +269,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
      */
     public function getStatusName($order, $statusCode)
     {
-        if ($statusCode == 2 || $statusCode == 3 || $statusCode == 100 || $statusCode == 201) {
+        if ($statusCode == 2 || $statusCode == 100 || $statusCode == 201)
             $name = 'InProcess';
-        } else if ($statusCode == 4 || $statusCode >= 200 && $statusCode < 400) {
+        else if($statusCode == 3)
+            $name = 'Authorized';
+        else if ($statusCode == 4 || $statusCode >= 200 && $statusCode < 400)
             $name = 'Approved';
-        } else {
+        else
             $name = $order->getStatus() != 'pending' ? 'Cancelled' : 'Refunded';
-        }
 
         return $name;
     }

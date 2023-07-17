@@ -11,7 +11,7 @@ class Mobbex_Mobbex_Model_Observer
 	public function __construct()
 	{
 		// Init class properties
-		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'customField', 'mobbexTransaction', '_checkoutSession', 'logger', 'sdk']);
+		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'customField', 'mobbexTransaction', '_checkoutSession', 'logger', 'sdk']);
 	}
 
 	/**
@@ -124,6 +124,30 @@ class Mobbex_Mobbex_Model_Observer
 			return !empty($result);
 		} catch (\Exception $e) {
 			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+		}
+	}
+
+	/**
+	 * Logic to execute when admin order view is fired.
+	 */
+	public function adminhtmlWidgetContainerHtmlBefore($event)
+	{
+		//Check if block is sales order view
+		$block = $event->getBlock();
+		
+		if ($block instanceof Mage_Adminhtml_Block_Sales_Order_View) {
+			//Get the order from block
+			$order = $block->getOrder();
+			//Return if status different to authorized
+			if($order->getStatus() !== 'authorized_mobbex')
+				return;
+			//Show capture button
+			$url = $this->helper->getModuleUrl('capture', ['order_id' => $order->getIncrementId()]);
+			$block->addButton('mobbex_capture', array(
+				'label'     => $this->helper->__('Capture'),
+				'onclick'   => "setLocation('$url')",
+				'class'     => 'go'
+			));
 		}
 	}
 }
