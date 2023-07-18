@@ -213,20 +213,6 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		return $addresses;
 	}
 
-	/**
-	 * Converts the WooCommerce country codes to 3-letter ISO codes.
-	 * 
-	 * @param string $code 2-Letter ISO code.
-	 * 
-	 * @return string|null
-	 */
-	public function convertCountryCode($code)
-	{
-		$countries = include ('iso-3166/country-codes.php') ?: [];
-
-		return isset($countries[$code]) ? $countries[$code] : null;
-	}
-
 	public function getModuleUrl($action, $queryParams) {
 
 		if ($this->settings->get('debug_mode'))

@@ -205,7 +205,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 throw new \Exception('Uncaught Exception on Mobbex Request', 500);
         } catch (\Exception $e) {
             // Add message to admin panel and debug
-            $this->logger->debug('err', $e->getMessage(), isset($e->data) ? $e->data : []);
+            $this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
         }
 
         return Mage::app()->getResponse()->setRedirect(Mage::helper('adminhtml')->getUrl("adminhtml/sales_order/view", array('order_id' => $this->_order->getId())));
