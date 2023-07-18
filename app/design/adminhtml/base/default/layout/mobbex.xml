@@ -15,7 +15,7 @@
 	</adminhtml_catalog_product_edit>
 	<adminhtml_sales_order_view>
 		<reference name="content">
-			<block type="adminhtml/sales_order_totals" name="order_totals_financing" template="mobbex/financingamountadmin.phtml" />
+			<block type="adminhtml/sales_order_totals" name="admin.order.info.mobbex" template="mobbex/financingamountadmin.phtml" />
 		</reference>
 	</adminhtml_sales_order_view>
 	<adminhtml_catalog_category_edit>

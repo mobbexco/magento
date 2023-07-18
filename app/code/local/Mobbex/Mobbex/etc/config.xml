@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<Mobbex_Mobbex>
-			<version>2.0</version>
+			<version>2.1.0</version>
 		</Mobbex_Mobbex>
 	</modules>
 	<global>
@@ -177,6 +177,15 @@ background-color: #6f00ff;
                     </mobbex_product_refund>
                 </observers>
             </sales_order_creditmemo_save_after>
+			<adminhtml_widget_container_html_before>
+            <observers>
+                <mobbex_capture>
+                    <type>singleton</type>
+                    <class>mobbex/observer</class>
+                    <method>adminhtmlWidgetContainerHtmlBefore</method>
+                </mobbex_capture>
+            </observers>
+        </adminhtml_widget_container_html_before>
         </events>
     </adminhtml>
 </config>

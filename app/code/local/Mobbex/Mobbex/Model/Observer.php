@@ -11,7 +11,7 @@ class Mobbex_Mobbex_Model_Observer
 	public function __construct()
 	{
 		// Init class properties
-		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'customField', 'mobbexTransaction', '_checkoutSession']);
+		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'customField', 'mobbexTransaction', '_checkoutSession', 'logger', 'sdk']);
 	}
 
 	/**
@@ -42,7 +42,7 @@ class Mobbex_Mobbex_Model_Observer
 
 		self::$_singletonFlag = true;
 
-		$id = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
+		$id = \Mage::registry('current_product') ? \Mage::registry('current_product')->getId() : false;
 
 		// Exit if it's associated products save
 		if (empty($id))
@@ -58,7 +58,7 @@ class Mobbex_Mobbex_Model_Observer
 
 		self::$_singletonFlag = true;
 
-		$id = Mage::registry('current_category') ? Mage::registry('current_category')->getId() : false;
+		$id = \Mage::registry('current_category') ? \Mage::registry('current_category')->getId() : false;
 
 		if (empty($id))
 			return;
@@ -93,8 +93,8 @@ class Mobbex_Mobbex_Model_Observer
 			$creditmemo = $observer->getEvent()->getCreditmemo();
 			$order = $observer->getEvent()->getCreditmemo()->getOrder();
 			$orderId = $order->getData('increment_id');
-			$data = $this->mobbexTransaction->getMobbexTransaction($orderId, [true, true]); //get transaction data
-			if (isset($data['data'])) {
+			$data = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $orderId, 'parent' => 1]);//get transaction data
+			if(isset($data['data'])){
 				$payment = $order->getPayment();
 				$transactionId = $payment->getData('last_trans_id');
 				$amount = $creditmemo->getData('grand_total');
@@ -124,6 +124,30 @@ class Mobbex_Mobbex_Model_Observer
 			return !empty($result);
 		} catch (\Exception $e) {
 			$this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+		}
+	}
+
+	/**
+	 * Logic to execute when admin order view is fired.
+	 */
+	public function adminhtmlWidgetContainerHtmlBefore($event)
+	{
+		//Check if block is sales order view
+		$block = $event->getBlock();
+		
+		if ($block instanceof Mage_Adminhtml_Block_Sales_Order_View) {
+			//Get the order from block
+			$order = $block->getOrder();
+			//Return if status different to authorized
+			if($order->getStatus() !== 'authorized_mobbex')
+				return;
+			//Show capture button
+			$url = $this->helper->getModuleUrl('capture', ['order_id' => $order->getIncrementId()]);
+			$block->addButton('mobbex_capture', array(
+				'label'     => $this->helper->__('Capture'),
+				'onclick'   => "setLocation('$url')",
+				'class'     => 'go'
+			));
 		}
 	}
 }
