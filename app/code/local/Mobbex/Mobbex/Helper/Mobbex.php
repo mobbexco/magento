@@ -81,7 +81,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		);
 
 		//debug data
-		$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+		$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 		return $mobbexCheckout->response;
 	}
@@ -169,12 +169,12 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 			);
 
 			//debug data
-			$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+			$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 			return $mobbexCheckout->response;
 
 		} catch (\Exception $e) {
-			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+			$this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
 		}
 
     }
@@ -200,7 +200,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			$addresses[] = [
 				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
-				'country' => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
+				'country' => isset($address["country_id"]) ? \Mobbex\Repository::convertCountryCode($address["country_id"]) : '',
 				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
 				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
 				'streetNotes' => '',
@@ -211,20 +211,6 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		}
 
 		return $addresses;
-	}
-
-	/**
-	 * Converts the WooCommerce country codes to 3-letter ISO codes.
-	 * 
-	 * @param string $code 2-Letter ISO code.
-	 * 
-	 * @return string|null
-	 */
-	public function convertCountryCode($code)
-	{
-		$countries = include ('iso-3166/country-codes.php') ?: [];
-
-		return isset($countries[$code]) ? $countries[$code] : null;
 	}
 
 	public function getModuleUrl($action, $queryParams) {
@@ -277,7 +263,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
             return $value;
         } catch (\Exception $e) {
-            $this->logger->debug('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
+            $this->logger->log('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
         }
     }
 } 
