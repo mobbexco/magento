@@ -6,7 +6,7 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
     public $instantiator;
 
     public function __construct() {
-        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'logger']);
+        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'logger', 'cache']);
     }
 
     /**
@@ -24,6 +24,9 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
             [$this->helper, 'executeHook'],
             [$this->logger, 'log']
         );
+
+        //Load models
+        \Mobbex\Platform::loadModels($this->cache);
 
         // Init api conector
         \Mobbex\Api::init();

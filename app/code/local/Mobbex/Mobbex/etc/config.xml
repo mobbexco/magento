@@ -14,6 +14,7 @@
 			<mobbex_mobbex_resource>
 				<class>Mobbex_Mobbex_Model_Resource</class>
 				<entities>
+
 					<customfield>
 						<table>mobbex_customfield</table>
 					</customfield>
@@ -21,6 +22,11 @@
 					<transaction>
 						<table>mobbex_transaction</table>
 					</transaction>
+
+					<cache>
+						<table>mobbex_cache</table>
+					</cache>
+					
 				</entities>
 			</mobbex_mobbex_resource>
 		</models>
