@@ -35,7 +35,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			$product      = $item->getProduct();
 			$products[]   = $product;
-			$subscription = $this->getProductSubscription($product->getId());
+			$subscription = $this->settings->getProductSubscription($product->getId());
 
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
@@ -48,7 +48,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 					"description" => $item->getName(), 
 					"quantity"    => $item->getQtyOrdered(), 
 					"total"       => round($item->getPrice(),2),
-					"entity"      => $this->getEntity($product),
+					"entity"      => $this->settings->getProductEntity($product),
 				);
 			}
 		}
@@ -77,11 +77,11 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 			\Mobbex\Repository::getInstallments($orderedItems, $common_plans, $advanced_plans),
 			$customer,
 			$this->getAddresses([$this->_order->getBillingAddress()->getData(), $this->_order->getShippingAddress()->getData()]),
-			'mobbexProcessPayment'
+			'mobbexCheckoutRequest'
 		);
 
 		//debug data
-		$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+		$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 		return $mobbexCheckout->response;
 	}
@@ -117,7 +117,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		
         foreach($quoteData['items'] as $product) {
 			
-			$subscription = $this->getProductSubscription($product->getId());
+			$subscription = $this->settings->getProductSubscription($product->getId());
 			
 			if($subscription['enable'] === 'yes'){
 				
@@ -165,53 +165,19 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 				\Mobbex\Repository::getInstallments($quoteData['items'], $common_plans, $advanced_plans),
 				$customer,
 				$quoteData['addresses'],
-				'mobbexProcessPayment'
+				'mobbexCheckoutRequest'
 			);
 
 			//debug data
-			$this->logger->debug('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
+			$this->logger->log('debug', 'Mobbex Helper > createCheckout | Checkout Response: ', $mobbexCheckout->response);
 
 			return $mobbexCheckout->response;
 
 		} catch (\Exception $e) {
-			$this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+			$this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
 		}
 
     }
-
-	/**
-	 * Get yhe entity of a product
-	 * @param object $product
-	 * @return string $entity
-	 */
-	public function getEntity($product)
-	{
-		if ($this->settings->getCatalogSetting($product->getId(), 'entity'))
-			return $this->settings->getCatalogSetting($product->getId(), 'entity');
-
-		$categories = $product->getCategoryIds();
-		foreach ($categories as $category) {
-			if ($this->settings->getCatalogSetting($category, 'entity', 'category'))
-				return $this->settings->getCatalogSetting($category, 'entity', 'category');
-		}
-
-		return '';
-	}
-
-	/**
-	 * Retrieve product subscription data.
-	 * 
-	 * @param int|string $id
-	 * 
-	 * @return array
-	 */
-	public function getProductSubscription($id)
-	{
-		foreach (['is_subscription', 'subscription_uid'] as $value)
-			${$value} = $this->settings->getCatalogSetting($id, $value);
-
-		return ['enable' => $is_subscription, 'uid' => $subscription_uid];
-	}
 
 	/**
 
@@ -234,7 +200,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
 			$addresses[] = [
 				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
-				'country' => isset($address["country_id"]) ? $this->convertCountryCode($address["country_id"]) : '',
+				'country' => isset($address["country_id"]) ? \Mobbex\Repository::convertCountryCode($address["country_id"]) : '',
 				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
 				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
 				'streetNotes' => '',
@@ -247,21 +213,11 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 		return $addresses;
 	}
 
-	/**
-	 * Converts the WooCommerce country codes to 3-letter ISO codes.
-	 * 
-	 * @param string $code 2-Letter ISO code.
-	 * 
-	 * @return string|null
-	 */
-	public function convertCountryCode($code)
-	{
-		$countries = include ('iso-3166/country-codes.php') ?: [];
-
-		return isset($countries[$code]) ? $countries[$code] : null;
-	}
-
 	public function getModuleUrl($action, $queryParams) {
+
+		if ($this->settings->get('debug_mode'))
+			$queryParams['XDEBUG_SESSION_START'] = 'PHPSTORM';
+
 		return Mage::getUrl('mobbex/payment/' . $action, array('_secure' => true, '_query' => $queryParams)); 
 	}
 
@@ -307,7 +263,7 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
 
             return $value;
         } catch (\Exception $e) {
-            $this->logger->debug('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
+            $this->logger->log('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
         }
     }
 } 

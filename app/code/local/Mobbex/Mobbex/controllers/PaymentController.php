@@ -15,7 +15,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
         try {
             
             //debug
-            $this->logger->debug('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
+            $this->logger->log('debug', 'Payment Controller > responseAction | Params: ', $this->getRequest()->getParams());
             //get params
             extract($this->getRequest()->getParams());
             //load order
@@ -34,7 +34,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     }
 
                     // Send error message
-                    $this->logger->debug('error', 'The payment has failed');
+                    $this->logger->log('error', 'The payment has failed');
 
                     //Redirect to cart
                     $this->_redirect('checkout/cart', array('_secure' => true));
@@ -42,7 +42,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
 
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage);
+            $this->logger->log('error', 'Payment Controller > responseAction | ' . $e->getMessage());   
         }
 
     }
@@ -57,8 +57,8 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             // Load the Order
             $this->_order->loadByIncrementId($orderId);
 
-            $res = $this->formatWebhookData($postData['data'], $orderId, (!!$this->settings->get('multicard')), !!$this->settings->get('multivendor'));
-            
+            $res = Mage::getModel('mobbex/transaction')->formatWebhookData($postData['data'], $orderId);
+
             //Execute own hook to extend functionalities
             $this->helper->executeHook('mobbexWebhookReceived', false, $postData['data'], $this->_order);
 
@@ -73,16 +73,15 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             $this->mobbexTransaction->saveMobbexTransaction($res);
 
             //Return if the webhook is not parent
-            if ($res['parent'] == false) {
+            if ($res['parent'] == false)
                 return;
-            }
 
             // Exit if it is a expired operation and the order has already been paid
-            if ($status == 401 && $order->getTotalPaid() > 0)
+            if ($status == 401 && $this->_order->getTotalPaid() > 0)
                 return;
 
             //Debug the response data
-            $this->logger->debug("debug", "Payment Controller > notificationAction | Processing Webhook Data: ", compact('orderId', 'res'));
+            $this->logger->log("debug", "Payment Controller > notificationAction | Processing Webhook Data: ", compact('orderId', 'res'));
 
             if (isset($orderId) && !empty($status)) {
 
@@ -96,7 +95,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $user_name  = $res['user']['name'];
                 $user_email = $res['user']['email'];
 
-                $this->logger->debug("debug", "Payment Controller > notificationAction | Saving state for order: " . $this->_order->getId());
+                $this->logger->log("debug", "Payment Controller > notificationAction | Saving state for order: " . $this->_order->getId());
 
                 $paymentComment = 'Método de pago: ' . $source_name . '. Número: ' . $source_number;
                 $userComment = 'Pago realizado por: ' . $user_name . ' - ' . $user_email;
@@ -149,14 +148,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $payment->save();
 
                     // Create invoice if not exists
-                    if (!$order->hasInvoices()) {
-                        $invoice = $order->prepareInvoice()
+                    if (!$this->_order->hasInvoices()) {
+                        $invoice = $this->_order->prepareInvoice()
                             ->register()
                             ->capture()
                             ->addComment($message, 1, 1)
                             ->save();
     
-                        $order->addRelatedObject($invoice);
+                        $this->_order->addRelatedObject($invoice);
                     }
 
                     // Send notifications to the user
@@ -166,11 +165,14 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 } else if ($statusName === 'Refunded') {
                     // Cancel Sale
                     $this->_order->cancel()->setStatus($this->settings->get('order_status_refunded'));
+                } else if($statusName === 'Authorized') {
+                    //set order status
+                    $this->_order->setStatus('authorized_mobbex');
                 } else {
                     $this->_order->cancel()->setState($this->settings->get('order_status_cancelled'), true, $message);
                 }
 
-                $this->logger->debug('debug', 'Payment Controller > notificationAction | Save Order: ' . $this->_order->getId());
+                $this->logger->log('debug', 'Payment Controller > notificationAction | Save Order: ' . $this->_order->getId());
 
                 // Save the order
                 $this->_order->save();
@@ -178,8 +180,35 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 $this->_checkoutSession->unsQuoteId();
             }
         } catch (Exception $e) {
-            $this->logger->debug('Error', 'Payment Controller > notificationAction | Exception: ', $e->getMessage());
+            $this->logger->log('Error', 'Payment Controller > notificationAction | Exception: ', $e->getMessage());
         }
+    }
+
+    public function captureAction()
+    {
+        try {
+            // Get order with him id
+            $id = $this->getRequest()->getParam('order_id');
+            $this->_order->loadByIncrementId($id);
+
+            // Get transaction data from db
+            $transaction = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $id, 'parent' => 1]);
+
+            // Make capture request
+            $result = \Mobbex\Api::request([
+                'method' => 'POST',
+                'uri'    => "operations/$transaction[payment_id]/capture",
+                'body'   => ['total' => $this->_order->getGrandTotal()],
+            ]);
+
+            if (!$result)
+                throw new \Exception('Uncaught Exception on Mobbex Request', 500);
+        } catch (\Exception $e) {
+            // Add message to admin panel and debug
+            $this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+        }
+
+        return Mage::app()->getResponse()->setRedirect(Mage::helper('adminhtml')->getUrl("adminhtml/sales_order/view", array('order_id' => $this->_order->getId())));
     }
 
     // The cancel action is triggered when an order is to be cancelled
@@ -193,7 +222,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             }
         }
 
-        $this->logger->debug('debug', 'Payment Controller > cancelAction | Order Cancelled', ['order_id' => $this->_order->getId()]);
+        $this->logger->log('debug', 'Payment Controller > cancelAction | Order Cancelled', ['order_id' => $this->_order->getId()]);
 
         Mage_Core_Controller_Varien_Action::_redirect('checkout/onepage/failure', array('_secure' => true));
     }
@@ -211,7 +240,6 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
 
             $mobbex_data['returnUrl']  = $this->helper->getModuleUrl('response', ['orderId' => $orderId]);
             $mobbex_data['checkoutId'] = isset($checkout['id']) ? $checkout['id'] : '';
-            $mobbex_data['orderId']    = $orderId;
             $mobbex_data['url']        = isset($checkout['url']) ? $checkout['url'] : '';
             $mobbex_data['wallet']     = isset($checkout['wallet']) ? $checkout['wallet'] : '';
 
@@ -225,7 +253,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
             );
             
         } catch (\Exception $e) {
-            $this->logger->debug('error', $e->getMessage(), isset($e->data) ? $e->data : []);
+            $this->logger->log('error', $e->getMessage(), isset($e->data) ? $e->data : []);
             return false;
         }
 
@@ -241,77 +269,15 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
      */
     public function getStatusName($order, $statusCode)
     {
-        if ($statusCode == 2 || $statusCode == 3 || $statusCode == 100 || $statusCode == 201) {
+        if ($statusCode == 2 || $statusCode == 100 || $statusCode == 201)
             $name = 'InProcess';
-        } else if ($statusCode == 4 || $statusCode >= 200 && $statusCode < 400) {
+        else if($statusCode == 3)
+            $name = 'Authorized';
+        else if ($statusCode == 4 || $statusCode >= 200 && $statusCode < 400)
             $name = 'Approved';
-        } else {
+        else
             $name = $order->getStatus() != 'pending' ? 'Cancelled' : 'Refunded';
-        }
 
         return $name;
-    }
-
-    /**
-     * Format the webhook data in an array.
-     * 
-     * @param array $webhook_data
-     * @param int $order_id
-     * @param bool $multicard
-     * @param bool $multivendor
-     * @return array $data
-     * 
-     */
-    public function formatWebhookData($webhookData, $orderId, $multicard, $multivendor)
-    {
-        $data = [
-            'order_id'           => $orderId,
-            'parent'             => isset($webhookData['payment']['id']) ? $this->isParent($webhookData['payment']['id']) : false,
-            'operation_type'     => isset($webhookData['payment']['operation']['type']) ? $webhookData['payment']['operation']['type'] : '',
-            'payment_id'         => isset($webhookData['payment']['id']) ? $webhookData['payment']['id'] : '',
-            'description'        => isset($webhookData['payment']['description']) ? $webhookData['payment']['description'] : '',
-            'status_code'        => isset($webhookData['payment']['status']['code']) ? $webhookData['payment']['status']['code'] : '',
-            'status_message'     => isset($webhookData['payment']['status']['message']) ? $webhookData['payment']['status']['message'] : '',
-            'source_name'        => isset($webhookData['payment']['source']['name']) ? $webhookData['payment']['source']['name'] : 'Mobbex',
-            'source_type'        => isset($webhookData['payment']['source']['type']) ? $webhookData['payment']['source']['type'] : 'Mobbex',
-            'source_reference'   => isset($webhookData['payment']['source']['reference']) ? $webhookData['payment']['source']['reference'] : '',
-            'source_number'      => isset($webhookData['payment']['source']['number']) ? $webhookData['payment']['source']['number'] : '',
-            'source_expiration'  => isset($webhookData['payment']['source']['expiration']) ? json_encode($webhookData['payment']['source']['expiration']) : '',
-            'source_installment' => isset($webhookData['payment']['source']['installment']) ? json_encode($webhookData['payment']['source']['installment']) : '',
-            'installment_name'   => isset($webhookData['payment']['source']['installment']['description']) ? json_encode($webhookData['payment']['source']['installment']['description']) : '',
-            'installment_amount' => isset($webhookData['payment']['source']['installment']['amount']) ? $webhookData['payment']['source']['installment']['amount'] : '',
-            'installment_count'  => isset($webhookData['payment']['source']['installment']['count']) ? $webhookData['payment']['source']['installment']['count'] : '',
-            'source_url'         => isset($webhookData['payment']['source']['url']) ? json_encode($webhookData['payment']['source']['url']) : '',
-            'cardholder'         => isset($webhookData['payment']['source']['cardholder']) ? json_encode(($webhookData['payment']['source']['cardholder'])) : '',
-            'entity_name'        => isset($webhookData['entity']['name']) ? $webhookData['entity']['name'] : '',
-            'entity_uid'         => isset($webhookData['entity']['uid']) ? $webhookData['entity']['uid'] : '',
-            'customer'           => isset($webhookData['customer']) ? json_encode($webhookData['customer']) : '',
-            'checkout_uid'       => isset($webhookData['checkout']['uid']) ? $webhookData['checkout']['uid'] : '',
-            'total'              => isset($webhookData['payment']['total']) ? $webhookData['payment']['total'] : '',
-            'currency'           => isset($webhookData['checkout']['currency']) ? $webhookData['checkout']['currency'] : '',
-            'risk_analysis'      => isset($webhookData['payment']['riskAnalysis']['level']) ? $webhookData['payment']['riskAnalysis']['level'] : '',
-            'data'               => json_encode($webhookData),
-            'created'            => isset($webhookData['payment']['created']) ? $webhookData['payment']['created'] : '',
-            'updated'            => isset($webhookData['payment']['updated']) ? $webhookData['payment']['created'] : '',
-            'user'               => [
-                'name' => isset($webhookData['user']['name']) ? $webhookData['user']['name'] : '',
-                'email' => isset($webhookData['user']['email']) ? $webhookData['user']['email'] : '',
-            ],
-
-        ];
-
-        return $data;
-    }
-
-    /**
-     * Check if webhook is parent type using him payment id.
-     * 
-     * @param string $paymentId
-     * 
-     * @return bool
-     */
-    public function isParent($paymentId)
-    {
-        return strpos($paymentId, 'CHD-') !== 0;
     }
 }

@@ -74,7 +74,7 @@ function processOrder() {
             if (wallet && mbbxCurrentCard) {
                 executeWallet(response.responseJSON);
             } else if (embed) {
-                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl, response.responseJSON.orderId);
+                renderMobbex(response.responseJSON.checkoutId, response.responseJSON.returnUrl);
             } else {
                 mbbxRedirect(response.responseJSON.url);
             }
@@ -96,7 +96,7 @@ function processOrder() {
 * @param returnUrl 
 * @param orderId 
 */
-function renderMobbex(id, returnUrl, orderId) {
+function renderMobbex(id, returnUrl) {
     let options = {
         id: id,
         type: 'checkout',
@@ -109,17 +109,8 @@ function renderMobbex(id, returnUrl, orderId) {
         onClose: () => {
             checkout.setLoadWaiting(false)
             location.href = returnUrl + '&status=500'
-        },
-
-        onError: (error) => {
-            console.log(error)
-            checkout.setLoadWaiting(false)
-            location.href = returnUrl + '&status=500'
         }
     }
-
-    if (mbbxCurrentMehtod)
-        options.paymentMethod = mbbxCurrentMehtod;
 
     let mbbxEmbed = window.MobbexEmbed.init(options)
     mbbxEmbed.open()

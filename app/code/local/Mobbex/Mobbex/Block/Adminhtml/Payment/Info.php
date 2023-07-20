@@ -9,31 +9,18 @@ class Mobbex_Mobbex_Block_Adminhtml_Payment_Info extends Mage_Payment_Block_Info
 
         // Init class properties
         \Mage::helper('mobbex/instantiator')->setProperties($this, ['mobbexTransaction']);
+
     }
 
     /**
-     * Eliminates duplicated cards.
-     * @param array
-     * @return array
+     * Return the payment data from mobbex transaction model.
+     * @return array $data
      */
-    public function filterCards($cards)
+    public function getPaymentData()
     {
-        if(!$cards)
-            return false;
-
-        $filter = $data = [];
-
-        foreach ($cards as $key => $card)
-            $filter['_' . $key] = $card['payment_id'];
-
-        $filter = array_unique($filter);
-
-        foreach ($cards as $key => $card) {
-            $pos = '_' . $key;
-            if (isset($filter[$pos])) {
-                $data[] = $card;
-            }
-        }
+        $data           = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId(), 'parent' => 1]);
+        $data['childs'] = !empty($mobbexData['childs']) ? $this->mobbexTransaction->getMobbexChilds(json_decode($mobbexData['childs'], true), $mobbexData['order_id']) : false;
+        $data['coupon'] = "https://mobbex.com/console/" . $data['entity_uid'] . "/operations/?oid=" . $data['payment_id'];
 
         return $data;
     }

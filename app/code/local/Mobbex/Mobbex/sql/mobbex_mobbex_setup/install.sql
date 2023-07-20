@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS DB_PREFIX_mobbex_transaction (
     `transaction_mobbex_id` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `order_id` INT(11) NOT NULL,
     `parent` TINYINT NOT NULL,
+    `childs` TEXT NOT NULL,
     `operation_type` TEXT NOT NULL,
     `payment_id` TEXT NOT NULL,
     `description` TEXT NOT NULL,

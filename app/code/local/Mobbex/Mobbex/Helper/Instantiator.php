@@ -30,13 +30,18 @@ class Mobbex_Mobbex_Helper_Instantiator extends Mage_Core_Helper_Abstract
     public function setProperties($object, $properties)
     {
         foreach ($properties as $property) {
-            foreach ($this->type as $key => $value) {
-                if (in_array($property, $value))
-                    $method = $key;
-            }
+            $method = $this->getMethod($property);
             $object->$property = Mage::$method($this->classes[$property]);
             if ($property === 'sdk')
                 $object->sdk->init();
+        }
+    }
+
+    public function getMethod($property)
+    {
+        foreach ($this->type as $method => $value) {
+            if(in_array($property, $value))
+                return $method;
         }
     }
 }

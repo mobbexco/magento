@@ -1,13 +1,13 @@
 <?php
-    $_helper = $this->helper('mobbex/data');
-    $_order = $this->getOrder();
-    $_order_id= $_order->getRealOrderId();
+    $_helper   = $this->helper('mobbex/data');
+    $_order    = $this->getOrder();
+    $_order_id = $_order->getRealOrderId();
     //Save transaction information
-    $data = json_decode(Mage::getModel('mobbex/transaction')->getMobbexTransaction(['order_id' => $_order_id, 'parent' => 1]));
+    $data = Mage::getModel('mobbex/transaction')->getMobbexTransaction(['order_id' => $_order_id, 'parent' => 1]);
     $newFTotalCost = 0;
     $newTotal = 0;
     if(isset($data['data'])){
-        $amount_paid = $data['total'] ;
+        $amount_paid = $data['total'];
         $subTotal = $_order->getData('base_subtotal');//subtotal is only the price of the products alone
         $shipTotal = $_order->getData('base_shipping_amount'); //shipping price
         $newFTotalCost =  $amount_paid - ($subTotal + $shipTotal); //Fininancing Total Cost

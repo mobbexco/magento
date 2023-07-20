@@ -1,8 +1,4 @@
-<?php
-    $mobbexData = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId(), 'parent' => 1]);
-    $cards      = $this->filterCards($mobbexData && $mobbexData['operation_type'] == 'payment.multiple-sources' ? $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId()]) : false);
-    $coupon     = isset($mobbexData['entity_uid']) && isset($mobbexData['payment_id']) ? "https://mobbex.com/console/" . $mobbexData['entity_uid'] . "/operations/?oid=" . $mobbexData['payment_id'] : '';
-?>
+<?php $data = $this->getPaymentData() ?>
 
 <table>
 <tr>
@@ -10,68 +6,96 @@
 </tr>
 <tr>
     <td>Transaction ID:</td>
-    <td><?= isset($mobbexData['payment_id']) ? $mobbexData['payment_id'] : '' ?></td>
+    <td><?= isset($data['payment_id']) ? $data['payment_id'] : '' ?></td>
 </tr>
 <tr>
     <td>Total:</td>
-    <td><?= isset($mobbexData['total']) ? $mobbexData['total'] : '' ?></td>
+    <td><?= isset($data['total']) ? $data['total'] : '' ?></td>
+</tr>
+<tr>
+    <td>Status Message:</td>
+    <td><?= isset($data['status_message']) ? $data['status_message'] : '' ?></td>
 </tr>
 <tr>
     <th>Payment Sources</th>
 </tr>
 <tr>
-    <td>Payment Method:</td>
-    <td><?= isset($mobbexData['source_type']) ? $mobbexData['source_type'] : '' ?></td>
+    <td>Payment Metdod:</td>
+    <td><?= isset($data['source_type']) ? $data['source_type'] : '' ?></td>
 </tr>
 
-<?php if($cards) : ?>
-    <?php foreach($cards as $key => $card): ?>
-        <?php if($card['source_name'] !== "multicard"): ?>
+<?php if($data['childs']) : ?>
+    <?php foreach($data['childs'] as $key => $child): ?>
+        <?php if($child['source_name'] !== "multicard"): ?>
             <tr>
-                <th><?= 'Card '.($key + 1)  ?></th>
+                <th><?= 'Card ' . ($key + 1)  ?></th>
             </tr>
             <tr>
                 <td>Name:</td>
-                <td><?= isset($card['source_name']) ? $card['source_name'] : '' ?></td>
+                <td><?= isset($child['source_name']) ? $child['source_name'] : '' ?></td>
             </tr>
             <tr>
                 <td>Number:</td>
-                <td><?= isset($card['source_number']) ? $card['source_number'] : '' ?></td>
+                <td><?= isset($child['source_number']) ? $child['source_number'] : '' ?></td>
             </tr>
             <tr>
                 <td>Installment:</td>
-                <td><?= isset($card['source_installment']) ? json_decode($card['source_installment'], true)['description'] . ' ' . json_decode($card['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
+                <td><?= isset($child['source_installment']) ? json_decode($child['source_installment'], true)['description'] . ' ' . json_decode($child['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
             </tr>
             <tr>
                 <td>Amount:</td>
-                <td><?= isset($card['total']) ? $card['total'] : '' ?></td>
+                <td><?= isset($child['total']) ? $child['total'] : '' ?></td>
             </tr>
         <?php endif; ?>
     <?php endforeach; ?>
 <?php else : ?>
     <tr>
         <td>Source name:</td>
-        <td><?= isset($mobbexData['source_name']) ? $mobbexData['source_name'] : '' ?></td>
+        <td><?= isset($data['source_name']) ? $data['source_name'] : '' ?></td>
     </tr>
     <tr>
         <td>Source Info:</td>
-        <td><?= isset($mobbexData['source_number']) ? $mobbexData['source_number'] : '' ?></td>
+        <td><?= isset($data['source_number']) ? $data['source_number'] : '' ?></td>
     </tr>
     <tr>
         <td>Source Installment:</td>
-        <td><?= isset($mobbexData['source_installment']) ? json_decode($mobbexData['source_installment'], true)['description'] . ' ' . json_decode($mobbexData['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
+        <td><?= isset($data['source_installment']) ? json_decode($data['source_installment'], true)['description'] . ' ' . json_decode($data['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
     </tr>
 <?php endif; ?>
 
 <tr>
     <th>Entity Data</th>
 </tr>
+    <?php if ($data['operation_type'] == 'payment.multiple-vendor' && $data['childs']) : ?>
+        <?php foreach ($data['childs'] as $key => $child) : ?>
+            <tr>
+                <th><?= 'Entity ' . ($key + 1)  ?></th>
+            </tr>
+            <tr>
+                <td>Name:</td>
+                <td><?= isset($child['entity_name']) ? $child['entity_name'] : '' ?></td>
+            </tr>
+            <tr>
+                <td>UID:</td>
+                <td><?= isset($child['entity_uid']) ? $child['entity_uid'] : '' ?></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <tr>
+            <td>Name:</td>
+            <td><?= isset($data['entity_name']) ? $data['entity_name'] : '' ?></td>
+        </tr>
+        <tr>
+            <td>UID:</td>
+            <td><?= isset($data['entity_uid']) ? $data['entity_uid'] : '' ?></td>
+        </tr>
+    <?php endif; ?>
 <tr>
     <td>Risk Analysis:</td>
-    <td><?= isset($mobbexData['risk_analysis']) ? $mobbexData['risk_analysis'] : '' ?></td>
+    <td><?= isset($data['risk_analysis']) ? $data['risk_analysis'] : '' ?></td>
 </tr>
 <tr>
     <td>Coupon:</td>
-    <td><a href="<?= $coupon ?>">View</a></td>
+    <td><a href="<?= $data['coupon'] ?>">View</a></td>
 </tr>
 </table>

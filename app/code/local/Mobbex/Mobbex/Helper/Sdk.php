@@ -6,7 +6,7 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
     public $instantiator;
 
     public function __construct() {
-        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'cache']);
+        \Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'helper', 'logger', 'cache']);
     }
 
     /**
@@ -15,12 +15,15 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
     public function init()
     {
         // Set platform information
-        \Mobbex\Platform::init('magento_1', '2.0', Mage::getBaseUrl(),
-        [
-            'magento' => Mage::getVersion(),
-            'webpay'  => 2.0,
-            'sdk'     => \Composer\InstalledVersions::getVersion('mobbexco/php-plugins-sdk'),
-        ], $this->settings->getAll(), [$this->helper, 'executeHook']);
+        \Mobbex\Platform::init('magento', $this->helper::VERSION, Mage::getBaseUrl(),
+            [
+                'magento' => Mage::getVersion(),
+                'sdk'     => class_exists('\Composer\InstalledVersions') && \Composer\InstalledVersions::isInstalled('mobbexco/php-plugins-sdk') ? \Composer\InstalledVersions::getVersion('mobbexco/php-plugins-sdk') : '',
+            ],
+            $this->settings->getAll(), 
+            [$this->helper, 'executeHook'],
+            [$this->logger, 'log']
+        );
 
         //Load models
         \Mobbex\Platform::loadModels($this->cache);
