@@ -24,27 +24,27 @@
     <td><?= isset($data['source_type']) ? $data['source_type'] : '' ?></td>
 </tr>
 
-<?php if($data['cards']) : ?>
-    <?php foreach($data['cards'] as $key => $card): ?>
-        <?php if($card['source_name'] !== "multicard"): ?>
+<?php if($data['childs']) : ?>
+    <?php foreach($data['childs'] as $key => $child): ?>
+        <?php if($child['source_name'] !== "multicard"): ?>
             <tr>
-                <th><?= 'Card '.($key + 1)  ?></th>
+                <th><?= 'Card ' . ($key + 1)  ?></th>
             </tr>
             <tr>
                 <td>Name:</td>
-                <td><?= isset($card['source_name']) ? $card['source_name'] : '' ?></td>
+                <td><?= isset($child['source_name']) ? $child['source_name'] : '' ?></td>
             </tr>
             <tr>
                 <td>Number:</td>
-                <td><?= isset($card['source_number']) ? $card['source_number'] : '' ?></td>
+                <td><?= isset($child['source_number']) ? $child['source_number'] : '' ?></td>
             </tr>
             <tr>
                 <td>Installment:</td>
-                <td><?= isset($card['source_installment']) ? json_decode($card['source_installment'], true)['description'] . ' ' . json_decode($card['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
+                <td><?= isset($child['source_installment']) ? json_decode($child['source_installment'], true)['description'] . ' ' . json_decode($child['source_installment'], true)['count'] . ' cuota/s' : '' ?></td>
             </tr>
             <tr>
                 <td>Amount:</td>
-                <td><?= isset($card['total']) ? $card['total'] : '' ?></td>
+                <td><?= isset($child['total']) ? $child['total'] : '' ?></td>
             </tr>
         <?php endif; ?>
     <?php endforeach; ?>
@@ -66,6 +66,30 @@
 <tr>
     <th>Entity Data</th>
 </tr>
+    <?php if ($data['operation_type'] == 'payment.multiple-vendor' && $data['childs']) : ?>
+        <?php foreach ($data['childs'] as $key => $child) : ?>
+            <tr>
+                <th><?= 'Entity ' . ($key + 1)  ?></th>
+            </tr>
+            <tr>
+                <td>Name:</td>
+                <td><?= isset($child['entity_name']) ? $child['entity_name'] : '' ?></td>
+            </tr>
+            <tr>
+                <td>UID:</td>
+                <td><?= isset($child['entity_uid']) ? $child['entity_uid'] : '' ?></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <tr>
+            <td>Name:</td>
+            <td><?= isset($data['entity_name']) ? $data['entity_name'] : '' ?></td>
+        </tr>
+        <tr>
+            <td>UID:</td>
+            <td><?= isset($data['entity_uid']) ? $data['entity_uid'] : '' ?></td>
+        </tr>
+    <?php endif; ?>
 <tr>
     <td>Risk Analysis:</td>
     <td><?= isset($data['risk_analysis']) ? $data['risk_analysis'] : '' ?></td>

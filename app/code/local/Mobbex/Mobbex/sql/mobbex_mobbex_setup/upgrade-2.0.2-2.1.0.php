@@ -21,4 +21,10 @@ if (!$this->getConnection()->tableColumnExists('mobbex_transaction', 'parent'))
         )
     );
 
+// Add childs column if doesn´t exists
+if (!$this->getConnection()->tableColumnExists('mobbex_transaction', 'childs'))
+    $this->getConnection('core_write')->query(
+        "ALTER TABLE `mobbex_transaction` ADD COLUMN `childs` TEXT NOT NULL;"
+    );
+
 $this->endSetup();
