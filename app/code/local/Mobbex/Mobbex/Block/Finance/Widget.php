@@ -32,7 +32,7 @@ class Mobbex_Mobbex_Block_Finance_Widget extends Mage_Core_Block_Template
         if ($this->action == 'product' ? !$product->isSaleable() : !$quote->hasItems())
             return $this->enable = false;
         
-        $total    = $this->action === 'product' ?   $product->getPrice() : $quote->getGrandTotal();
+        $total    = $this->action === 'product' ?   $product->getGroupPrice() : $quote->getGrandTotal();
         $products = $this->action === 'product' ? [$product] : [];
         
         if ($this->action === 'cart') {
