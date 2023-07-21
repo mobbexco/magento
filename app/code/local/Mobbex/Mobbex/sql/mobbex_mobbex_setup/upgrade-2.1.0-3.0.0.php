@@ -2,6 +2,14 @@
 
 $this->startSetup();
 
+// Stops execution if dependencies cannot be found
+if (!file_exists(__DIR__ . '/../../vendor/autoload.php'))
+    throw new \Exception(sprintf(
+        'Error: Bad installation of Mobbex module. Re-download the module (%s) from releases page on Github (%s).',
+        'mobbex.{version}.mage-1.6-1.9.zip',
+        'https://github.com/mobbexco/magento/releases/'
+    ), 1);
+
 //install tables from sdk sql
 foreach (['cache'] as $table) {
     $this->run(
@@ -34,7 +42,7 @@ if (!$this->getConnection()->tableColumnExists('mobbex_transaction', 'parent'))
 
 // Insert authorized status
 if (!$this->getTableRow('sales/order_status', 'status', 'authorized_mobbex'))
-    $this->getConnection()->insertArray('sales/order_status', ['status', 'label'],
+    $this->getConnection()->insertArray($this->getTable('sales/order_status'), ['status', 'label'],
         [
             [
                 'status' => 'authorized_mobbex',
@@ -45,7 +53,7 @@ if (!$this->getTableRow('sales/order_status', 'status', 'authorized_mobbex'))
 
 // Insert states
 if (!$this->getTableRow('sales/order_status_state', 'status', 'authorized_mobbex'))
-    $this->getConnection()->insertArray('sales/order_status_state', ['status', 'state', 'is_default'],
+    $this->getConnection()->insertArray($this->getTable('sales/order_status_state'), ['status', 'state', 'is_default'],
         [
             [
                 'status'     => 'authorized_mobbex',
