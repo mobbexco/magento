@@ -1,12 +1,12 @@
 <?php
 foreach ($this->settings->catalogSettings as $value)
-	${$value} = $this->settings->getCatalogSetting($this->idProduct, $value);
+	${$value} = $this->settings->getCatalogSetting($this->rowId, $value);
 
-extract(\Mobbex\Repository::getPlansFilterFields($id, $common_plans, $advanced_plans));
+extract(\Mobbex\Repository::getPlansFilterFields($this->rowId, $common_plans, $advanced_plans));
 
 include 'plans-filter.phtml';
 include 'subscriptions.phtml';
 if($this->settings->get('multivendor'))
 	include 'multivendor.phtml';
 
-$this->helper->executeHook('mobbexProductSettings', false, $id);
+$this->helper->executeHook('mobbexProductSettings', false, $this->rowId);
