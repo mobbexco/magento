@@ -44,7 +44,6 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	{
 		// Init class properties
 		\Mage::helper('mobbex/instantiator')->setProperties($this, ['customField']);
-		$this->helper = \Mage::helper('mobbex/data');
 		$this->fields = \Mage::getModel('mobbex/customfield');
 	}
 
@@ -88,10 +87,12 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	 */
 	public function getCatalogSetting($id, $object, $catalogType = 'product')
 	{
-		if (strpos($object, '_plans'))
-			return unserialize($this->customField->getCustomField($id, $catalogType, $object)) ?: [];
+		$setting = $this->customField->getCustomField($id, $catalogType, $object);
 
-		return $this->customField->getCustomField($id, $catalogType, $object) ?: '';
+		if (strpos($object, '_plans'))
+			return $setting && is_string($setting) ? json_decode($setting, true) : [];
+
+		return $setting ?: '';
 	}
 
 	/**
@@ -124,11 +125,8 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 			}
 		}
 
-		foreach (['advanced_plans', 'common_plans'] as $plan)
-			$configs[$plan] = serialize($configs[$plan]);
-
 		foreach ($configs as $key => $value)
-			$this->customField->saveCustomField($id, 'product', $key, $value);
+			$this->customField->saveCustomField($id, $catalogType, $key, $value);
 	}
 
 	/** CATALOG SETTINGS */

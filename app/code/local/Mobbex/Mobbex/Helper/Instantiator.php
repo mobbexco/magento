@@ -6,7 +6,7 @@ class Mobbex_Mobbex_Helper_Instantiator extends Mage_Core_Helper_Abstract
     public $classes = [
         'sdk'               => 'mobbex/sdk',
         'settings'          => 'mobbex/settings',
-        'helper'            => 'mobbex/mobbex',
+        'helper'            => 'mobbex',
         'logger'            => 'mobbex/logger',
         'customField'       => 'mobbex/customfield',
         'cache'             => 'mobbex/cache',

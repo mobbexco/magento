@@ -1,8 +1,6 @@
 #!/bin/sh
 
-VER="2.1.0"
-
-# Create 1.6 version
+VER="3.0.0"
 MAGE_V="1.6-1.9"
 
 mkdir mobbex

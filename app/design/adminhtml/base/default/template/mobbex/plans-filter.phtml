@@ -14,7 +14,7 @@
 						<?php foreach ($commonFields as $field) : ?>
 							<div class="mbbx-plan">
 								<input type="hidden" name="<?= $field['id'] ?>" value="no">
-								<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>" data-form-part="<?= $form ?>">
+								<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>">
 								<label for="<?= $field['id'] ?>"><?= $field['label'] ?></label>
 							</div>
 						<?php endforeach; ?>
@@ -27,7 +27,7 @@
 							</div>
 							<?php foreach ($fields as $field) : ?>
 								<div class="mbbx-plan-advanced">
-									<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>" data-form-part="<?= $form ?>">
+									<input type="checkbox" name="<?= $field['id'] ?>" <?= (bool) $field['value'] ? 'checked="checked"' : '' ?> id="<?= $field['id'] ?>">
 									<label for="<?= $field['id'] ?>"><?= $field['label'] ?></label>
 								</div>
 							<?php endforeach; ?>

@@ -7,13 +7,12 @@ class Mobbex_Mobbex_Block_Adminhtml_Catalog_Product_Tab extends Mage_Adminhtml_B
 	{
 		parent::_construct();
 
-		$id = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
+		$this->rowId = Mage::registry('current_product') ? Mage::registry('current_product')->getId() : false;
 
-		if (empty($id))
+		if (!$this->rowId)
 			return;
 
 		\Mage::helper('mobbex/instantiator')->setProperties($this, ['sdk', 'settings', 'helper']);
-		$this->idProduct = $id;
 
 		$this->setTemplate('mobbex/product-settings.phtml');
 	}

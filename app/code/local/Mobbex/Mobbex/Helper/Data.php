@@ -1,13 +1,13 @@
 <?php
 
-class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
+/**
+ * Do not rename this class. Magento uses it name to get module translations.
+ */
+class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
     const VERSION = '3.0.0';
-	
-	/** @var Mobbex_Mobbex_Helper_Instantiator*/
-	public $instantiator;
 
-	public function __construct()
+    public function __construct()
 	{
 		//Set properties
 		\Mage::helper('mobbex/instantiator')->setProperties($this, ['settings', 'logger', 'customField', '_order']);
@@ -183,15 +183,11 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
     }
 
 	/**
-
 	 * Get Addresses data for Mobebx Checkout.
-
+     * 
 	 * @param array $addressesData
-
 	 * @return array $addresses
-
 	 */
-
 	public function getAddresses($addressesData)
 
 	{
@@ -269,5 +265,4 @@ class Mobbex_Mobbex_Helper_Mobbex extends Mage_Core_Helper_Abstract
             $this->logger->log('error', 'Mobbex Helper > executeHook | Error: ', $e->getMessage());
         }
     }
-} 
-
+}
