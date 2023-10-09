@@ -2,6 +2,8 @@
 
 class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 {
+	const EMBED_VERSION = '1.1.0';
+	
 	/** @var Mobbex_Mobbex_Helper_Instantiator */
 	public $instantiator;
 
