@@ -192,9 +192,13 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     public function captureAction()
     {
         try {
-            // Get order with him id
-            $id = $this->getRequest()->getParam('order_id');
+            // Get order id and the token
+            $id    = $this->getRequest()->getParam('order_id');
+            $token = urldecode($this->getRequest()->getParam('mbbxToken', ''));
             $this->_order->loadByIncrementId($id);
+
+            if (!\Mobbex\Repository::validateToken($token))
+                throw new \Exception('Invalid Token on capture action', 1);
 
             // Get transaction data from db
             $transaction = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $id, 'parent' => 1]);
