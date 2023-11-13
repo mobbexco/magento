@@ -80,6 +80,7 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			\Mobbex\Repository::getInstallments($orderedItems, $common_plans, $advanced_plans),
 			$customer,
 			$this->getAddresses([$this->_order->getBillingAddress()->getData(), $this->_order->getShippingAddress()->getData()]),
+			'all',
 			'mobbexCheckoutRequest'
 		);
 
