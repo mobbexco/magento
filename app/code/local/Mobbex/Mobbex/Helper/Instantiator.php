@@ -14,11 +14,12 @@ class Mobbex_Mobbex_Helper_Instantiator extends Mage_Core_Helper_Abstract
         '_checkoutSession'  => 'checkout/session',
         '_quote'            => 'sales/quote',
         '_order'            => 'sales/order',
+        'db'                => 'mobbex/db',
     ];
 
     public $type = [
         'helper'       => ['sdk', 'settings', 'helper', 'logger'],
-        'getModel'     => ['customField', 'cache', 'mobbexTransaction', '_quote', '_order'],
+        'getModel'     => ['customField', 'cache', 'mobbexTransaction', '_quote', '_order', 'db'],
         'getSingleton' => ['_checkoutSession'],
     ];
 
