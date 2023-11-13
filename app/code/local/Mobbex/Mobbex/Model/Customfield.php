@@ -42,7 +42,7 @@ class Mobbex_Mobbex_Model_Customfield extends Mage_Core_Model_Abstract
     public function saveCustomField($row_id, $object, $field_name, $data)
     {
         // Previus record
-        $previous_id = $this->getCustomField($row_id, $object, $field_name, 'customfield_id');
+        $previous_id = $this->getCustomField($row_id, $object, $field_name, 'id');
         
         // Instantiate if record previously exists
         $custom_field = $previous_id ? $this->load($previous_id) : new Mobbex_Mobbex_Model_Customfield();
