@@ -10,20 +10,22 @@ if (!file_exists(__DIR__ . '/../../vendor/autoload.php'))
         'https://github.com/mobbexco/magento/releases/'
     ), 1);
 
+// Load sdk models
 require_once __DIR__ . '/../../vendor/autoload.php';
+\Mobbex\Platform::loadModels(null, \Mage::getModel('mobbex/db'));
 
 // Rename transaction id column
 if ($this->getConnection()->isTableExists('mobbex_transaction'))
     if ($this->getConnection()->tableColumnExists('mobbex_transaction', 'transaction_mobbex_id'))
         $this->run(
-            "ALTER TABLE `mobbex_transaction` RENAME COLUMN transaction_mobbex_id TO id;"
+            "ALTER TABLE `mobbex_transaction` CHANGE COLUMN `transaction_mobbex_id` id INT(11);"
         );
 
 // Rename customfield id column
 if ($this->getConnection()->isTableExists('mobbex_customfield'))
     if ($this->getConnection()->tableColumnExists('mobbex_customfield', 'customfield_id'))
         $this->run(
-            "ALTER TABLE `mobbex_customfield` RENAME COLUMN customfield_id TO id;"
+            "ALTER TABLE `mobbex_customfield` CHANGE COLUMN `customfield_id` id INT(11);"
         );
 
 // Create and alter tables
