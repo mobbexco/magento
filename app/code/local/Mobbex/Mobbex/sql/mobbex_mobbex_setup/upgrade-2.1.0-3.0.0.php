@@ -10,34 +10,29 @@ if (!file_exists(__DIR__ . '/../../vendor/autoload.php'))
         'https://github.com/mobbexco/magento/releases/'
     ), 1);
 
-//install tables from sdk sql
-foreach (['cache'] as $table) {
-    $this->run(
-        str_replace(
-            'DB_PREFIX_',
-            (string) \Mage::getConfig()->getTablePrefix(),
-            file_get_contents(__DIR__ . "/../../vendor/mobbexco/php-plugins-sdk/src/sql/$table.sql")
-        )
-    );
-}
+// Load sdk models
+require_once __DIR__ . '/../../vendor/autoload.php';
+\Mobbex\Platform::loadModels(null, \Mage::getModel('mobbex/db'));
 
-// Try to create tables
-$this->run(
-    str_replace(
-        'DB_PREFIX_',
-        (string) \Mage::getConfig()->getTablePrefix(),
-        file_get_contents(dirname(__FILE__) . '/install.sql')
-    )
-);
+// Rename transaction id column
+if ($this->getConnection()->isTableExists('mobbex_transaction'))
+    if ($this->getConnection()->tableColumnExists('mobbex_transaction', 'transaction_mobbex_id'))
+        $this->run(
+            "ALTER TABLE `mobbex_transaction` CHANGE COLUMN `transaction_mobbex_id` id INT(11);"
+        );
 
-// Update < 1.4 transaction table
-if (!$this->getConnection()->tableColumnExists('mobbex_transaction', 'parent'))
-    $this->run(
-        str_replace(
-            'DB_PREFIX_',
-            (string) \Mage::getConfig()->getTablePrefix(),
-            file_get_contents(dirname(__FILE__) . '/alter.sql')
-        )
+// Rename customfield id column
+if ($this->getConnection()->isTableExists('mobbex_customfield'))
+    if ($this->getConnection()->tableColumnExists('mobbex_customfield', 'customfield_id'))
+        $this->run(
+            "ALTER TABLE `mobbex_customfield` CHANGE COLUMN `customfield_id` id INT(11);"
+        );
+
+// Create and alter tables
+foreach (['cache', 'transaction', 'log', 'task', 'customfield'] as $table)
+    new \Mobbex\Model\Table(
+        $table,
+        $table == 'customfield' ? \Mobbex\Model\Table::getTableDefinition('custom_fields') : null
     );
 
 // Insert authorized status
@@ -61,12 +56,6 @@ if (!$this->getTableRow('sales/order_status_state', 'status', 'authorized_mobbex
                 'is_default' => 1
             ]
         ]
-    );
-
-// Add childs column if doesn´t exists
-if (!$this->getConnection()->tableColumnExists('mobbex_transaction', 'childs'))
-    $this->run(
-        "ALTER TABLE `mobbex_transaction` ADD COLUMN `childs` TEXT NOT NULL;"
     );
 
 $this->endSetup();
