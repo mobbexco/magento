@@ -1,4 +1,7 @@
 window.addEventListener('load', function () {
+
+    var mbbxPaymentData = false;
+
     // Catch checkout section change
     if ((typeof Checkout !== 'undefined')) {
         Checkout.prototype.gotoSection = Checkout.prototype.gotoSection.wrap(
@@ -102,13 +105,17 @@ function renderMobbex(id, returnUrl) {
         type: 'checkout',
         paymentMethod: mbbxCurrentMethod || null,
 
+        onPayment: (data) => {
+            mbbxPaymentData = data.data;
+        },
+
         onResult: (responseData) => {
             location.href = returnUrl + '&status=' + responseData.status.code
         },
 
         onClose: () => {
             checkout.setLoadWaiting(false)
-            location.href = returnUrl + '&status=500'
+            location.href = returnUrl + '&status=500' + (mbbxPaymentData ? mbbxPaymentData.status.code : '500');
         }
     }
 
