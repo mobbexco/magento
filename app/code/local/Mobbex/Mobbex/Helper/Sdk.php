@@ -19,7 +19,6 @@ class Mobbex_Mobbex_Helper_Sdk extends Mage_Core_Helper_Abstract
             'magento', 
             \Mobbex_Mobbex_Helper_Data::VERSION, 
             \Mage::getBaseUrl(),
-            Mobbex_Mobbex_Helper_Settings::EMBED_VERSION,
             [
                 'magento' => Mage::getVersion(),
                 'sdk'     => class_exists('\Composer\InstalledVersions') && \Composer\InstalledVersions::isInstalled('mobbexco/php-plugins-sdk') ? \Composer\InstalledVersions::getVersion('mobbexco/php-plugins-sdk') : '',
