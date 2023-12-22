@@ -1,16 +1,22 @@
 <?php
+// Get primary color config
+$color = (new Mobbex_Mobbex_Helper_Settings)->get('color');
 
 foreach ($this->data['methods'] as $method) :
 ?>
     <dt id="dt_method_mobbex_<?= $method['id'] ?>" style="display:flex;align-items: center;">
-
-        <input id="p_method_mobbex_<?= $method['id'] ?>" value="<?= $method['value'] ?>" type="radio" name="form_key" class="radio mbbx-payment-method-input" style="float: none;top:-4px;" />
-        <label for="p_method_mobbex_<?= $method['id'] ?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
-            <?php if ($method['image']) : ?>
-                <img src="<?= $method['image'] ?>" style="margin-right:5px;">
-            <?php endif; ?>
-            <?= $method['name'] ?>
-        </label>
+    <input id="p_method_mobbex_<?= $method['id'] ?>" value="<?= $method['value'] ?>" 
+        type="radio" 
+        name="form_key"
+        class="radio mbbx-payment-method-input"
+        style="float: none;top:-4px;"
+        />
+    <label for="p_method_mobbex_<?= $method['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
+        <?php if($method['image']): ?>
+            <img src="<?= $method['image'] ?>" style= "<?= $method['id'] == 'card_input' ? "background-color:$color;" : '' ?> margin-right:5px;">
+        <?php endif; ?>
+        <?= $method['name']?>
+    </label>
 
     </dt>
     <?php

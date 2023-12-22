@@ -9,6 +9,7 @@ class Mobbex_Mobbex_Helper_Settings extends Mage_Core_Helper_Abstract
 	public $settingPaths = [
 		'enabled'                 => 'payment/mobbex/active',
 		'title'                   => 'payment/mobbex/title',
+		'timeout'                 => 'payment/mobbex/timeout',
 		'api_key'                 => 'payment/mobbex/api_key',
 		'access_token'            => 'payment/mobbex/access_token',
 		'site_id'                 => 'payment/mobbex/site_id',
