@@ -1,4 +1,6 @@
 <?php
+// Get primary color config
+$color = (new Mobbex_Mobbex_Helper_Settings)->get('color');
 
 foreach ($this->data['methods'] as $method) :
     ?>
@@ -12,7 +14,7 @@ foreach ($this->data['methods'] as $method) :
         />
     <label for="p_method_mobbex_<?= $method['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
         <?php if($method['image']): ?>
-            <img src="<?= $method['image'] ?>" style="width:50px;border-radius:50%;margin-right:5px;">
+            <img src="<?= $method['image'] ?>" style= "<?= $method['id'] == 'card_input' ? "background-color:$color;" : '' ?> width:50px;border-radius:50%;margin-right:5px;">
         <?php endif; ?>
         <?= $method['name']?>
     </label>
