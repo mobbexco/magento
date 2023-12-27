@@ -16,7 +16,7 @@ $wallet     = $settings->get('wallet') && Mage::getSingleton('customer/session')
 </script>
 
 <?php if($embed): ?>
-	<script type="text/javascript" src="https://res.mobbex.com/js/embed/mobbex.embed@1.0.23.js"></script>
+	<script type="text/javascript" src="https://res.mobbex.com/js/embed/mobbex.embed@<?= Mobbex_Mobbex_Helper_Settings::EMBED_VERSION ?>.js"></script>
 <?php endif; ?>
 <?php if($wallet): ?>
 	<script type="text/javascript" src="https://res.mobbex.com/js/sdk/mobbex@1.1.0.js" async></script>
