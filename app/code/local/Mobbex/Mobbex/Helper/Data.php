@@ -5,7 +5,7 @@
  */
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '3.0.0';
+    const VERSION = '3.1.0';
 
     public function __construct()
 	{
