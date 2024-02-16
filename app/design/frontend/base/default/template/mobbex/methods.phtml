@@ -13,7 +13,9 @@ foreach ($this->data['methods'] as $method) :
         />
     <label for="p_method_mobbex_<?= $method['id']?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
         <?php if($method['image']): ?>
-            <img src="<?= $method['image'] ?>" style= "<?= $method['id'] == 'card_input' ? "background-color:$color;" : '' ?> margin-right:5px;">
+            <div class="method-img-cont">
+                <img src="<?= $method['image'] ?>">
+            </div>
         <?php endif; ?>
         <?= $method['name']?>
     </label>
@@ -30,7 +32,9 @@ foreach ($this->data['cards'] as $card) :
                 <input id="p_method_mobbex_<?= $card['id'] ?>" value="<?= $card['value'] ?>" type="radio" name="form_key" class="radio mbbx-payment-method-input mbbx-card" style="float: none;top:-4px;" />
                 <label for="p_method_mobbex_<?= $card['id'] ?>" style="display:flex;align-items:center;margin-left:12px;padding-left:33px;">
                     <?php if ($card['image']) : ?>
-                        <img src="<?= $card['image'] ?>" style="margin-right:5px;">
+                        <div class="method-img-cont">
+                            <img src="<?= $card['image'] ?>">
+                        </div>
                     <?php endif; ?>
                     <?= $card['name'] ?>
                 </label>
@@ -59,8 +63,19 @@ endforeach;
 
     img[src*='res.mobbex'],
     img[src*='res.sugaway'] {
-        max-height: 2.5em;
+        max-height: 35px;
         border-radius: 100%;
+    }
+
+    .method-img-cont {
+        background-color: #6f00ff;
+        margin-right: 5px;
+        border-radius: 100%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        place-items: center;
+        justify-content: center;
     }
 </style>
 <script>
