@@ -113,7 +113,7 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                 // Get Order status
                 if ($statusName == 'inProcess') {
                     $this->_order->setStatus($this->settings->get('order_status_in_process'));
-                } else if ($statusName === 'Approved') {
+                } else if ($statusName === 'approved') {
 
                     //Uncancel order if is cancelled
                     $items = $this->_order->getAllItems();
@@ -167,10 +167,10 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
                     $this->_order->sendNewOrderEmail();
                     $this->_order->setEmailSent(true);
 
-                } else if ($statusName === 'Refunded') {
+                } else if ($statusName === 'refunded') {
                     // Cancel Sale
                     $this->_order->cancel()->setStatus($this->settings->get('order_status_refunded'));
-                } else if($statusName === 'Authorized') {
+                } else if($statusName === 'authorized') {
                     //set order status
                     $this->_order->setStatus('authorized_mobbex');
                 } else {
@@ -279,13 +279,13 @@ class Mobbex_Mobbex_PaymentController extends Mage_Core_Controller_Front_Action
     public function getStatusName($order, $statusCode)
     {
         if ($statusCode == 2 || $statusCode == 100 || $statusCode == 201)
-            $name = 'InProcess';
+            $name = 'inProcess';
         else if($statusCode == 3)
-            $name = 'Authorized';
+            $name = 'authorized';
         else if ($statusCode == 4 || $statusCode >= 200 && $statusCode < 400)
-            $name = 'Approved';
+            $name = 'approved';
         else
-            $name = $order->getStatus() != 'pending' ? 'Cancelled' : 'Refunded';
+            $name = $order->getStatus() != 'pending' ? 'refunded' : 'cancelled';
 
         return $name;
     }
