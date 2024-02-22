@@ -78,7 +78,10 @@ class Mobbex_Mobbex_Block_Payment_Methods extends Mage_Core_Block_Template
             ],
             'items'          => [],
             'shipping_total' => $quote->getShippingAddress()->getShippingAmount(),
-            'addresses'      => $this->helper->getAddresses([$billingData, $quote->getShippingAddress()->getData()]),
+            'addresses'      => array_filter([
+				$this->helper->getAddressData($quote->getBillingAddress()),
+				$this->helper->getAddressData($quote->getShippingAddress())
+			]),
             'quote'          => $quote
         ];
 

@@ -19,8 +19,7 @@ class Mobbex_Mobbex_Block_Adminhtml_Payment_Info extends Mage_Payment_Block_Info
     public function getPaymentData()
     {
         $data           = $this->mobbexTransaction->getMobbexTransaction(['order_id' => $this->getInfo()->getOrder()->getIncrementId(), 'parent' => 1]);
-        $data['childs'] = !empty($mobbexData['childs']) ? $this->mobbexTransaction->getMobbexChilds(json_decode($mobbexData['childs'], true), $mobbexData['order_id']) : false;
-        $data['coupon'] = "https://mobbex.com/console/" . $data['entity_uid'] . "/operations/?oid=" . $data['payment_id'];
+        $data['childs'] = !empty($data['childs']) ? $this->mobbexTransaction->getMobbexChilds(json_decode($data['childs'], true), $data['order_id']) : [];
 
         return $data;
     }

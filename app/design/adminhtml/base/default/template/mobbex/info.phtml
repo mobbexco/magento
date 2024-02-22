@@ -66,7 +66,7 @@
 <tr>
     <th>Entity Data</th>
 </tr>
-    <?php if ($data['operation_type'] == 'payment.multiple-vendor' && $data['childs']) : ?>
+    <?php if (isset($data['operation_type']) && $data['operation_type'] == 'payment.multiple-vendor' && $data['childs']) : ?>
         <?php foreach ($data['childs'] as $key => $child) : ?>
             <tr>
                 <th><?= 'Entity ' . ($key + 1)  ?></th>
@@ -96,6 +96,8 @@
 </tr>
 <tr>
     <td>Coupon:</td>
-    <td><a href="<?= $data['coupon'] ?>">View</a></td>
+    <?php if (isset($data['entity_uid']) && isset($data['payment_id'])) : ?>
+        <td><a href="<?= "https://mobbex.com/console/$data[entity_uid]/operations/?oid=$data[payment_id]" ?>">View</a></td>
+    <?php endif; ?>
 </tr>
 </table>

@@ -5,7 +5,7 @@
  */
 class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 {
-    const VERSION = '3.0.0';
+    const VERSION = '3.1.0';
 
     public function __construct()
 	{
@@ -40,7 +40,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
 					'type'      => 'subscription',
-					'reference' => $subscription['uid']
+					'reference' => $subscription['uid'],
+					'total'     => round($item->getPrice(),2)
 				];
 			} else {
 				$items[] = array(
@@ -79,7 +80,10 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			$items,
 			\Mobbex\Repository::getInstallments($orderedItems, $common_plans, $advanced_plans),
 			$customer,
-			$this->getAddresses([$this->_order->getBillingAddress()->getData(), $this->_order->getShippingAddress()->getData()]),
+			array_filter([
+				$this->getAddressData($this->_order->getBillingAddress()),
+				$this->getAddressData($this->_order->getShippingAddress())
+			]),
 			'all',
 			'mobbexCheckoutRequest'
 		);
@@ -186,31 +190,27 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 	/**
 	 * Get Addresses data for Mobebx Checkout.
      * 
-	 * @param array $addressesData
+	 * @param Mage_Sales_Model_Order_Address $address
 	 * @return array $addresses
 	 */
-	public function getAddresses($addressesData)
-
+	public function getAddressData($address)
 	{
-		$addresses = [];
+		if (!$address)
+			return;
 
-		foreach ($addressesData as $address) {
+		$addressData = $address->getData();
+		$region = Mage::getModel('directory/region')->load($addressData['region_id'])->getData();
 
-			$region = Mage::getModel('directory/region')->load($address['region_id'])->getData();
-
-			$addresses[] = [
-				'type' => isset($address["address_type"]) ? $address["address_type"] : '',
-				'country' => isset($address["country_id"]) ? \Mobbex\Repository::convertCountryCode($address["country_id"]) : '',
-				'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street']))),
-				'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($address['street'])), '', trim($address['street'])),
-				'streetNotes' => '',
-				'zipCode' => isset($address["postcode"]) ? $address["postcode"] : '',
-				'city' => isset($address["city"]) ? $address["city"] : '',
-				'state'  => (isset($address["country_id"]) && isset($region['code'])) ? str_replace($address["country_id"] . '-', '', $region['code']) : ''
-			];
-		}
-
-		return $addresses;
+		return [
+			'type'         => isset($addressData["address_type"]) ? $addressData["address_type"] : '',
+			'country'      => isset($addressData["country_id"]) ? \Mobbex\Repository::convertCountryCode($addressData["country_id"]) : '',
+			'street'       => trim(preg_replace('/(\D{0})+(\d*)+$/', '', trim($addressData['street']))),
+			'streetNumber' => str_replace(preg_replace('/(\D{0})+(\d*)+$/', '', trim($addressData['street'])), '', trim($addressData['street'])),
+			'streetNotes'  => '',
+			'zipCode'      => isset($addressData["postcode"]) ? $addressData["postcode"] : '',
+			'city'         => isset($addressData["city"]) ? $addressData["city"] : '',
+			'state'        => (isset($addressData["country_id"]) && isset($region['code'])) ? str_replace($addressData["country_id"] . '-', '', $region['code']) : ''
+		];
 	}
 
 	public function getModuleUrl($action, $queryParams) {
