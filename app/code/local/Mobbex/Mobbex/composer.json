@@ -1,5 +1,5 @@
 {
     "require": {
-        "mobbexco/php-plugins-sdk": "1.7.0"
+        "mobbexco/php-plugins-sdk": "1.8.0"
     }
 }

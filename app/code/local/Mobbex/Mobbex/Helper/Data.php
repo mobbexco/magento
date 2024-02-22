@@ -40,7 +40,8 @@ class Mobbex_Mobbex_Helper_Data extends Mage_Core_Helper_Abstract
 			if($subscription['enable'] === 'yes'){
 				$items[] = [
 					'type'      => 'subscription',
-					'reference' => $subscription['uid']
+					'reference' => $subscription['uid'],
+					'total'     => round($item->getPrice(),2)
 				];
 			} else {
 				$items[] = array(
